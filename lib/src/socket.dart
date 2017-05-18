@@ -291,7 +291,7 @@ class Socket extends EventEmitter {
       sent = true;
       _logger.fine('sending ack $_');
 
-      packet({'type': ACK, 'id': 'id', 'data': [_]});
+      packet({'type': ACK, 'id': id, 'data': [_]});
     };
   }
 
