@@ -372,7 +372,7 @@ class Manager extends EventEmitter {
      */
     destroy(socket) {
       this.connecting.remove(socket);
-      if (this.connecting.isEmpty) return;
+      if (this.connecting.isNotEmpty) return;
 
       this.close();
     }
@@ -506,7 +506,7 @@ class Manager extends EventEmitter {
           // check again for the case socket closed in above events
           if (skipReconnect) return;
 
-          open(callback: (err) {
+          open(callback: ([err]) {
             if (err != null) {
               _logger.fine('reconnect attempt error');
               reconnecting = false;
