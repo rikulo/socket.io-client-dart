@@ -10,7 +10,7 @@ environment:
 dependencies:
   logging: any
   socket_io:
-    path: ../socket_io
+    git: https://github.com/rikulo/socket.io-dart.git
 
 dev_dependencies:
   unittest: any
