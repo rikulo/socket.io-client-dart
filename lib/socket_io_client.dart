@@ -50,8 +50,8 @@ _lookup(uri, opts) {
   var id = '${parsed.scheme}://${parsed.host}:${parsed.port}';
   var path = parsed.path;
   var sameNamespace = cache.containsKey(id) && cache[id].nsps.containsKey(path);
-  var newConnection = opts['forceNew'] || opts['force new connection'] ||
-      false == opts['multiplex'] || sameNamespace;
+  var newConnection = opts['forceNew'] == true || opts['force new connection'] == true
+      || false == opts['multiplex'] || sameNamespace;
 
   var io;
 

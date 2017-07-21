@@ -182,7 +182,7 @@ abstract class PollingTransport extends Transport {
   write(List<Map> packets) {
     var self = this;
     this.writable = false;
-    var callbackfn = () {
+    var callbackfn = (_) {
       self.writable = true;
       self.emit('drain');
     };

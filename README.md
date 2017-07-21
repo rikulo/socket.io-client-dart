@@ -29,11 +29,14 @@ Port of awesome JavaScript Node.js library - [Socket.io-client v2.0.1](https://g
           io.listen(3000);
 
         // Dart client
-        Io.Socket socket = IO.io('http://localhost:3000');
-        socket.on('connect', (_) => print('connect'));
+        IO.Socket socket = IO.io('http://localhost:3000');
+        socket.on('connect', (_) {
+         print('connect');
+         socket.emit('msg', 'test');
+        });
         socket.on('event', (data) => print(data));
-        socket.on('disconnect', (_) print('disconnect'));
-        socket.on('fromServer', (_) print(_));
+        socket.on('disconnect', (_) => print('disconnect'));
+        socket.on('fromServer', (_) => print(_));
     }
 
 ## Notes to Contributors

@@ -300,7 +300,7 @@ class Request extends EventEmitter {
       readyStateChange = null;
     }
 
-    if (fromError) {
+    if (fromError != null) {
       try {
         this.xhr.abort();
       } catch (e) {}

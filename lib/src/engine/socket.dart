@@ -71,59 +71,59 @@ class Socket extends EventEmitter {
   Socket(String uri, Map opts) {
     opts = opts ?? {};
 
-  if (uri.isNotEmpty) {
-    this.uri = Uri.parse(uri);
-    opts['hostname'] = this.uri.host;
-    opts['secure'] = this.uri.scheme == 'https' || this.uri.scheme == 'wss';
-    opts['port'] = this.uri.port;
-    if (this.uri.hasQuery)
-      opts['query'] = this.uri.query;
-  } else if (opts.containsKey('host')) {
-    opts['hostname'] = Uri.parse(opts['host']).host;
-  }
-
-  this.secure = opts['secure'] ?? (window.location.protocol == 'https:');
-
-  if (opts['hostname'] != null && !opts.containsKey('port')) {
-    // if no port is specified manually, use the protocol default
-    opts['port'] = this.secure ? '443' : '80';
-  }
-
-  this.agent = opts['agent'] ?? false;
-  this.hostname = opts['hostname'] ?? (window.location.hostname ?? 'localhost');
-  this.port = opts['port'] ?? (window.location.port.isNotEmpty ? int.parse(window.location.port) : (this.secure ? 443 : 80));
-  var query = opts['query'] ?? {};
-  if (query is String)
-    this.query = decode(query);
-  else if (query is Map) {
-    this.query = query;
-  }
-
-  this.upgrade = opts['upgrade'] != false;
-  this.path = (opts['path'] ?? '/engine.io').toString().replaceFirst(new RegExp(r'\/$'), '') + '/';
-  this.forceJSONP = opts['forceJSONP'] == true;
-  this.jsonp = opts['jsonp'] != false;
-  this.forceBase64 = opts['forceBase64'] == true;
-  this.enablesXDR = opts['enablesXDR'] == true;
-  this.timestampParam = opts['timestampParam'] ?? 't';
-  this.timestampRequests = opts['timestampRequests'];
-  this.transports = opts['transports'] ?? ['polling', 'websocket'];
-  this.transportOptions = opts['transportOptions'] ?? {};
-  this.readyState = '';
-  this.writeBuffer = [];
-  this.prevBufferLen = 0;
-  this.policyPort = opts['policyPort'] ?? 843;
-  this.rememberUpgrade = opts['rememberUpgrade'] ?? false;
-  this.binaryType = null;
-  this.onlyBinaryUpgrades = opts['onlyBinaryUpgrades'];
-
-  if (!opts.containsKey('perMessageDeflate') || opts['perMessageDeflate'] == true) {
-    this.perMessageDeflate = opts['perMessageDeflate'] is Map ? opts['perMessageDeflate'] : {};
-    if (!this.perMessageDeflate.containsKey('threshold'))
-      this.perMessageDeflate['threshold'] = 1024;
+    if (uri.isNotEmpty) {
+      this.uri = Uri.parse(uri);
+      opts['hostname'] = this.uri.host;
+      opts['secure'] = this.uri.scheme == 'https' || this.uri.scheme == 'wss';
+      opts['port'] = this.uri.port;
+      if (this.uri.hasQuery)
+        opts['query'] = this.uri.query;
+    } else if (opts.containsKey('host')) {
+      opts['hostname'] = Uri.parse(opts['host']).host;
     }
 
-  // SSL options for Node.js client
+    this.secure = opts['secure'] ?? (window.location.protocol == 'https:');
+
+    if (opts['hostname'] != null && !opts.containsKey('port')) {
+      // if no port is specified manually, use the protocol default
+      opts['port'] = this.secure ? '443' : '80';
+    }
+
+    this.agent = opts['agent'] ?? false;
+    this.hostname = opts['hostname'] ?? (window.location.hostname ?? 'localhost');
+    this.port = opts['port'] ?? (window.location.port.isNotEmpty ? int.parse(window.location.port) : (this.secure ? 443 : 80));
+    var query = opts['query'] ?? {};
+    if (query is String)
+      this.query = decode(query);
+    else if (query is Map) {
+      this.query = query;
+    }
+
+    this.upgrade = opts['upgrade'] != false;
+    this.path = (opts['path'] ?? '/engine.io').toString().replaceFirst(new RegExp(r'\/$'), '') + '/';
+    this.forceJSONP = opts['forceJSONP'] == true;
+    this.jsonp = opts['jsonp'] != false;
+    this.forceBase64 = opts['forceBase64'] == true;
+    this.enablesXDR = opts['enablesXDR'] == true;
+    this.timestampParam = opts['timestampParam'] ?? 't';
+    this.timestampRequests = opts['timestampRequests'];
+    this.transports = opts['transports'] ?? ['polling', 'websocket'];
+    this.transportOptions = opts['transportOptions'] ?? {};
+    this.readyState = '';
+    this.writeBuffer = [];
+    this.prevBufferLen = 0;
+    this.policyPort = opts['policyPort'] ?? 843;
+    this.rememberUpgrade = opts['rememberUpgrade'] ?? false;
+    this.binaryType = null;
+    this.onlyBinaryUpgrades = opts['onlyBinaryUpgrades'];
+
+    if (!opts.containsKey('perMessageDeflate') || opts['perMessageDeflate'] == true) {
+      this.perMessageDeflate = opts['perMessageDeflate'] is Map ? opts['perMessageDeflate'] : {};
+      if (!this.perMessageDeflate.containsKey('threshold'))
+        this.perMessageDeflate['threshold'] = 1024;
+    }
+
+    // SSL options for Node.js client
 //  this.pfx = opts.pfx || null;
 //  this.key = opts.key || null;
 //  this.passphrase = opts.passphrase || null;
@@ -133,7 +133,7 @@ class Socket extends EventEmitter {
 //  this.rejectUnauthorized = opts.rejectUnauthorized === undefined ? true : opts.rejectUnauthorized;
 //  this.forceNode = !!opts.forceNode;
 
-  // other options for Node.js client
+    // other options for Node.js client
 //  var freeGlobal = typeof global === 'object' && global;
 //  if (freeGlobal.global === freeGlobal) {
 //  if (opts.extraHeaders && Object.keys(opts.extraHeaders).length > 0) {
@@ -145,13 +145,13 @@ class Socket extends EventEmitter {
 //  }
 //  }
 
-  // set on handshake
+    // set on handshake
 //  this.id = null;
 //  this.upgrades = null;
 //  this.pingInterval = null;
 //  this.pingTimeout = null;
 
-  // set on heartbeat
+    // set on heartbeat
 //  this.pingIntervalTimer = null;
 //  this.pingTimeoutTimer = null;
 
@@ -307,7 +307,7 @@ class Socket extends EventEmitter {
     var cleanup;
     priorWebsocketSuccess = false;
 
-    var onTransportOpen = () {
+    var onTransportOpen = (_) {
       if (onlyBinaryUpgrades == true) {
         var upgradeLosesBinary = this.supportsBinary == false &&
             transport.supportsBinary;
@@ -323,24 +323,26 @@ class Socket extends EventEmitter {
           _logger.fine('probe transport "$name" pong');
           upgrading = true;
           emit('upgrading', transport);
-          if (!transport) return;
+          if (transport == null) return;
           priorWebsocketSuccess = 'websocket' == transport.name;
 
           _logger.fine('pausing current transport "%s"', transport.name);
-          (transport as PollingTransport).pause(() {
-            if (failed) return;
-            if ('closed' == readyState) return;
-            _logger.fine('changing transport and sending upgrade packet');
+          if (transport is PollingTransport) {
+            (transport as PollingTransport).pause(() {
+              if (failed) return;
+              if ('closed' == readyState) return;
+              _logger.fine('changing transport and sending upgrade packet');
 
-            cleanup();
+              cleanup();
 
-            setTransport(transport);
-            transport.send([{ 'type': 'upgrade'}]);
-            emit('upgrade', transport);
-            transport = null;
-            upgrading = false;
-            flush();
-          });
+              setTransport(transport);
+              transport.send([{ 'type': 'upgrade'}]);
+              emit('upgrade', transport);
+              transport = null;
+              upgrading = false;
+              flush();
+            });
+          }
         } else {
           _logger.fine('probe transport "%s" failed', name);
           emit('upgradeError',
@@ -363,12 +365,13 @@ class Socket extends EventEmitter {
 
     // Handle any error that happens while probing
     var onerror = (err) {
+      final oldTransport = transport;
       freezeTransport();
 
       _logger.fine(
-          'probe transport "%s" failed because of error: %s', name, err);
+          'probe transport "$name" failed because of error: $err');
 
-      emit('upgradeError', {'error': 'probe error: $err', 'transport': transport.name});
+      emit('upgradeError', {'error': 'probe error: $err', 'transport': oldTransport.name});
     };
 
     var onTransportClose = (_) => onerror('transport closed');
@@ -379,7 +382,7 @@ class Socket extends EventEmitter {
     // When the socket is upgraded while we're probing
     var onupgrade = (to) {
       if (transport != null && to.name != transport.name) {
-        _logger.fine('"%s" works - aborting "%s"', to.name, transport.name);
+        _logger.fine('"${to?.name}" works - aborting "${transport?.name}"');
         freezeTransport();
       }
     };
@@ -516,9 +519,9 @@ class Socket extends EventEmitter {
     pingIntervalTimer?.cancel();
     pingIntervalTimer = new Timer(new Duration(milliseconds: pingInterval), () {
       _logger.fine('writing ping packet - expecting pong within ${pingTimeout}ms');
-        ping();
-        onHeartbeat(pingTimeout);
-      });
+      ping();
+      onHeartbeat(pingTimeout);
+    });
   }
 
   /**
@@ -641,13 +644,13 @@ class Socket extends EventEmitter {
 
       if (this.writeBuffer.isNotEmpty) {
         this.once('drain', (_) {
-          if (this.upgrading) {
+          if (this.upgrading == true) {
             waitForUpgrade();
           } else {
             close();
           }
         });
-      } else if (this.upgrading) {
+      } else if (this.upgrading == true) {
         waitForUpgrade();
       } else {
         close();
@@ -663,7 +666,7 @@ class Socket extends EventEmitter {
    * @api private
    */
   onError(err) {
-  _logger.fine('socket error $err');
+    _logger.fine('socket error $err');
     priorWebsocketSuccess = false;
     this.emit('error', err);
     this.onClose('transport error', err);
