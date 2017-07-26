@@ -14,4 +14,5 @@ dependencies:
 
 dev_dependencies:
   unittest: any
+  browser: any
   test: '>=0.12.0 <0.13.0'

@@ -143,7 +143,7 @@ abstract class PollingTransport extends Transport {
       if ('open' == this.readyState) {
         this.poll();
       } else {
-        _logger.fine('ignoring poll - transport state "%s"', this.readyState);
+        _logger.fine('ignoring poll - transport state "${this.readyState}"');
       }
     }
   }

@@ -209,7 +209,7 @@ class Manager extends EventEmitter {
       _logger.fine('readyState $readyState');
       if (this.readyState.contains('open')) return this;
 
-      _logger.fine('opening %s', this.uri);
+      _logger.fine('opening $uri');
       this.engine = new Engine.Socket(this.uri, this.options);
       var socket = this.engine;
       var self = this;

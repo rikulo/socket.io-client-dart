@@ -186,7 +186,7 @@ class Socket extends EventEmitter {
    * @api private
    */
   createTransport(name, [options]) {
-    _logger.fine('creating transport "%s"', name);
+    _logger.fine('creating transport "$name"');
     var query = new Map.from(this.query);
 
     // append engine.io protocol identifier
@@ -275,11 +275,11 @@ class Socket extends EventEmitter {
    * @api private
    */
   setTransport(transport) {
-    _logger.fine('setting transport %s', transport.name);
+    _logger.fine('setting transport ${transport?.name}');
     var self = this;
 
     if (this.transport != null) {
-      _logger.fine('clearing existing transport %s', this.transport.name);
+      _logger.fine('clearing existing transport ${this.transport?.name}');
       this.transport.clearListeners();
     }
 
@@ -326,9 +326,9 @@ class Socket extends EventEmitter {
           if (transport == null) return;
           priorWebsocketSuccess = 'websocket' == transport.name;
 
-          _logger.fine('pausing current transport "%s"', transport.name);
-          if (transport is PollingTransport) {
-            (transport as PollingTransport).pause(() {
+          _logger.fine('pausing current transport "${transport?.name}"');
+          if (this.transport is PollingTransport) {
+            (this.transport as PollingTransport).pause(() {
               if (failed) return;
               if ('closed' == readyState) return;
               _logger.fine('changing transport and sending upgrade packet');
@@ -344,7 +344,7 @@ class Socket extends EventEmitter {
             });
           }
         } else {
-          _logger.fine('probe transport "%s" failed', name);
+          _logger.fine('probe transport "$name" failed');
           emit('upgradeError',
               {'error': 'probe error', 'transport': transport.name});
         }
@@ -468,7 +468,7 @@ class Socket extends EventEmitter {
       }
     } else {
       _logger.fine(
-          'packet received with socket readyState "%s"', this.readyState);
+          'packet received with socket readyState "${this.readyState}"');
     }
   }
 

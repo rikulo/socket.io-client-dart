@@ -241,7 +241,7 @@ class Request extends EventEmitter {
         });
       /*}*/
 
-      _logger.fine('xhr data %s', this.data);
+      _logger.fine('xhr data ${this.data}');
       xhr.send(this.data);
     } catch (e) {
 // Need to defer since .create() is called directly fhrom the constructor
