@@ -119,7 +119,8 @@ class Manager extends EventEmitter {
    * @api private
    */
   String generateId(String nsp) {
-    return (nsp == '/' ? '' : (nsp + '#')) + this.engine.id;
+    if (nsp.startsWith('/')) nsp = nsp.substring(1);
+    return (nsp.isEmpty ? '' : (nsp + '#')) + this.engine.id;
   }
 
   /**
