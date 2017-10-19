@@ -94,9 +94,9 @@ class Manager extends EventEmitter {
    * @api private
    */
   void emitAll(String event, [data]) {
-    Function.apply(this.emit, [event, data]);
+    this.emit(event, data);
     for (var nsp in this.nsps.keys) {
-      Function.apply(this.nsps[nsp].emit, [event, data]);
+      this.nsps[nsp].emit(event, data);
     }
   }
 
