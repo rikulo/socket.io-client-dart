@@ -10,7 +10,7 @@
  *
  * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
  */
-import 'package:socket_io/socket.io.dart';
+import 'package:socket_io/socket_io.dart';
 
 main() {
   // Dart server

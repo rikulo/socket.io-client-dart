@@ -5,7 +5,7 @@ Port of awesome JavaScript Node.js library - [Socket.io-client v2.0.1](https://g
 ## Usage
 
 
-    import 'package:socket_io/socket.io.dart';
+    import 'package:socket_io/socket_io.dart';
     import 'package:socket_io_client/socket_io_client.dart' as IO;
 
     main() {

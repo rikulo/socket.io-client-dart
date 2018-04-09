@@ -8,9 +8,8 @@ environment:
   sdk: '>=1.0.0'
 
 dependencies:
-  logging: any
-  socket_io:
-    git: https://github.com/rikulo/socket.io-dart.git
+  logging: '>=0.11.3+1 <0.12.0'
+  socket_io: any
 
 dev_dependencies:
   unittest: any
