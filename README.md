@@ -50,6 +50,7 @@ If you are new to Git or GitHub, please read [this guide](https://help.github.co
 ## Who Uses
 
 * [Quire](https://quire.io) - a simple, collaborative, multi-level task management tool.
+* [KEIKAI](https://keikai.io/) - a web spreadsheet for Big Data.
 
 ## Socket.io Dart Server
 
