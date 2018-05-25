@@ -205,6 +205,7 @@ class Socket extends EventEmitter {
    */
   onclose(String reason) {
     _logger.fine('close ($reason)');
+    this.emit('disconnecting', reason);
     this.connected = false;
     this.disconnected = true;
     this.id = null;
