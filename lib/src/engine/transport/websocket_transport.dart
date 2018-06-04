@@ -29,9 +29,7 @@ class WebSocketTransport extends Transport {
 
   WebSocketTransport(Map opts) : super(opts) {
     var forceBase64 = (opts != null && opts['forceBase64']);
-    if (forceBase64) {
-      this.supportsBinary = false;
-    }
+    this.supportsBinary = !forceBase64;
     this.perMessageDeflate = opts['perMessageDeflate'];
     this.protocols = opts['protocols'];
   }
@@ -123,7 +121,7 @@ class WebSocketTransport extends Transport {
     // encodePacket efficient as it uses WS framing
     // no need for encodePayload
     packets.forEach((packet) {
-      PacketParser.encodePacket(packet, supportsBinary: supportsBinary, callback: (data) {
+      PacketParser.encodePacket(packet, supportsBinary: supportsBinary, fromClient: true, callback: (data) {
 
       // Sometimes the websocket has already been closed but the browser didn't
       // have a chance of informing us about it yet, in that case send will

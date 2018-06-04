@@ -132,20 +132,24 @@ class Socket extends EventEmitter {
     emitWithAck(event, data);
   }
 
+  void emitWithBinary(String event, [data]) {
+    emitWithAck(event, data, binary: true);
+  }
+
   /**
    * Emits to this client.
    *
    * @return {Socket} self
    * @api public
    */
-  void emitWithAck(String event, dynamic data, {Function ack}) {
+  void emitWithAck(String event, dynamic data, {Function ack, bool binary = false}) {
     if (EVENTS.contains(event)) {
       super.emit(event, data);
     } else {
       List sendData = data == null ? [event] : [event, data];
 
       var packet = {
-        'type': EVENT,
+        'type':  binary ? BINARY_EVENT : EVENT,
         'data': sendData,
         'options': {
           'compress': this.flags?.isNotEmpty == true && this.flags['compress']
