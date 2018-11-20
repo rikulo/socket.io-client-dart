@@ -18,7 +18,8 @@ import 'package:socket_io_client/src/engine/parseqs.dart';
 import 'package:socket_io_client/src/engine/transport/transports.dart';
 
 class WebSocketTransport extends Transport {
-  static Logger _logger = new Logger('socket_io_client:transport.WebSocketTransport');
+  static Logger _logger =
+      new Logger('socket_io_client:transport.WebSocketTransport');
 
   String name = 'websocket';
   var protocols;
@@ -35,32 +36,8 @@ class WebSocketTransport extends Transport {
   }
 
   void doOpen() {
-//    if (!this.check()) {
-//      // let probe timeout
-//      return null;
-//    }
-
     var uri = this.uri();
     var protocols = this.protocols;
-    var opts = {
-      'agent': this.agent,
-      'perMessageDeflate': this.perMessageDeflate
-    };
-
-//    // SSL options for Node.js client
-//    opts.pfx = this.pfx;
-//    opts.key = this.key;
-//    opts.passphrase = this.passphrase;
-//    opts.cert = this.cert;
-//    opts.ca = this.ca;
-//    opts.ciphers = this.ciphers;
-//    opts.rejectUnauthorized = this.rejectUnauthorized;
-//    if (this.extraHeaders) {
-//      opts.headers = this.extraHeaders;
-//    }
-//    if (this.localAddress) {
-//      opts.localAddress = this.localAddress;
-//    }
 
     try {
       this.ws = new WebSocket(uri, protocols);
@@ -72,12 +49,7 @@ class WebSocketTransport extends Transport {
       this.supportsBinary = false;
     }
 
-//    if (this.ws.supports && this.ws.supports.binary) {
-//      this.supportsBinary = true;
-//      this.ws.binaryType = 'nodebuffer';
-//    } else {
-      this.ws.binaryType = 'arraybuffer';
-//    }
+    this.ws.binaryType = 'arraybuffer';
 
     this.addEventListeners();
   }
@@ -88,7 +60,8 @@ class WebSocketTransport extends Transport {
    * @api private
    */
   void addEventListeners() {
-    this.ws..onOpen.listen((_) => onOpen())
+    this.ws
+      ..onOpen.listen((_) => onOpen())
       ..onClose.listen((_) => onClose())
       ..onMessage.listen((MessageEvent evt) => onData(evt.data))
       ..onError.listen((e) {
@@ -105,7 +78,6 @@ class WebSocketTransport extends Transport {
   write(List packets) {
     this.writable = false;
 
-
     var done = () {
       emit('flush');
 
@@ -121,23 +93,21 @@ class WebSocketTransport extends Transport {
     // encodePacket efficient as it uses WS framing
     // no need for encodePayload
     packets.forEach((packet) {
-      PacketParser.encodePacket(packet, supportsBinary: supportsBinary, fromClient: true, callback: (data) {
+      PacketParser.encodePacket(packet,
+          supportsBinary: supportsBinary, fromClient: true, callback: (data) {
+        // Sometimes the websocket has already been closed but the browser didn't
+        // have a chance of informing us about it yet, in that case send will
+        // throw an error
+        try {
+          // TypeError is thrown when passing the second argument on Safari
+          ws.send(data);
+        } catch (e) {
+          _logger.fine('websocket closed before onclose event');
+        }
 
-      // Sometimes the websocket has already been closed but the browser didn't
-      // have a chance of informing us about it yet, in that case send will
-      // throw an error
-      try {
-      // TypeError is thrown when passing the second argument on Safari
-        ws.send(data);
-      } catch (e) {
-        _logger.fine('websocket closed before onclose event');
-      }
-
-      if (--total == 0)
-        done();
+        if (--total == 0) done();
       });
     });
-
   }
 
   /**
@@ -160,14 +130,16 @@ class WebSocketTransport extends Transport {
     var port = '';
 
     // avoid port if default for schema
-    if (this.port != null && (('wss' == schema && this.port != 443) ||
-        ('ws' == schema && this.port != 80))) {
+    if (this.port != null &&
+        (('wss' == schema && this.port != 443) ||
+            ('ws' == schema && this.port != 80))) {
       port = ':${this.port}';
     }
 
     // append timestamp to URI
     if (this.timestampRequests == true) {
-      query[this.timestampParam] = new DateTime.now().millisecondsSinceEpoch.toRadixString(36);
+      query[this.timestampParam] =
+          new DateTime.now().millisecondsSinceEpoch.toRadixString(36);
     }
 
     // communicate binary support capabilities
@@ -183,7 +155,12 @@ class WebSocketTransport extends Transport {
     }
 
     var ipv6 = this.hostname.contains(':');
-    return schema + '://' + (ipv6 ? '[' + this.hostname + ']' : this.hostname) + port + this.path + queryString;
+    return schema +
+        '://' +
+        (ipv6 ? '[' + this.hostname + ']' : this.hostname) +
+        port +
+        this.path +
+        queryString;
   }
 //
 //  /**
