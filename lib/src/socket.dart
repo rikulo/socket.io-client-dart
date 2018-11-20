@@ -142,14 +142,15 @@ class Socket extends EventEmitter {
    * @return {Socket} self
    * @api public
    */
-  void emitWithAck(String event, dynamic data, {Function ack, bool binary = false}) {
+  void emitWithAck(String event, dynamic data,
+      {Function ack, bool binary = false}) {
     if (EVENTS.contains(event)) {
       super.emit(event, data);
     } else {
       List sendData = data == null ? [event] : [event, data];
 
       var packet = {
-        'type':  binary ? BINARY_EVENT : EVENT,
+        'type': binary ? BINARY_EVENT : EVENT,
         'data': sendData,
         'options': {
           'compress': this.flags?.isNotEmpty == true && this.flags['compress']
@@ -296,7 +297,11 @@ class Socket extends EventEmitter {
       sent = true;
       _logger.fine('sending ack $_');
 
-      packet({'type': ACK, 'id': id, 'data': [_]});
+      packet({
+        'type': ACK,
+        'id': id,
+        'data': [_]
+      });
     };
   }
 

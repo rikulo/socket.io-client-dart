@@ -16,7 +16,6 @@ import 'package:socket_io_client/src/engine/transport/polling_transport.dart';
  * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
  */
 
-
 /**
  * Cached regular expressions.
  */
@@ -31,7 +30,6 @@ final RegExp rEscapedNewline = new RegExp(r'\\n');
 var callbacks;
 
 class JSONPTransport extends PollingTransport {
-
 //  static var empty = (_) => '';
   int index;
   ScriptElement script;
@@ -61,7 +59,6 @@ class JSONPTransport extends PollingTransport {
     this.index = callbacks.length;
 
     // add callback to jsonp global
-    var self = this;
     callbacks.add((msg) {
       onData(msg);
     });
@@ -107,7 +104,6 @@ class JSONPTransport extends PollingTransport {
    * @api private
    */
   doPoll() {
-    var self = this;
     ScriptElement script = document.createElement('script');
 
     this.script?.remove();
@@ -146,13 +142,10 @@ class JSONPTransport extends PollingTransport {
    * @api private
    */
   doWrite(data, fn) {
-    var self = this;
-
     if (this.form == null) {
       FormElement form = document.createElement('form');
       TextAreaElement area = document.createElement('textarea');
       var id = this.iframeId = 'eio_iframe_${this.index}';
-      var iframe;
 
       form.className = 'socketio';
       form.style.position = 'absolute';

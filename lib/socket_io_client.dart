@@ -23,11 +23,9 @@ export 'package:socket_io_client/src/socket.dart';
 // Protocol version
 final protocol = Parser.protocol;
 
-
 final Map<String, dynamic> cache = {};
 
 final Logger _logger = new Logger('socket_io_client');
-
 
 /**
  * Looks up an existing `Manager` for multiplexing.
@@ -50,8 +48,10 @@ _lookup(uri, opts) {
   var id = '${parsed.scheme}://${parsed.host}:${parsed.port}';
   var path = parsed.path;
   var sameNamespace = cache.containsKey(id) && cache[id].nsps.containsKey(path);
-  var newConnection = opts['forceNew'] == true || opts['force new connection'] == true
-      || false == opts['multiplex'] || sameNamespace;
+  var newConnection = opts['forceNew'] == true ||
+      opts['force new connection'] == true ||
+      false == opts['multiplex'] ||
+      sameNamespace;
 
   var io;
 

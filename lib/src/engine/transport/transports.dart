@@ -29,12 +29,11 @@ class Transports {
   static Transport newInstance(String name, options) {
     if ('websocket' == name) {
       return new WebSocketTransport(options);
-    } else if ('polling' == name ) {
+    } else if ('polling' == name) {
       if (options['forceJSONP'] != true) {
         return new XHRTransport(options);
       } else {
-        if (options['jsonp'] != false)
-          return new JSONPTransport(options);
+        if (options['jsonp'] != false) return new JSONPTransport(options);
         throw new StateError('JSONP disabled');
       }
     } else {
@@ -60,7 +59,6 @@ abstract class Transport extends EventEmitter {
   bool writable;
   String name;
   bool supportsBinary;
-
 
   Transport(Map opts) {
     this.path = opts['path'];
@@ -161,7 +159,8 @@ abstract class Transport extends EventEmitter {
    * @api private
    */
   onData(data) {
-    var packet = PacketParser.decodePacket(data, binaryType: this.socket.binaryType);
+    var packet =
+        PacketParser.decodePacket(data, binaryType: this.socket.binaryType);
     this.onPacket(packet);
   }
 
@@ -181,6 +180,7 @@ abstract class Transport extends EventEmitter {
     this.readyState = 'closed';
     this.emit('close');
   }
+
   void write(List<Map> data);
   void doOpen();
   void doClose();

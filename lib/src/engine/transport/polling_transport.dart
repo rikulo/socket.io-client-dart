@@ -18,7 +18,6 @@ import 'package:socket_io/src/engine/parser/parser.dart';
 final Logger _logger = new Logger('socket_io:transport.PollingTransport');
 
 abstract class PollingTransport extends Transport {
-
   /**
    * Transport name.
    */
@@ -33,13 +32,12 @@ abstract class PollingTransport extends Transport {
    * @param {Object} opts
    * @api private
    */
-  PollingTransport(Map opts): super(opts) {
+  PollingTransport(Map opts) : super(opts) {
     var forceBase64 = (opts != null && opts['forceBase64']);
-    if (/*!hasXHR2 || */forceBase64) {
+    if (/*!hasXHR2 || */ forceBase64) {
       this.supportsBinary = false;
     }
   }
-
 
   /**
    * Opens the socket (triggers polling). We write a PING message to determine
@@ -75,9 +73,8 @@ abstract class PollingTransport extends Transport {
         _logger.fine('we are currently polling - waiting to pause');
         total++;
         this.once('pollComplete', (_) {
-        _logger.fine('pre-pause polling complete');
-        if (--total == 0)
-          pause();
+          _logger.fine('pre-pause polling complete');
+          if (--total == 0) pause();
         });
       }
 
@@ -85,9 +82,8 @@ abstract class PollingTransport extends Transport {
         _logger.fine('we are currently writing - waiting to pause');
         total++;
         this.once('drain', (_) {
-        _logger.fine('pre-pause writing complete');
-        if (--total == 0)
-          pause();
+          _logger.fine('pre-pause writing complete');
+          if (--total == 0) pause();
         });
       }
     } else {
@@ -132,7 +128,8 @@ abstract class PollingTransport extends Transport {
     };
 
     // decode payload
-    PacketParser.decodePayload(data, binaryType: this.socket.binaryType, callback: callback);
+    PacketParser.decodePayload(data,
+        binaryType: this.socket.binaryType, callback: callback);
 
     // if an event did not trigger closing
     if ('closed' != this.readyState) {
@@ -158,7 +155,9 @@ abstract class PollingTransport extends Transport {
 
     var close = ([_]) {
       _logger.fine('writing close packet');
-      self.write([{ 'type': 'close' }]);
+      self.write([
+        {'type': 'close'}
+      ]);
     };
 
     if ('open' == this.readyState) {
@@ -187,7 +186,8 @@ abstract class PollingTransport extends Transport {
       self.emit('drain');
     };
 
-    PacketParser.encodePayload(packets, supportsBinary: this.supportsBinary, callback: (data) {
+    PacketParser.encodePayload(packets, supportsBinary: this.supportsBinary,
+        callback: (data) {
       self.doWrite(data, callbackfn);
     });
   }
@@ -204,17 +204,18 @@ abstract class PollingTransport extends Transport {
 
     // cache busting is forced
     if (this.timestampRequests != false) {
-      query[this.timestampParam] = new DateTime.now().millisecondsSinceEpoch.toRadixString(36);
+      query[this.timestampParam] =
+          new DateTime.now().millisecondsSinceEpoch.toRadixString(36);
     }
 
     if (this.supportsBinary == false && !query.containsKey('sid')) {
       query['b64'] = 1;
     }
 
-
     // avoid port if default for schema
-    if (this.port != null && (('https' == schema && this.port != 443) ||
-        ('http' == schema && this.port != 80))) {
+    if (this.port != null &&
+        (('https' == schema && this.port != 443) ||
+            ('http' == schema && this.port != 80))) {
       port = ':${this.port}';
     }
 
@@ -226,7 +227,12 @@ abstract class PollingTransport extends Transport {
     }
 
     var ipv6 = this.hostname.contains(':');
-    return schema + '://' + (ipv6 ? '[' + this.hostname + ']' : this.hostname) + port + this.path + queryString;
+    return schema +
+        '://' +
+        (ipv6 ? '[' + this.hostname + ']' : this.hostname) +
+        port +
+        this.path +
+        queryString;
   }
 
   void doWrite(data, callback);

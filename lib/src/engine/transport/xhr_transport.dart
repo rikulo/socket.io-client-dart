@@ -21,7 +21,6 @@ import 'package:socket_io_client/src/engine/transport/polling_transport.dart';
 
 final Logger _logger = new Logger('socket_io_client:transport.XHRTransport');
 
-
 class XHRTransport extends PollingTransport {
   int requestTimeout;
   bool xd;
@@ -96,9 +95,8 @@ class XHRTransport extends PollingTransport {
    */
   doWrite(data, fn) {
     var isBinary = data is! String;
-    var req = this.request(
-        { 'method': 'POST', 'data': data, 'isBinary': isBinary});
-    var self = this;
+    var req =
+        this.request({'method': 'POST', 'data': data, 'isBinary': isBinary});
     req.on('success', fn);
     req.on('error', (err) {
       onError('xhr post error', err);
@@ -114,7 +112,6 @@ class XHRTransport extends PollingTransport {
   doPoll() {
     _logger.fine('xhr poll');
     var req = this.request();
-    var self = this;
     req.on('data', (data) {
       onData(data);
     });
@@ -124,6 +121,7 @@ class XHRTransport extends PollingTransport {
     this.pollXhr = req;
   }
 }
+
 /**
  * Request constructor
  *
@@ -221,24 +219,24 @@ class Request extends EventEmitter {
         };
       } else {*/
       readyStateChange = xhr.onReadyStateChange.listen((evt) {
-          if (xhr.readyState == 2) {
-            var contentType;
-            try {
-              contentType = xhr.getResponseHeader('Content-Type');
-            } catch (e) {}
-            if (contentType == 'application/octet-stream') {
-              xhr.responseType = 'arraybuffer';
-            }
+        if (xhr.readyState == 2) {
+          var contentType;
+          try {
+            contentType = xhr.getResponseHeader('Content-Type');
+          } catch (e) {}
+          if (contentType == 'application/octet-stream') {
+            xhr.responseType = 'arraybuffer';
           }
-          if (4 != xhr.readyState) return;
-          if (200 == xhr.status || 1223 == xhr.status) {
-            self.onLoad();
-          } else {
+        }
+        if (4 != xhr.readyState) return;
+        if (200 == xhr.status || 1223 == xhr.status) {
+          self.onLoad();
+        } else {
 // make sure the `error` event handler that's user-set
 // does not throw in the same tick and gets caught here
-            Timer.run(() => self.onError(xhr.status));
-          }
-        });
+          Timer.run(() => self.onError(xhr.status));
+        }
+      });
       /*}*/
 
       _logger.fine('xhr data ${this.data}');
@@ -293,8 +291,6 @@ class Request extends EventEmitter {
     }
     // xmlhttprequest
     if (this.hasXDR()) {
-      //TODO: handle it in dart way
-      //    this.xhr.onload = this.xhr.onerror = empty;
     } else {
       readyStateChange?.cancel();
       readyStateChange = null;
@@ -330,8 +326,7 @@ class Request extends EventEmitter {
       this.onError(e);
     }
     if (null != data) {
-      if (data is ByteBuffer)
-        data = data.asUint8List();
+      if (data is ByteBuffer) data = data.asUint8List();
       this.onData(data);
     }
   }

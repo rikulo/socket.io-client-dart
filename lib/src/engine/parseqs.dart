@@ -10,7 +10,6 @@
  *
  * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
  */
-import 'dart:html';
 encode(Map obj) {
   var str = '';
 
@@ -28,7 +27,7 @@ encode(Map obj) {
  * @param {String} qs
  * @api private
  */
-decode(qs){
+decode(qs) {
   var qry = {};
   var pairs = qs.split('&');
   for (var i = 0, l = pairs.length; i < l; i++) {
