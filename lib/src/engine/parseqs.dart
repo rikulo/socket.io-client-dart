@@ -28,7 +28,7 @@ encode(Map obj) {
  * @api private
  */
 decode(qs) {
-  var qry = {};
+  var qry = <dynamic, dynamic>{};
   var pairs = qs.split('&');
   for (var i = 0, l = pairs.length; i < l; i++) {
     var pair = pairs[i].split('=');

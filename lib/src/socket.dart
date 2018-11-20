@@ -11,10 +11,10 @@
  * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
  */
 import 'package:logging/logging.dart';
-import 'package:socket_io/src/util/event_emitter.dart';
+import 'package:socket_io_common/src/util/event_emitter.dart';
 import 'package:socket_io_client/src/manager.dart';
 import 'package:socket_io_client/src/on.dart' as ON;
-import 'package:socket_io/src/parser/parser.dart';
+import 'package:socket_io_common/src/parser/parser.dart';
 
 /**
  * Internal events (blacklisted).
@@ -208,7 +208,7 @@ class Socket extends EventEmitter {
    * @param {String} reason
    * @api private
    */
-  onclose(String reason) {
+  onclose(reason) {
     _logger.fine('close ($reason)');
     this.emit('disconnecting', reason);
     this.connected = false;
@@ -223,7 +223,7 @@ class Socket extends EventEmitter {
    * @param {Object} packet
    * @api private
    */
-  onpacket(Map packet) {
+  onpacket(packet) {
     if (packet['nsp'] != this.nsp) return;
 
     switch (packet['type']) {

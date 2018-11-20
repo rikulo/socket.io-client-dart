@@ -11,8 +11,8 @@
  * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
  */
 import 'package:logging/logging.dart';
-import 'package:socket_io/src/engine/parser/parser.dart';
-import 'package:socket_io/src/util/event_emitter.dart';
+import 'package:socket_io_common/src/engine/parser/parser.dart';
+import 'package:socket_io_common/src/util/event_emitter.dart';
 import 'package:socket_io_client/src/engine/socket.dart';
 import 'package:socket_io_client/src/engine/transport/jsonp_transport.dart';
 import 'package:socket_io_client/src/engine/transport/websocket_transport.dart';
@@ -133,7 +133,7 @@ abstract class Transport extends EventEmitter {
    * @param {Array} packets
    * @api private
    */
-  send(List<Map> packets) {
+  send(List packets) {
     if ('open' == this.readyState) {
       this.write(packets);
     } else {
@@ -167,7 +167,7 @@ abstract class Transport extends EventEmitter {
   /**
    * Called with a decoded packet.
    */
-  onPacket(Map packet) {
+  onPacket(packet) {
     this.emit('packet', packet);
   }
 
@@ -181,7 +181,7 @@ abstract class Transport extends EventEmitter {
     this.emit('close');
   }
 
-  void write(List<Map> data);
+  void write(List data);
   void doOpen();
   void doClose();
 }

@@ -15,9 +15,9 @@ import 'dart:convert';
 import 'dart:html';
 
 import 'package:logging/logging.dart';
-import 'package:socket_io/src/util/event_emitter.dart';
+import 'package:socket_io_common/src/util/event_emitter.dart';
 import 'package:socket_io_client/src/engine/parseqs.dart';
-import 'package:socket_io/src/engine/parser/parser.dart' as parser;
+import 'package:socket_io_common/src/engine/parser/parser.dart' as parser;
 import 'package:socket_io_client/src/engine/transport/polling_transport.dart';
 import 'package:socket_io_client/src/engine/transport/transports.dart';
 
@@ -68,7 +68,7 @@ class Socket extends EventEmitter {
   bool upgrading;
 
   Socket(String uri, Map opts) {
-    opts = opts ?? {};
+    opts = opts ?? <dynamic, dynamic>{};
 
     if (uri.isNotEmpty) {
       this.uri = Uri.parse(uri);

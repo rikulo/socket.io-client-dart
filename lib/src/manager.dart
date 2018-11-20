@@ -14,8 +14,8 @@ import 'dart:async';
 import 'dart:math' as Math;
 
 import 'package:logging/logging.dart';
-import 'package:socket_io/src/util/event_emitter.dart';
-import 'package:socket_io/src/parser/parser.dart';
+import 'package:socket_io_common/src/util/event_emitter.dart';
+import 'package:socket_io_common/src/parser/parser.dart';
 import 'package:socket_io_client/src/on.dart';
 import 'package:socket_io_client/src/socket.dart';
 import 'package:socket_io_client/src/engine/socket.dart' as Engine;
@@ -58,7 +58,7 @@ class Manager extends EventEmitter {
   bool skipReconnect;
 
   Manager({uri, Map options}) {
-    options = options ?? {};
+    options = options ?? <dynamic, dynamic>{};
 
     options['path'] ??= '/socket.io';
     this.nsps = {};

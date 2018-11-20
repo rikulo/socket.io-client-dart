@@ -1,4 +1,4 @@
-import 'package:socket_io/src/util/event_emitter.dart';
+import 'package:socket_io_common/src/util/event_emitter.dart';
 
 /**
  * on.dart

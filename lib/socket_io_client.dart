@@ -14,7 +14,7 @@
 library socket_io_client;
 
 import 'package:logging/logging.dart';
-import 'package:socket_io/src/engine/parser/parser.dart' as Parser;
+import 'package:socket_io_common/src/engine/parser/parser.dart' as Parser;
 import 'package:socket_io_client/src/engine/parseqs.dart';
 import 'package:socket_io_client/src/manager.dart';
 
@@ -42,7 +42,7 @@ final Logger _logger = new Logger('socket_io_client');
 io(uri, [opts]) => _lookup(uri, opts);
 
 _lookup(uri, opts) {
-  opts = opts ?? {};
+  opts = opts ?? <dynamic, dynamic>{};
 
   Uri parsed = Uri.parse(uri);
   var id = '${parsed.scheme}://${parsed.host}:${parsed.port}';

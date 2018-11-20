@@ -55,3 +55,7 @@ If you are new to Git or GitHub, please read [this guide](https://help.github.co
 ## Socket.io Dart Server
 
 * [socket.io-dart](https://github.com/rikulo/socket.io-dart)
+
+
+## Contributors
+* Thanks [@felangel](https://github.com/felangel) for https://github.com/rikulo/socket.io-client-dart/issues/7
