@@ -1,25 +1,18 @@
-/**
- * websocket_transport.dart
- *
- * Purpose:
- *
- * Description:
- *
- * History:
- *   26/04/2017, Created by jumperchen
- *
- * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
- */
+// Copyright (C) 2019 Potix Corporation. All Rights Reserved 
+// History: 2019-01-21 12:13
+// Author: jumperchen<jumperchen@potix.com>
+
 import 'dart:async';
-import 'dart:html';
+import 'dart:io';
+//import 'dart:html';
 import 'package:logging/logging.dart';
 import 'package:socket_io_client/src/engine/transport/transport.dart';
 import 'package:socket_io_common/src/engine/parser/parser.dart';
 import 'package:socket_io_client/src/engine/parseqs.dart';
 
-class WebSocketTransport extends Transport {
+class IOWebSocketTransport extends Transport {
   static Logger _logger =
-      new Logger('socket_io_client:transport.WebSocketTransport');
+  new Logger('socket_io_client:transport.IOWebSocketTransport');
 
   String name = 'websocket';
   var protocols;
@@ -28,28 +21,28 @@ class WebSocketTransport extends Transport {
   Map perMessageDeflate;
   WebSocket ws;
 
-  WebSocketTransport(Map opts) : super(opts) {
+  IOWebSocketTransport(Map opts) : super(opts) {
     var forceBase64 = (opts != null && opts['forceBase64']);
     this.supportsBinary = !forceBase64;
     this.perMessageDeflate = opts['perMessageDeflate'];
     this.protocols = opts['protocols'];
   }
 
-  void doOpen() {
+  void doOpen() async {
     var uri = this.uri();
     var protocols = this.protocols;
 
     try {
-      this.ws = new WebSocket(uri, protocols);
+      this.ws = await WebSocket.connect(uri, protocols: protocols);
     } catch (err) {
       return this.emit('error', err);
     }
 
-    if (this.ws.binaryType == null) {
-      this.supportsBinary = false;
-    }
-
-    this.ws.binaryType = 'arraybuffer';
+//    if (this.ws.binaryType == null) {
+//      this.supportsBinary = false;
+//    }
+//
+//    this.ws.binaryType = 'arraybuffer';
 
     this.addEventListeners();
   }
@@ -60,13 +53,14 @@ class WebSocketTransport extends Transport {
    * @api private
    */
   void addEventListeners() {
-    this.ws
-      ..onOpen.listen((_) => onOpen())
-      ..onClose.listen((_) => onClose())
-      ..onMessage.listen((MessageEvent evt) => onData(evt.data))
-      ..onError.listen((e) {
-        onError('websocket error');
-      });
+    bool isOpen = false;
+    this.ws.listen((data) {
+      if (isOpen != true) {
+        onOpen();
+        isOpen = true;
+      }
+      onData(data);
+    }, onDone:  () => onClose(), onError:  (_) => onError('websocket error'));
   }
 
   /**
@@ -95,18 +89,18 @@ class WebSocketTransport extends Transport {
     packets.forEach((packet) {
       PacketParser.encodePacket(packet,
           supportsBinary: supportsBinary, fromClient: true, callback: (data) {
-        // Sometimes the websocket has already been closed but the browser didn't
-        // have a chance of informing us about it yet, in that case send will
-        // throw an error
-        try {
-          // TypeError is thrown when passing the second argument on Safari
-          ws.send(data);
-        } catch (e) {
-          _logger.fine('websocket closed before onclose event');
-        }
+            // Sometimes the websocket has already been closed but the browser didn't
+            // have a chance of informing us about it yet, in that case send will
+            // throw an error
+            try {
+              // TypeError is thrown when passing the second argument on Safari
+              ws.add(data);
+            } catch (e) {
+              _logger.fine('websocket closed before onclose event');
+            }
 
-        if (--total == 0) done();
-      });
+            if (--total == 0) done();
+          });
     });
   }
 
