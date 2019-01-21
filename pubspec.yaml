@@ -1,6 +1,6 @@
 name: socket_io_client
 description: Dartlang port of socket.io-client
-version: 0.9.0+1
+version: 0.9.1
 author: jumperchen <jumperchen@potix.com>
 homepage: https://www.zkoss.org
 
