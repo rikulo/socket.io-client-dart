@@ -147,7 +147,12 @@ class Socket extends EventEmitter {
     if (EVENTS.contains(event)) {
       super.emit(event, data);
     } else {
-      List sendData = data == null ? [event] : [event, data];
+      List sendData = [event];
+      if (data is Iterable) {
+          sendData.addAll(data);
+      } else {
+          sendData.add(data);
+      }
 
       var packet = {
         'type': binary ? BINARY_EVENT : EVENT,
