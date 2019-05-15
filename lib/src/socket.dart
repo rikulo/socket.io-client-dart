@@ -150,7 +150,7 @@ class Socket extends EventEmitter {
       List sendData = [event];
       if (data is Iterable) {
           sendData.addAll(data);
-      } else {
+      } else if (data != null) {
           sendData.add(data);
       }
 

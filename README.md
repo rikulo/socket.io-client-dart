@@ -59,3 +59,4 @@ If you are new to Git or GitHub, please read [this guide](https://help.github.co
 
 ## Contributors
 * Thanks [@felangel](https://github.com/felangel) for https://github.com/rikulo/socket.io-client-dart/issues/7
+* Thanks [@Oskang09](https://github.com/Oskang09) for https://github.com/rikulo/socket.io-client-dart/issues/21
