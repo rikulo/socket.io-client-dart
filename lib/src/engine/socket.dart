@@ -73,6 +73,7 @@ class Socket extends EventEmitter {
   Transport transport;
   bool supportsBinary;
   bool upgrading;
+  Map extraHeaders;
 
   Socket(String uri, Map opts) {
     opts = opts ?? <dynamic, dynamic>{};
@@ -137,6 +138,7 @@ class Socket extends EventEmitter {
         this.perMessageDeflate['threshold'] = 1024;
     }
 
+    this.extraHeaders = opts['extraHeaders'] ?? {};
     // SSL options for Node.js client
 //  this.pfx = opts.pfx || null;
 //  this.key = opts.key || null;
@@ -239,7 +241,7 @@ class Socket extends EventEmitter {
 //  'rejectUnauthorized: options.rejectUnauthorized || this.rejectUnauthorized,
       'perMessageDeflate':
           options['perMessageDeflate'] ?? this.perMessageDeflate,
-//  'extraHeaders: options['extraHeaders ?? this.extraHeaders,
+      'extraHeaders': options['extraHeaders'] ?? this.extraHeaders,
 //  'forceNode: options.forceNode || this.forceNode,
 //  'localAddress: options.localAddress || this.localAddress,
       'requestTimeout': options['requestTimeout'] ?? this.requestTimeout,

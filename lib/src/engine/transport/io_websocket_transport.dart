@@ -1,4 +1,4 @@
-// Copyright (C) 2019 Potix Corporation. All Rights Reserved 
+// Copyright (C) 2019 Potix Corporation. All Rights Reserved
 // History: 2019-01-21 12:13
 // Author: jumperchen<jumperchen@potix.com>
 
@@ -19,6 +19,7 @@ class IOWebSocketTransport extends Transport {
 
   bool supportsBinary;
   Map perMessageDeflate;
+  Map extraHeaders;
   WebSocket ws;
 
   IOWebSocketTransport(Map opts) : super(opts) {
@@ -26,6 +27,7 @@ class IOWebSocketTransport extends Transport {
     this.supportsBinary = !forceBase64;
     this.perMessageDeflate = opts['perMessageDeflate'];
     this.protocols = opts['protocols'];
+    this.extraHeaders = opts['extraHeaders'];
   }
 
   void doOpen() async {
@@ -33,7 +35,7 @@ class IOWebSocketTransport extends Transport {
     var protocols = this.protocols;
 
     try {
-      this.ws = await WebSocket.connect(uri, protocols: protocols);
+      this.ws = await WebSocket.connect(uri, protocols: protocols, headers: extraHeaders);
     } catch (err) {
       return this.emit('error', err);
     }
