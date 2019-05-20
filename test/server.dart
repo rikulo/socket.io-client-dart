@@ -16,6 +16,9 @@ main() {
   // Dart server
   var io = new Server();
   io.on('connection', (client) {
+    final headers = client.handshake['headers'];
+    headers.forEach((k, v) => print('$k => $v'));
+
     print('connection default namespace');
     client.on('msg', (data) {
       print('data from default => $data');
