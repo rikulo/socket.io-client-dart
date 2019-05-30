@@ -138,7 +138,7 @@ class Socket extends EventEmitter {
         this.perMessageDeflate['threshold'] = 1024;
     }
 
-    this.extraHeaders = opts['extraHeaders'] ?? {};
+    this.extraHeaders = opts['extraHeaders'] ?? <String, dynamic>{};
     // SSL options for Node.js client
 //  this.pfx = opts.pfx || null;
 //  this.key = opts.key || null;
