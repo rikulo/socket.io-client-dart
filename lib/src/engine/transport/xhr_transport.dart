@@ -27,6 +27,7 @@ class XHRTransport extends PollingTransport {
   bool xs;
   Request sendXhr;
   Request pollXhr;
+  Map extraHeaders;
 
   /**
    * XHR Polling constructor.
@@ -36,7 +37,7 @@ class XHRTransport extends PollingTransport {
    */
   XHRTransport(Map opts) : super(opts) {
     this.requestTimeout = opts['requestTimeout'];
-//    this.extraHeaders = opts.extraHeaders;
+    this.extraHeaders = opts['extraHeaders'] ?? <String, dynamic>{};
 
     var isSSL = 'https:' == window.location.protocol;
     var port = window.location.port;
@@ -81,7 +82,7 @@ class XHRTransport extends PollingTransport {
 //    opts.requestTimeout = this.requestTimeout;
 
     // other options for Node.js client
-//    opts.extraHeaders = this.extraHeaders;
+    opts['extraHeaders'] = this.extraHeaders;
 
     return new Request(opts);
   }
@@ -142,6 +143,7 @@ class Request extends EventEmitter {
   HttpRequest xhr;
   String method;
   StreamSubscription readyStateChange;
+  Map extraHeaders;
 
   Request(Map opts) {
     this.method = opts['method'] ?? 'GET';
@@ -155,6 +157,7 @@ class Request extends EventEmitter {
     this.supportsBinary = opts['supportsBinary'];
     this.enablesXDR = opts['enablesXDR'];
     this.requestTimeout = opts['requestTimeout'];
+    this.extraHeaders = opts['extraHeaders'];
 
     this.create();
   }
@@ -174,16 +177,13 @@ class Request extends EventEmitter {
       _logger.fine('xhr open ${this.method}: ${this.uri}');
       xhr.open(this.method, this.uri, async: this.async);
 
-//try {
-//if (this.extraHeaders) {
-//xhr.setDisableHeaderCheck && xhr.setDisableHeaderCheck(true);
-//for (var i in this.extraHeaders) {
-//if (this.extraHeaders.hasOwnProperty(i)) {
-//xhr.setRequestHeader(i, this.extraHeaders[i]);
-//}
-//}
-//}
-//} catch (e) {}
+      try {
+        if (this.extraHeaders?.isNotEmpty == true) {
+          this.extraHeaders.forEach((k, v) {
+            xhr.setRequestHeader(k, v);
+          });
+        }
+      } catch (e) {}
 
       if ('POST' == this.method) {
         try {
