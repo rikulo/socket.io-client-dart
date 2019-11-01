@@ -574,7 +574,8 @@ class _Backoff {
       var deviation = (rand * _jitter * ms).floor();
       ms = ((rand * 10).floor() & 1) == 0 ? ms - deviation : ms + deviation;
     }
-    return Math.min(ms, _max);
+    // #39: avoid an overflow with negative value
+    return Math.max(Math.min(ms, _max), 0);
   }
 
   /**
