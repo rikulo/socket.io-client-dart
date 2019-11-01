@@ -38,6 +38,18 @@ Port of awesome JavaScript Node.js library - [Socket.io-client v2.0.1](https://g
         socket.on('disconnect', (_) => print('disconnect'));
         socket.on('fromServer', (_) => print(_));
     }
+    
+## Usage (Flutter)
+In Flutter env. it only works with `dart:io` websocket, not with `dart:html` websocket, so in this case
+you have to add `'transports': ['websocket']` when creates the socket instance.
+
+For example,
+```
+IO.Socket socket = IO.io('http://localhost:3000', <String, dynamic>{
+    'transports': ['websocket'],
+    'extraHeaders': {'foo': 'bar'} // optional
+  });
+```
 
 ## Notes to Contributors
 
