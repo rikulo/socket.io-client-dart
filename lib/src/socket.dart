@@ -1,29 +1,28 @@
-/**
- * socket.dart
- *
- * Purpose:
- *
- * Description:
- *
- * History:
- *   26/04/2017, Created by jumperchen
- *
- * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
- */
+///
+/// socket.dart
+///
+/// Purpose:
+///
+/// Description:
+///
+/// History:
+///   26/04/2017, Created by jumperchen
+///
+/// Copyright (C) 2017 Potix Corporation. All Rights Reserved.
 import 'package:logging/logging.dart';
 import 'package:socket_io_common/src/util/event_emitter.dart';
 import 'package:socket_io_client/src/manager.dart';
-import 'package:socket_io_client/src/on.dart' as ON;
+import 'package:socket_io_client/src/on.dart' as util;
 import 'package:socket_io_common/src/parser/parser.dart';
 
-/**
- * Internal events (blacklisted).
- * These events can't be emitted by the user.
- *
- * @api private
- */
+///
+/// Internal events (blacklisted).
+/// These events can't be emitted by the user.
+///
+/// @api private
+///
 
-const List EVENTS = const [
+const List EVENTS = [
   'connect',
   'connect_error',
   'connect_timeout',
@@ -39,13 +38,12 @@ const List EVENTS = const [
   'pong'
 ];
 
-final Logger _logger = new Logger('socket_io_client:Socket');
+final Logger _logger = Logger('socket_io_client:Socket');
 
-/**
- * `Socket` constructor.
- *
- * @api public
- */
+///
+/// `Socket` constructor.
+///
+/// @api public
 class Socket extends EventEmitter {
   String nsp;
   Map opts;
@@ -77,27 +75,25 @@ class Socket extends EventEmitter {
     if (this.io.autoConnect) this.open();
   }
 
-  /**
-   * Subscribe to open, close and packet events
-   *
-   * @api private
-   */
+  ///
+  /// Subscribe to open, close and packet events
+  ///
+  /// @api private
   subEvents() {
     if (this.subs?.isEmpty == true) return;
 
     var io = this.io;
     this.subs = [
-      ON.on(io, 'open', this.onopen),
-      ON.on(io, 'packet', this.onpacket),
-      ON.on(io, 'close', this.onclose)
+      util.on(io, 'open', this.onopen),
+      util.on(io, 'packet', this.onpacket),
+      util.on(io, 'close', this.onclose)
     ];
   }
 
-  /**
-   * "Opens" the socket.
-   *
-   * @api public
-   */
+  ///
+  /// "Opens" the socket.
+  ///
+  /// @api public
   open() => connect();
 
   connect() {
@@ -109,25 +105,23 @@ class Socket extends EventEmitter {
     return this;
   }
 
-  /**
-   * Sends a `message` event.
-   *
-   * @return {Socket} self
-   * @api public
-   */
+  ///
+  /// Sends a `message` event.
+  ///
+  /// @return {Socket} self
+  /// @api public
   send(List args) {
     this.emit('message', args);
     return this;
   }
 
-  /**
-   * Override `emit`.
-   * If the event is in `events`, it's emitted normally.
-   *
-   * @param {String} event name
-   * @return {Socket} self
-   * @api public
-   */
+  ///
+  /// Override `emit`.
+  /// If the event is in `events`, it's emitted normally.
+  ///
+  /// @param {String} event name
+  /// @return {Socket} self
+  /// @api public
   void emit(String event, [data]) {
     emitWithAck(event, data);
   }
@@ -136,12 +130,11 @@ class Socket extends EventEmitter {
     emitWithAck(event, data, binary: true);
   }
 
-  /**
-   * Emits to this client.
-   *
-   * @return {Socket} self
-   * @api public
-   */
+  ///
+  /// Emits to this client.
+  ///
+  /// @return {Socket} self
+  /// @api public
   void emitWithAck(String event, dynamic data,
       {Function ack, bool binary = false}) {
     if (EVENTS.contains(event)) {
@@ -149,9 +142,9 @@ class Socket extends EventEmitter {
     } else {
       List sendData = [event];
       if (data is Iterable) {
-          sendData.addAll(data);
+        sendData.addAll(data);
       } else if (data != null) {
-          sendData.add(data);
+        sendData.add(data);
       }
 
       var packet = {
@@ -178,22 +171,20 @@ class Socket extends EventEmitter {
     }
   }
 
-  /**
-   * Sends a packet.
-   *
-   * @param {Object} packet
-   * @api private
-   */
+  ///
+  /// Sends a packet.
+  ///
+  /// @param {Object} packet
+  /// @api private
   packet(Map packet) {
     packet['nsp'] = this.nsp;
     this.io.packet(packet);
   }
 
-  /**
-   * Called upon engine `open`.
-   *
-   * @api private
-   */
+  ///
+  /// Called upon engine `open`.
+  ///
+  /// @api private
   onopen([_]) {
     _logger.fine('transport is open - connecting');
 
@@ -207,12 +198,11 @@ class Socket extends EventEmitter {
     }
   }
 
-  /**
-   * Called upon engine `close`.
-   *
-   * @param {String} reason
-   * @api private
-   */
+  ///
+  /// Called upon engine `close`.
+  ///
+  /// @param {String} reason
+  /// @api private
   onclose(reason) {
     _logger.fine('close ($reason)');
     this.emit('disconnecting', reason);
@@ -222,12 +212,11 @@ class Socket extends EventEmitter {
     this.emit('disconnect', reason);
   }
 
-  /**
-   * Called with socket packet.
-   *
-   * @param {Object} packet
-   * @api private
-   */
+  ///
+  /// Called with socket packet.
+  ///
+  /// @param {Object} packet
+  /// @api private
   onpacket(packet) {
     if (packet['nsp'] != this.nsp) return;
 
@@ -262,12 +251,11 @@ class Socket extends EventEmitter {
     }
   }
 
-  /**
-   * Called upon a server event.
-   *
-   * @param {Object} packet
-   * @api private
-   */
+  ///
+  /// Called upon a server event.
+  ///
+  /// @param {Object} packet
+  /// @api private
   onevent(Map packet) {
     List args = packet['data'] ?? [];
 //    debug('emitting event %j', args);
@@ -289,11 +277,10 @@ class Socket extends EventEmitter {
     }
   }
 
-  /**
-   * Produces an ack callback to emit with an event.
-   *
-   * @api private
-   */
+  ///
+  /// Produces an ack callback to emit with an event.
+  ///
+  /// @api private
   Function ack(id) {
     var sent = false;
     return (_) {
@@ -310,12 +297,11 @@ class Socket extends EventEmitter {
     };
   }
 
-  /**
-   * Called upon a server acknowlegement.
-   *
-   * @param {Object} packet
-   * @api private
-   */
+  ///
+  /// Called upon a server acknowlegement.
+  ///
+  /// @param {Object} packet
+  /// @api private
   onack(Map packet) {
     var ack = this.acks.remove(packet['id']);
     if (ack is Function) {
@@ -333,11 +319,10 @@ class Socket extends EventEmitter {
     }
   }
 
-  /**
-   * Called upon server connect.
-   *
-   * @api private
-   */
+  ///
+  /// Called upon server connect.
+  ///
+  /// @api private
   onconnect() {
     this.connected = true;
     this.disconnected = false;
@@ -345,11 +330,10 @@ class Socket extends EventEmitter {
     this.emitBuffered();
   }
 
-  /**
-   * Emit buffered events (received and emitted).
-   *
-   * @api private
-   */
+  ///
+  /// Emit buffered events (received and emitted).
+  ///
+  /// @api private
   emitBuffered() {
     var i;
     for (i = 0; i < this.receiveBuffer.length; i++) {
@@ -368,24 +352,22 @@ class Socket extends EventEmitter {
     this.sendBuffer = [];
   }
 
-  /**
-   * Called upon server disconnect.
-   *
-   * @api private
-   */
+  ///
+  /// Called upon server disconnect.
+  ///
+  /// @api private
   ondisconnect() {
     _logger.fine('server disconnect (${this.nsp})');
     this.destroy();
     this.onclose('io server disconnect');
   }
 
-  /**
-   * Called upon forced client/server side disconnections,
-   * this method ensures the manager stops tracking us and
-   * that reconnections don't get triggered for this.
-   *
-   * @api private.
-   */
+  ///
+  /// Called upon forced client/server side disconnections,
+  /// this method ensures the manager stops tracking us and
+  /// that reconnections don't get triggered for this.
+  ///
+  /// @api private.
 
   destroy() {
     if (this.subs?.isNotEmpty == true) {
@@ -399,12 +381,11 @@ class Socket extends EventEmitter {
     this.io.destroy(this);
   }
 
-  /**
-   * Disconnects the socket manually.
-   *
-   * @return {Socket} self
-   * @api public
-   */
+  ///
+  /// Disconnects the socket manually.
+  ///
+  /// @return {Socket} self
+  /// @api public
   close() => disconnect();
 
   disconnect() {
@@ -423,13 +404,12 @@ class Socket extends EventEmitter {
     return this;
   }
 
-  /**
-   * Sets the compress flag.
-   *
-   * @param {Boolean} if `true`, compresses the sending data
-   * @return {Socket} self
-   * @api public
-   */
+  ///
+  /// Sets the compress flag.
+  ///
+  /// @param {Boolean} if `true`, compresses the sending data
+  /// @return {Socket} self
+  /// @api public
   compress(compress) {
     this.flags = this.flags ??= {};
     this.flags['compress'] = compress;

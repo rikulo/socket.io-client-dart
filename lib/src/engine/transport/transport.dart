@@ -1,4 +1,4 @@
-// Copyright (C) 2019 Potix Corporation. All Rights Reserved 
+// Copyright (C) 2019 Potix Corporation. All Rights Reserved
 // History: 2019-01-21 12:27
 // Author: jumperchen<jumperchen@potix.com>
 import 'package:logging/logging.dart';
@@ -7,7 +7,7 @@ import 'package:socket_io_common/src/util/event_emitter.dart';
 import 'package:socket_io_client/src/engine/socket.dart';
 
 abstract class Transport extends EventEmitter {
-  static Logger _logger = new Logger('socket_io_client:transport.Transport');
+  static Logger _logger = Logger('socket_io_client:transport.Transport');
 
   String path;
   String hostname;
@@ -52,13 +52,12 @@ abstract class Transport extends EventEmitter {
 //    this.localAddress = opts['calAddress'];
   }
 
-  /**
-   * Emits an error.
-   *
-   * @param {String} str
-   * @return {Transport} for chaining
-   * @api public
-   */
+  ///
+  /// Emits an error.
+  ///
+  /// @param {String} str
+  /// @return {Transport} for chaining
+  /// @api public
   void onError(msg, [desc]) {
     if (this.hasListeners('error')) {
       this.emit('error', {'msg': msg, 'desc': desc, 'type': 'TransportError'});
@@ -67,11 +66,10 @@ abstract class Transport extends EventEmitter {
     }
   }
 
-  /**
-   * Opens the transport.
-   *
-   * @api public
-   */
+  ///
+  /// Opens the transport.
+  ///
+  /// @api public
   void open() {
     if ('closed' == this.readyState || '' == this.readyState) {
       this.readyState = 'opening';
@@ -79,11 +77,10 @@ abstract class Transport extends EventEmitter {
     }
   }
 
-  /**
-   * Closes the transport.
-   *
-   * @api private
-   */
+  ///
+  /// Closes the transport.
+  ///
+  /// @api private
   void close() {
     if ('opening' == this.readyState || 'open' == this.readyState) {
       this.doClose();
@@ -91,55 +88,50 @@ abstract class Transport extends EventEmitter {
     }
   }
 
-  /**
-   * Sends multiple packets.
-   *
-   * @param {Array} packets
-   * @api private
-   */
+  ///
+  /// Sends multiple packets.
+  ///
+  /// @param {Array} packets
+  /// @api private
   send(List packets) {
     if ('open' == this.readyState) {
       this.write(packets);
     } else {
-      throw new StateError('Transport not open');
+      throw StateError('Transport not open');
     }
   }
 
-  /**
-   * Called upon open
-   *
-   * @api private
-   */
+  ///
+  /// Called upon open
+  ///
+  /// @api private
   onOpen() {
     this.readyState = 'open';
     this.writable = true;
     this.emit('open');
   }
 
-  /**
-   * Called with data.
-   *
-   * @param {String} data
-   * @api private
-   */
+  ///
+  /// Called with data.
+  ///
+  /// @param {String} data
+  /// @api private
   onData(data) {
     var packet =
-    PacketParser.decodePacket(data, binaryType: this.socket.binaryType);
+        PacketParser.decodePacket(data, binaryType: this.socket.binaryType);
     this.onPacket(packet);
   }
 
-  /**
-   * Called with a decoded packet.
-   */
+  ///
+  /// Called with a decoded packet.
   onPacket(packet) {
     this.emit('packet', packet);
   }
 
-  /**
-   * Called upon close.
-   *
-   * @api private
-   */
+  ///
+  /// Called upon close.
+  ///
+  /// @api private
   onClose() {
     this.readyState = 'closed';
     this.emit('close');

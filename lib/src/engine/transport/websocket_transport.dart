@@ -1,15 +1,7 @@
-/**
- * websocket_transport.dart
- *
- * Purpose:
- *
- * Description:
- *
- * History:
- *   26/04/2017, Created by jumperchen
- *
- * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
- */
+// Copyright (C) 2017 Potix Corporation. All Rights Reserved
+// History: 26/04/2017
+// Author: jumperchen<jumperchen@potix.com>
+
 import 'dart:async';
 import 'dart:html';
 import 'package:logging/logging.dart';
@@ -19,7 +11,7 @@ import 'package:socket_io_client/src/engine/parseqs.dart';
 
 class WebSocketTransport extends Transport {
   static Logger _logger =
-      new Logger('socket_io_client:transport.WebSocketTransport');
+      Logger('socket_io_client:transport.WebSocketTransport');
 
   String name = 'websocket';
   var protocols;
@@ -40,7 +32,7 @@ class WebSocketTransport extends Transport {
     var protocols = this.protocols;
 
     try {
-      this.ws = new WebSocket(uri, protocols);
+      this.ws = WebSocket(uri, protocols);
     } catch (err) {
       return this.emit('error', err);
     }
@@ -54,11 +46,9 @@ class WebSocketTransport extends Transport {
     this.addEventListeners();
   }
 
-  /**
-   * Adds event listeners to the socket
-   *
-   * @api private
-   */
+  /// Adds event listeners to the socket
+  ///
+  /// @api private
   void addEventListeners() {
     this.ws
       ..onOpen.listen((_) => onOpen())
@@ -69,12 +59,10 @@ class WebSocketTransport extends Transport {
       });
   }
 
-  /**
-   * Writes data to socket.
-   *
-   * @param {Array} array of packets.
-   * @api private
-   */
+  /// Writes data to socket.
+  ///
+  /// @param {Array} array of packets.
+  /// @api private
   write(List packets) {
     this.writable = false;
 
@@ -110,20 +98,16 @@ class WebSocketTransport extends Transport {
     });
   }
 
-  /**
-   * Closes socket.
-   *
-   * @api private
-   */
+  /// Closes socket.
+  ///
+  /// @api private
   doClose() {
     this.ws?.close();
   }
 
-  /**
-   * Generates uri for connection.
-   *
-   * @api private
-   */
+  /// Generates uri for connection.
+  ///
+  /// @api private
   uri() {
     var query = this.query ?? {};
     var schema = this.secure ? 'wss' : 'ws';
@@ -139,7 +123,7 @@ class WebSocketTransport extends Transport {
     // append timestamp to URI
     if (this.timestampRequests == true) {
       query[this.timestampParam] =
-          new DateTime.now().millisecondsSinceEpoch.toRadixString(36);
+          DateTime.now().millisecondsSinceEpoch.toRadixString(36);
     }
 
     // communicate binary support capabilities
@@ -162,13 +146,12 @@ class WebSocketTransport extends Transport {
         this.path +
         queryString;
   }
-//
-//  /**
-//   * Feature detection for WebSocket.
-//   *
-//   * @return {Boolean} whether this transport is available.
-//   * @api public
-//   */
+/////
+///// Feature detection for WebSocket.
+/////
+///// @return {Boolean} whether this transport is available.
+///// @api public
+//////
 //  check() {
 //    return !!WebSocket && !('__initialize' in WebSocket && this.name === WS.prototype.name);
 //  }

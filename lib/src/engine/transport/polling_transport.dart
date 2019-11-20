@@ -1,37 +1,35 @@
 import 'package:socket_io_client/src/engine/parseqs.dart';
-/**
- * polling_transport.dart
- *
- * Purpose:
- *
- * Description:
- *
- * History:
- *   26/04/2017, Created by jumperchen
- *
- * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
- */
+
+///
+/// polling_transport.dart
+///
+/// Purpose:
+///
+/// Description:
+///
+/// History:
+///   26/04/2017, Created by jumperchen
+///
+/// Copyright (C) 2017 Potix Corporation. All Rights Reserved.
 import 'package:logging/logging.dart';
 import 'package:socket_io_client/src/engine/transport/transport.dart';
 import 'package:socket_io_common/src/engine/parser/parser.dart';
 
-final Logger _logger = new Logger('socket_io:transport.PollingTransport');
+final Logger _logger = Logger('socket_io:transport.PollingTransport');
 
 abstract class PollingTransport extends Transport {
-  /**
-   * Transport name.
-   */
+  ///
+  /// Transport name.
   String name = 'polling';
 
   bool supportsBinary;
   bool polling;
 
-  /**
-   * Polling interface.
-   *
-   * @param {Object} opts
-   * @api private
-   */
+  ///
+  /// Polling interface.
+  ///
+  /// @param {Object} opts
+  /// @api private
   PollingTransport(Map opts) : super(opts) {
     var forceBase64 = (opts != null && opts['forceBase64']);
     if (/*!hasXHR2 || */ forceBase64) {
@@ -39,22 +37,20 @@ abstract class PollingTransport extends Transport {
     }
   }
 
-  /**
-   * Opens the socket (triggers polling). We write a PING message to determine
-   * when the transport is open.
-   *
-   * @api private
-   */
+  ///
+  /// Opens the socket (triggers polling). We write a PING message to determine
+  /// when the transport is open.
+  ///
+  /// @api private
   doOpen() {
     this.poll();
   }
 
-  /**
-   * Pauses polling.
-   *
-   * @param {Function} callback upon buffers are flushed and transport is paused
-   * @api private
-   */
+  ///
+  /// Pauses polling.
+  ///
+  /// @param {Function} callback upon buffers are flushed and transport is paused
+  /// @api private
   pause(onPause) {
     var self = this;
 
@@ -91,11 +87,10 @@ abstract class PollingTransport extends Transport {
     }
   }
 
-  /**
-   * Starts polling cycle.
-   *
-   * @api public
-   */
+  ///
+  /// Starts polling cycle.
+  ///
+  /// @api public
   poll() {
     _logger.fine('polling');
     this.polling = true;
@@ -103,11 +98,10 @@ abstract class PollingTransport extends Transport {
     this.emit('poll');
   }
 
-  /**
-   * Overloads onData to detect payloads.
-   *
-   * @api private
-   */
+  ///
+  /// Overloads onData to detect payloads.
+  ///
+  /// @api private
   onData(data) {
     var self = this;
     _logger.fine('polling got data $data');
@@ -125,6 +119,7 @@ abstract class PollingTransport extends Transport {
 
       // otherwise bypass onData and handle the message
       self.onPacket(packet);
+      return null;
     };
 
     // decode payload
@@ -145,11 +140,10 @@ abstract class PollingTransport extends Transport {
     }
   }
 
-  /**
-   * For polling, send a close packet.
-   *
-   * @api private
-   */
+  ///
+  /// For polling, send a close packet.
+  ///
+  /// @api private
   doClose() {
     var self = this;
 
@@ -171,13 +165,12 @@ abstract class PollingTransport extends Transport {
     }
   }
 
-  /**
-   * Writes a packets payload.
-   *
-   * @param {Array} data packets
-   * @param {Function} drain callback
-   * @api private
-   */
+  ///
+  /// Writes a packets payload.
+  ///
+  /// @param {Array} data packets
+  /// @param {Function} drain callback
+  /// @api private
   write(List packets) {
     var self = this;
     this.writable = false;
@@ -192,11 +185,10 @@ abstract class PollingTransport extends Transport {
     });
   }
 
-  /**
-   * Generates uri for connection.
-   *
-   * @api private
-   */
+  ///
+  /// Generates uri for connection.
+  ///
+  /// @api private
   uri() {
     var query = this.query ?? {};
     var schema = this.secure ? 'https' : 'http';
@@ -205,7 +197,7 @@ abstract class PollingTransport extends Transport {
     // cache busting is forced
     if (this.timestampRequests != false) {
       query[this.timestampParam] =
-          new DateTime.now().millisecondsSinceEpoch.toRadixString(36);
+          DateTime.now().millisecondsSinceEpoch.toRadixString(36);
     }
 
     if (this.supportsBinary == false && !query.containsKey('sid')) {

@@ -1,44 +1,44 @@
-/**
- * socket_io_client.dart
- *
- * Purpose:
- *
- * Description:
- *
- * History:
- *   26/04/2017, Created by jumperchen
- *
- * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
- */
+///
+/// socket_io_client.dart
+///
+/// Purpose:
+///
+/// Description:
+///
+/// History:
+///   26/04/2017, Created by jumperchen
+///
+/// Copyright (C) 2017 Potix Corporation. All Rights Reserved.
+///
 
 library socket_io_client;
 
 import 'package:logging/logging.dart';
-import 'package:socket_io_common/src/engine/parser/parser.dart' as Parser;
+import 'package:socket_io_common/src/engine/parser/parser.dart' as parser;
 import 'package:socket_io_client/src/engine/parseqs.dart';
 import 'package:socket_io_client/src/manager.dart';
 
 export 'package:socket_io_client/src/socket.dart';
 
 // Protocol version
-final protocol = Parser.protocol;
+final protocol = parser.protocol;
 
 final Map<String, dynamic> cache = {};
 
-final Logger _logger = new Logger('socket_io_client');
+final Logger _logger = Logger('socket_io_client');
 
-/**
- * Looks up an existing `Manager` for multiplexing.
- * If the user summons:
- *
- *   `io('http://localhost/a');`
- *   `io('http://localhost/b');`
- *
- * We reuse the existing instance based on same scheme/port/host,
- * and we initialize sockets for each namespace.
- *
- * @api public
- */
+///
+/// Looks up an existing `Manager` for multiplexing.
+/// If the user summons:
+///
+///   `io('http://localhost/a');`
+///   `io('http://localhost/b');`
+///
+/// We reuse the existing instance based on same scheme/port/host,
+/// and we initialize sockets for each namespace.
+///
+/// @api public
+///
 io(uri, [opts]) => _lookup(uri, opts);
 
 _lookup(uri, opts) {
@@ -57,9 +57,9 @@ _lookup(uri, opts) {
 
   if (newConnection) {
     _logger.fine('ignoring socket cache for $uri');
-    io = new Manager(uri: uri, options: opts);
+    io = Manager(uri: uri, options: opts);
   } else {
-    io = cache[id] ??= new Manager(uri: uri, options: opts);
+    io = cache[id] ??= Manager(uri: uri, options: opts);
   }
   if (parsed.query.isNotEmpty && opts['query'] == null) {
     opts['query'] = parsed.query;

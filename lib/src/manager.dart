@@ -11,25 +11,25 @@
  * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
  */
 import 'dart:async';
-import 'dart:math' as Math;
+import 'dart:math' as math;
 
 import 'package:logging/logging.dart';
 import 'package:socket_io_common/src/util/event_emitter.dart';
 import 'package:socket_io_common/src/parser/parser.dart';
 import 'package:socket_io_client/src/on.dart';
 import 'package:socket_io_client/src/socket.dart';
-import 'package:socket_io_client/src/engine/socket.dart' as Engine;
-import 'package:socket_io_client/src/on.dart' as ON;
+import 'package:socket_io_client/src/engine/socket.dart' as engine_socket;
+import 'package:socket_io_client/src/on.dart' as util;
 
-final Logger _logger = new Logger('socket_io_client:Manager');
+final Logger _logger = Logger('socket_io_client:Manager');
 
-/**
- * `Manager` constructor.
- *
- * @param {String} engine instance or engine uri/opts
- * @param {Object} options
- * @api public
- */
+///
+/// `Manager` constructor.
+///
+/// @param {String} engine instance or engine uri/opts
+/// @param {Object} options
+/// @api public
+///
 class Manager extends EventEmitter {
   // Namespaces
   Map<String, Socket> nsps;
@@ -51,7 +51,7 @@ class Manager extends EventEmitter {
   List packetBuffer;
   bool reconnecting = false;
 
-  Engine.Socket engine;
+  engine_socket.Socket engine;
   Encoder encoder;
   Decoder decoder;
   bool autoConnect;
@@ -70,7 +70,7 @@ class Manager extends EventEmitter {
     this.reconnectionDelay = options['reconnectionDelay'] ?? 1000;
     this.reconnectionDelayMax = options['reconnectionDelayMax'] ?? 5000;
     this.randomizationFactor = options['randomizationFactor'] ?? 0.5;
-    this.backoff = new _Backoff(
+    this.backoff = _Backoff(
         min: this.reconnectionDelay,
         max: this.reconnectionDelayMax,
         jitter: this.randomizationFactor);
@@ -81,17 +81,17 @@ class Manager extends EventEmitter {
     this.lastPing = null;
     this.encoding = false;
     this.packetBuffer = [];
-    this.encoder = new Encoder();
-    this.decoder = new Decoder();
+    this.encoder = Encoder();
+    this.decoder = Decoder();
     this.autoConnect = options['autoConnect'] != false;
     if (this.autoConnect) this.open();
   }
 
-  /**
-   * Propagate given event to sockets and emit on `this`
-   *
-   * @api private
-   */
+  ///
+  /// Propagate given event to sockets and emit on `this`
+  ///
+  /// @api private
+  ///
   void emitAll(String event, [data]) {
     this.emit(event, data);
     for (var nsp in this.nsps.keys) {
@@ -99,56 +99,56 @@ class Manager extends EventEmitter {
     }
   }
 
-  /**
-   * Update `socket.id` of all sockets
-   *
-   * @api private
-   */
+  ///
+  /// Update `socket.id` of all sockets
+  ///
+  /// @api private
+  ///
   void updateSocketIds() {
     for (var nsp in this.nsps.keys) {
       this.nsps[nsp].id = this.generateId(nsp);
     }
   }
 
-  /**
-   * generate `socket.id` for the given `nsp`
-   *
-   * @param {String} nsp
-   * @return {String}
-   * @api private
-   */
+  ///
+  /// generate `socket.id` for the given `nsp`
+  ///
+  /// @param {String} nsp
+  /// @return {String}
+  /// @api private
+  ///
   String generateId(String nsp) {
     if (nsp.startsWith('/')) nsp = nsp.substring(1);
     return (nsp.isEmpty ? '' : (nsp + '#')) + this.engine.id;
   }
 
-  /**
-   * Sets the `reconnection` config.
-   *
-   * @param {Boolean} true/false if it should automatically reconnect
-   * @return {Manager} self or value
-   * @api public
-   */
+  ///
+  /// Sets the `reconnection` config.
+  ///
+  /// @param {Boolean} true/false if it should automatically reconnect
+  /// @return {Manager} self or value
+  /// @api public
+  ///
   bool get reconnection => this._reconnection;
   set reconnection(bool v) => this._reconnection = v;
 
-  /**
-   * Sets the reconnection attempts config.
-   *
-   * @param {Number} max reconnection attempts before giving up
-   * @return {Manager} self or value
-   * @api public
-   */
+  ///
+  /// Sets the reconnection attempts config.
+  ///
+  /// @param {Number} max reconnection attempts before giving up
+  /// @return {Manager} self or value
+  /// @api public
+  ///
   num get reconnectionAttempts => this._reconnectionAttempts;
   set reconnectionAttempts(num v) => this._reconnectionAttempts = v;
 
-  /**
-   * Sets the delay between reconnections.
-   *
-   * @param {Number} delay
-   * @return {Manager} self or value
-   * @api public
-   */
+  ///
+  /// Sets the delay between reconnections.
+  ///
+  /// @param {Number} delay
+  /// @return {Manager} self or value
+  /// @api public
+  ///
   num get reconnectionDelay => this._reconnectionDelay;
   set reconnectionDelay(num v) => this._reconnectionDelay = v;
 
@@ -158,34 +158,34 @@ class Manager extends EventEmitter {
     if (this.backoff != null) this.backoff.jitter = v;
   }
 
-  /**
-     * Sets the maximum delay between reconnections.
-     *
-     * @param {Number} delay
-     * @return {Manager} self or value
-     * @api public
-     */
+  ///
+  /// Sets the maximum delay between reconnections.
+  ///
+  /// @param {Number} delay
+  /// @return {Manager} self or value
+  /// @api public
+  ///
   num get reconnectionDelayMax => this._reconnectionDelayMax;
   set reconnectionDelayMax(num v) {
     this._reconnectionDelayMax = v;
     if (this.backoff != null) this.backoff.max = v;
   }
 
-  /**
-     * Sets the connection timeout. `false` to disable
-     *
-     * @return {Manager} self or value
-     * @api public
-     */
+  ///
+  /// Sets the connection timeout. `false` to disable
+  ///
+  /// @return {Manager} self or value
+  /// @api public
+  ///
   num get timeout => this._timeout;
   set timeout(num v) => this._timeout = v;
 
-  /**
-     * Starts trying to reconnect if reconnection is enabled and we have not
-     * started reconnecting yet
-     *
-     * @api private
-     */
+  ///
+  /// Starts trying to reconnect if reconnection is enabled and we have not
+  /// started reconnecting yet
+  ///
+  /// @api private
+  ///
   maybeReconnectOnOpen() {
     // Only try to reconnect if it's the first time we're connecting
     if (!this.reconnecting &&
@@ -196,13 +196,13 @@ class Manager extends EventEmitter {
     }
   }
 
-  /**
-     * Sets the current transport `socket`.
-     *
-     * @param {Function} optional, callback
-     * @return {Manager} self
-     * @api public
-     */
+  ///
+  /// Sets the current transport `socket`.
+  ///
+  /// @param {Function} optional, callback
+  /// @return {Manager} self
+  /// @api public
+  ///
   open({callback, Map opts}) => connect(callback: callback, opts: opts);
 
   connect({callback, Map opts}) {
@@ -210,19 +210,19 @@ class Manager extends EventEmitter {
     if (this.readyState.contains('open')) return this;
 
     _logger.fine('opening $uri');
-    this.engine = new Engine.Socket(this.uri, this.options);
+    this.engine = engine_socket.Socket(this.uri, this.options);
     var socket = this.engine;
     this.readyState = 'opening';
     this.skipReconnect = false;
 
     // emit `open`
-    var openSub = ON.on(socket, 'open', (_) {
+    var openSub = util.on(socket, 'open', (_) {
       onopen();
       if (callback != null) callback();
     });
 
     // emit `connect_error`
-    var errorSub = ON.on(socket, 'error', (data) {
+    var errorSub = util.on(socket, 'error', (data) {
       _logger.fine('connect_error');
       cleanup();
       readyState = 'closed';
@@ -241,7 +241,7 @@ class Manager extends EventEmitter {
       _logger.fine('connect attempt will timeout after $timeout');
 
       // set timer
-      var timer = new Timer(new Duration(milliseconds: timeout), () {
+      var timer = Timer(Duration(milliseconds: timeout), () {
         _logger.fine('connect attempt timed out after $timeout');
         openSub.destroy();
         socket.close();
@@ -249,7 +249,7 @@ class Manager extends EventEmitter {
         emitAll('connect_timeout', timeout);
       });
 
-      this.subs.add(new Destroyable(() => timer?.cancel()));
+      this.subs.add(Destroyable(() => timer?.cancel()));
     }
 
     this.subs.add(openSub);
@@ -258,11 +258,11 @@ class Manager extends EventEmitter {
     return this;
   }
 
-  /**
-     * Called upon transport open.
-     *
-     * @api private
-     */
+  ///
+  /// Called upon transport open.
+  ///
+  /// @api private
+  ///
   onopen([_]) {
     _logger.fine('open');
 
@@ -273,70 +273,69 @@ class Manager extends EventEmitter {
     this.readyState = 'open';
     this.emit('open');
 
-    // add new subs
+    // add subs
     var socket = this.engine;
-    this.subs.add(ON.on(socket, 'data', this.ondata));
-    this.subs.add(ON.on(socket, 'ping', this.onping));
-    this.subs.add(ON.on(socket, 'pong', this.onpong));
-    this.subs.add(ON.on(socket, 'error', this.onerror));
-    this.subs.add(ON.on(socket, 'close', this.onclose));
-    this.subs.add(ON.on(this.decoder, 'decoded', this.ondecoded));
+    this.subs.add(util.on(socket, 'data', this.ondata));
+    this.subs.add(util.on(socket, 'ping', this.onping));
+    this.subs.add(util.on(socket, 'pong', this.onpong));
+    this.subs.add(util.on(socket, 'error', this.onerror));
+    this.subs.add(util.on(socket, 'close', this.onclose));
+    this.subs.add(util.on(this.decoder, 'decoded', this.ondecoded));
   }
 
-  /**
-     * Called upon a ping.
-     *
-     * @api private
-     */
+  ///
+  /// Called upon a ping.
+  ///
+  /// @api private
+  ///
   onping([_]) {
-    this.lastPing = new DateTime.now().millisecondsSinceEpoch;
+    this.lastPing = DateTime.now().millisecondsSinceEpoch;
     this.emitAll('ping');
   }
 
-  /**
-     * Called upon a packet.
-     *
-     * @api private
-     */
+  ///
+  /// Called upon a packet.
+  ///
+  /// @api private
+  ///
   onpong([_]) {
-    this.emitAll(
-        'pong', new DateTime.now().millisecondsSinceEpoch - this.lastPing);
+    this.emitAll('pong', DateTime.now().millisecondsSinceEpoch - this.lastPing);
   }
 
-  /**
-     * Called with data.
-     *
-     * @api private
-     */
+  ///
+  /// Called with data.
+  ///
+  /// @api private
+  ///
   ondata(data) {
     this.decoder.add(data);
   }
 
-  /**
-     * Called when parser fully decodes a packet.
-     *
-     * @api private
-     */
+  ///
+  /// Called when parser fully decodes a packet.
+  ///
+  /// @api private
+  ///
   ondecoded(packet) {
     this.emit('packet', packet);
   }
 
-  /**
-     * Called upon socket error.
-     *
-     * @api private
-     */
+  ///
+  /// Called upon socket error.
+  ///
+  /// @api private
+  ///
   onerror(err) {
     _logger.fine('error $err');
     this.emitAll('error', err);
   }
 
-  /**
-     * Creates a new socket for the given `nsp`.
-     *
-     * @return {Socket}
-     * @api public
-     */
+  ///
+  /// Creates a socket for the given `nsp`.
+  ///
+  /// @return {Socket}
+  /// @api public
+  ///
   Socket socket(String nsp, Map opts) {
     var socket = this.nsps[nsp];
 
@@ -347,7 +346,7 @@ class Manager extends EventEmitter {
     };
 
     if (socket == null) {
-      socket = new Socket(this, nsp, opts);
+      socket = Socket(this, nsp, opts);
       this.nsps[nsp] = socket;
       socket.on('connecting', onConnecting);
       socket.on('connect', (_) {
@@ -363,11 +362,11 @@ class Manager extends EventEmitter {
     return socket;
   }
 
-  /**
-     * Called upon a socket close.
-     *
-     * @param {Socket} socket
-     */
+  ///
+  /// Called upon a socket close.
+  ///
+  /// @param {Socket} socket
+  ///
   destroy(socket) {
     this.connecting.remove(socket);
     if (this.connecting.isNotEmpty) return;
@@ -375,16 +374,17 @@ class Manager extends EventEmitter {
     this.close();
   }
 
-  /**
-     * Writes a packet.
-     *
-     * @param {Object} packet
-     * @api private
-     */
+  ///
+  /// Writes a packet.
+  ///
+  /// @param {Object} packet
+  /// @api private
+  ///
   packet(Map packet) {
     _logger.fine('writing packet $packet');
-    if (packet.containsKey('query') && packet['type'] == 0)
+    if (packet.containsKey('query') && packet['type'] == 0) {
       packet['nsp'] += '''?${packet['query']}''';
+    }
 
     if (encoding != true) {
       // encode, then write to engine with result
@@ -402,24 +402,24 @@ class Manager extends EventEmitter {
     }
   }
 
-  /**
-     * If packet buffer is non-empty, begins encoding the
-     * next packet in line.
-     *
-     * @api private
-     */
+  ///
+  /// If packet buffer is non-empty, begins encoding the
+  /// next packet in line.
+  ///
+  /// @api private
+  ///
   processPacketQueue() {
-    if (this.packetBuffer.length > 0 && this.encoding != true) {
+    if (this.packetBuffer.isNotEmpty && this.encoding != true) {
       var pack = this.packetBuffer.removeAt(0);
       this.packet(pack);
     }
   }
 
-  /**
-     * Clean up transport subscriptions and packet buffer.
-     *
-     * @api private
-     */
+  ///
+  /// Clean up transport subscriptions and packet buffer.
+  ///
+  /// @api private
+  ///
   cleanup() {
     _logger.fine('cleanup');
 
@@ -436,11 +436,11 @@ class Manager extends EventEmitter {
     this.decoder.destroy();
   }
 
-  /**
-     * Close the current socket.
-     *
-     * @api private
-     */
+  ///
+  /// Close the current socket.
+  ///
+  /// @api private
+  ///
   close() => disconnect();
 
   disconnect() {
@@ -457,11 +457,11 @@ class Manager extends EventEmitter {
     this.engine?.close();
   }
 
-  /**
-     * Called upon engine close.
-     *
-     * @api private
-     */
+  ///
+  /// Called upon engine close.
+  ///
+  /// @api private
+  ///
   onclose(error) {
     _logger.fine('onclose');
 
@@ -475,11 +475,11 @@ class Manager extends EventEmitter {
     }
   }
 
-  /**
-     * Attempt a reconnection.
-     *
-     * @api private
-     */
+  ///
+  /// Attempt a reconnection.
+  ///
+  /// @api private
+  ///
   reconnect() {
     if (this.reconnecting || this.skipReconnect) return this;
 
@@ -493,7 +493,7 @@ class Manager extends EventEmitter {
       _logger.fine('will wait %dms before reconnect attempt', delay);
 
       this.reconnecting = true;
-      var timer = new Timer(new Duration(milliseconds: delay), () {
+      var timer = Timer(Duration(milliseconds: delay), () {
         if (skipReconnect) return;
 
         _logger.fine('attempting reconnect');
@@ -516,15 +516,15 @@ class Manager extends EventEmitter {
         });
       });
 
-      this.subs.add(new Destroyable(() => timer.cancel()));
+      this.subs.add(Destroyable(() => timer.cancel()));
     }
   }
 
-  /**
-     * Called upon successful reconnect.
-     *
-     * @api private
-     */
+  ///
+  /// Called upon successful reconnect.
+  ///
+  /// @api private
+  ///
   onreconnect() {
     var attempt = this.backoff.attempts;
     this.reconnecting = false;
@@ -534,18 +534,16 @@ class Manager extends EventEmitter {
   }
 }
 
-/**
- * Initialize backoff timer with `opts`.
- *
- * - `min` initial timeout in milliseconds [100]
- * - `max` max timeout [10000]
- * - `jitter` [0]
- * - `factor` [2]
- *
- * @param {Object} opts
- * @api public
- */
-
+///
+/// Initialize backoff timer with `opts`.
+///
+/// - `min` initial timeout in milliseconds [100]
+/// - `max` max timeout [10000]
+/// - `jitter` [0]
+/// - `factor` [2]
+///
+/// @param {Object} opts
+/// @api public
 class _Backoff {
   num _ms;
   num _max;
@@ -561,50 +559,50 @@ class _Backoff {
     attempts = 0;
   }
 
-  /**
-   * Return the backoff duration.
-   *
-   * @return {Number}
-   * @api public
-   */
+  ///
+  /// Return the backoff duration.
+  ///
+  /// @return {Number}
+  /// @api public
+  ///
   num get duration {
-    var ms = _ms * Math.pow(_factor, this.attempts++);
+    var ms = _ms * math.pow(_factor, this.attempts++);
     if (_jitter > 0) {
-      var rand = new Math.Random().nextDouble();
+      var rand = math.Random().nextDouble();
       var deviation = (rand * _jitter * ms).floor();
       ms = ((rand * 10).floor() & 1) == 0 ? ms - deviation : ms + deviation;
     }
     // #39: avoid an overflow with negative value
-    return Math.max(Math.min(ms, _max), 0);
+    return math.max(math.min(ms, _max), 0);
   }
 
-  /**
-   * Reset the number of attempts.
-   *
-   * @api public
-   */
+  ///
+  /// Reset the number of attempts.
+  ///
+  /// @api public
+  ///
   void reset() {
     attempts = 0;
   }
 
-  /**
-   * Set the minimum duration
-   *
-   * @api public
-   */
+  ///
+  /// Set the minimum duration
+  ///
+  /// @api public
+  ///
   set min(min) => _ms = min;
 
-  /**
-   * Set the maximum duration
-   *
-   * @api public
-   */
+  ///
+  /// Set the maximum duration
+  ///
+  /// @api public
+  ///
   set max(max) => _max = max;
 
-  /**
-   * Set the jitter
-   *
-   * @api public
-   */
+  ///
+  /// Set the jitter
+  ///
+  /// @api public
+  ///
   set jitter(jitter) => _jitter = jitter;
 }

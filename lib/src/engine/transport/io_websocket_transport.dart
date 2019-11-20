@@ -12,7 +12,7 @@ import 'package:socket_io_client/src/engine/parseqs.dart';
 
 class IOWebSocketTransport extends Transport {
   static Logger _logger =
-  new Logger('socket_io_client:transport.IOWebSocketTransport');
+      Logger('socket_io_client:transport.IOWebSocketTransport');
 
   String name = 'websocket';
   var protocols;
@@ -35,7 +35,8 @@ class IOWebSocketTransport extends Transport {
     var protocols = this.protocols;
 
     try {
-      this.ws = await WebSocket.connect(uri, protocols: protocols, headers: extraHeaders);
+      this.ws = await WebSocket.connect(uri,
+          protocols: protocols, headers: extraHeaders);
     } catch (err) {
       return this.emit('error', err);
     }
@@ -49,11 +50,9 @@ class IOWebSocketTransport extends Transport {
     this.addEventListeners();
   }
 
-  /**
-   * Adds event listeners to the socket
-   *
-   * @api private
-   */
+  /// Adds event listeners to the socket
+  ///
+  /// @api private
   void addEventListeners() {
     bool isOpen = false;
     this.ws.listen((data) {
@@ -62,15 +61,13 @@ class IOWebSocketTransport extends Transport {
         isOpen = true;
       }
       onData(data);
-    }, onDone:  () => onClose(), onError:  (_) => onError('websocket error'));
+    }, onDone: () => onClose(), onError: (_) => onError('websocket error'));
   }
 
-  /**
-   * Writes data to socket.
-   *
-   * @param {Array} array of packets.
-   * @api private
-   */
+  /// Writes data to socket.
+  ///
+  /// @param {Array} array of packets.
+  /// @api private
   write(List packets) {
     this.writable = false;
 
@@ -91,35 +88,33 @@ class IOWebSocketTransport extends Transport {
     packets.forEach((packet) {
       PacketParser.encodePacket(packet,
           supportsBinary: supportsBinary, fromClient: true, callback: (data) {
-            // Sometimes the websocket has already been closed but the browser didn't
-            // have a chance of informing us about it yet, in that case send will
-            // throw an error
-            try {
-              // TypeError is thrown when passing the second argument on Safari
-              ws.add(data);
-            } catch (e) {
-              _logger.fine('websocket closed before onclose event');
-            }
+        // Sometimes the websocket has already been closed but the browser didn't
+        // have a chance of informing us about it yet, in that case send will
+        // throw an error
+        try {
+          // TypeError is thrown when passing the second argument on Safari
+          ws.add(data);
+        } catch (e) {
+          _logger.fine('websocket closed before onclose event');
+        }
 
-            if (--total == 0) done();
-          });
+        if (--total == 0) done();
+      });
     });
   }
 
-  /**
-   * Closes socket.
-   *
-   * @api private
-   */
+  ///
+  /// Closes socket.
+  ///
+  /// @api private
   doClose() {
     this.ws?.close();
   }
 
-  /**
-   * Generates uri for connection.
-   *
-   * @api private
-   */
+  ///
+  /// Generates uri for connection.
+  ///
+  /// @api private
   uri() {
     var query = this.query ?? {};
     var schema = this.secure ? 'wss' : 'ws';
@@ -135,7 +130,7 @@ class IOWebSocketTransport extends Transport {
     // append timestamp to URI
     if (this.timestampRequests == true) {
       query[this.timestampParam] =
-          new DateTime.now().millisecondsSinceEpoch.toRadixString(36);
+          DateTime.now().millisecondsSinceEpoch.toRadixString(36);
     }
 
     // communicate binary support capabilities
@@ -159,12 +154,12 @@ class IOWebSocketTransport extends Transport {
         queryString;
   }
 //
-//  /**
-//   * Feature detection for WebSocket.
-//   *
-//   * @return {Boolean} whether this transport is available.
-//   * @api public
-//   */
+/////
+  ///// Feature detection for WebSocket.
+  /////
+  ///// @return {Boolean} whether this transport is available.
+  ///// @api public
+  //////
 //  check() {
 //    return !!WebSocket && !('__initialize' in WebSocket && this.name === WS.prototype.name);
 //  }

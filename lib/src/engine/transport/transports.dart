@@ -26,16 +26,16 @@ class Transports {
 
   static Transport newInstance(String name, options) {
     if ('websocket' == name) {
-      return new WebSocketTransport(options);
+      return WebSocketTransport(options);
     } else if ('polling' == name) {
       if (options['forceJSONP'] != true) {
-        return new XHRTransport(options);
+        return XHRTransport(options);
       } else {
-        if (options['jsonp'] != false) return new JSONPTransport(options);
-        throw new StateError('JSONP disabled');
+        if (options['jsonp'] != false) return JSONPTransport(options);
+        throw StateError('JSONP disabled');
       }
     } else {
-      throw new UnsupportedError('Unknown transport $name');
+      throw UnsupportedError('Unknown transport $name');
     }
   }
 }

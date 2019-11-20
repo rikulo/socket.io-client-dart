@@ -1,18 +1,9 @@
+// Copyright (C) 2017 Potix Corporation. All Rights Reserved
+// History: 26/04/2017
+// Author: jumperchen<jumperchen@potix.com>
+
 import 'dart:async';
 import 'dart:convert';
-/**
- * socket.dart
- *
- * Purpose:
- *
- * Description:
- *
- * History:
- *   26/04/2017, Created by jumperchen
- *
- * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
- */
-//import 'dart:html';
 
 import 'package:logging/logging.dart';
 import 'package:socket_io_common/src/util/event_emitter.dart';
@@ -24,19 +15,19 @@ import './transport/transport.dart';
 // ignore: uri_does_not_exist
 import './transport/transports_stub.dart'
 // ignore: uri_does_not_exist
-if (dart.library.html) './transport/transports.dart'
+    if (dart.library.html) './transport/transports.dart'
 // ignore: uri_does_not_exist
-if (dart.library.io) './transport/io_transports.dart';
+    if (dart.library.io) './transport/io_transports.dart';
 
-final Logger _logger = new Logger('socket_io_client:engine.Socket');
+final Logger _logger = Logger('socket_io_client:engine.Socket');
 
-/**
- * Socket constructor.
- *
- * @param {String|Object} uri or options
- * @param {Object} options
- * @api public
- */
+///
+/// Socket constructor.
+///
+/// @param {String|Object} uri or options
+/// @param {Object} options
+/// @api public
+///
 class Socket extends EventEmitter {
   Map opts;
   Uri uri;
@@ -98,21 +89,23 @@ class Socket extends EventEmitter {
     this.agent = opts['agent'] ?? false;
     this.hostname =
         opts['hostname'] /*?? (window.location.hostname ?? 'localhost')*/;
-    this.port = opts['port'] /*??
+    this.port = opts[
+            'port'] /*??
         (window.location.port.isNotEmpty
             ? int.parse(window.location.port)
-            : (this.secure ? 443 : 80))*/;
+            : (this.secure ? 443 : 80))*/
+        ;
     var query = opts['query'] ?? {};
-    if (query is String)
+    if (query is String) {
       this.query = decode(query);
-    else if (query is Map) {
+    } else if (query is Map) {
       this.query = query;
     }
 
     this.upgrade = opts['upgrade'] != false;
     this.path = (opts['path'] ?? '/engine.io')
             .toString()
-            .replaceFirst(new RegExp(r'\/$'), '') +
+            .replaceFirst(RegExp(r'\/$'), '') +
         '/';
     this.forceJSONP = opts['forceJSONP'] == true;
     this.jsonp = opts['jsonp'] != false;
@@ -134,8 +127,9 @@ class Socket extends EventEmitter {
         opts['perMessageDeflate'] == true) {
       this.perMessageDeflate =
           opts['perMessageDeflate'] is Map ? opts['perMessageDeflate'] : {};
-      if (!this.perMessageDeflate.containsKey('threshold'))
+      if (!this.perMessageDeflate.containsKey('threshold')) {
         this.perMessageDeflate['threshold'] = 1024;
+      }
     }
 
     this.extraHeaders = opts['extraHeaders'] ?? <String, dynamic>{};
@@ -176,33 +170,27 @@ class Socket extends EventEmitter {
 
   static bool priorWebsocketSuccess = false;
 
-  /**
-   * Protocol version.
-   *
-   * @api public
-   */
+  ///
+  /// Protocol version.
+  ///
+  /// @api public
   static int protocol = parser.protocol; // this is an int
 
-//  /**
-//   * Expose deps for legacy compatibility
-//   * and standalone browser access.
-//   */
 //
 //  Socket.Socket = Socket;
 //  Socket.Transport = require('./transport');
 //  Socket.transports = require('./transports/index');
 //  Socket.parser = require('engine.io-parser');
 
-  /**
-   * Creates transport of the given type.
-   *
-   * @param {String} transport name
-   * @return {Transport}
-   * @api private
-   */
+  ///
+  /// Creates transport of the given type.
+  ///
+  /// @param {String} transport name
+  /// @return {Transport}
+  /// @api private
   createTransport(name, [options]) {
     _logger.fine('creating transport "$name"');
-    var query = new Map.from(this.query);
+    var query = Map.from(this.query);
 
     // append engine.io protocol identifier
     query['EIO'] = parser.protocol;
@@ -251,18 +239,17 @@ class Socket extends EventEmitter {
     return transport;
   }
 
-  /**
-   * Initializes transport to use and starts probe.
-   *
-   * @api private
-   */
+  ///
+  /// Initializes transport to use and starts probe.
+  ///
+  /// @api private
   open() {
     var transport;
     if (this.rememberUpgrade != null &&
         priorWebsocketSuccess &&
         this.transports.contains('websocket')) {
       transport = 'websocket';
-    } else if (0 == this.transports.length) {
+    } else if (this.transports.isEmpty) {
       // Emit error on next tick so it can be listened to
       Timer.run(() => emit('error', 'No transports available'));
       return;
@@ -284,11 +271,10 @@ class Socket extends EventEmitter {
     this.setTransport(transport);
   }
 
-  /**
-   * Sets the current transport. Disables the existing one (if any).
-   *
-   * @api private
-   */
+  ///
+  /// Sets the current transport. Disables the existing one (if any).
+  ///
+  /// @api private
   setTransport(transport) {
     _logger.fine('setting transport ${transport?.name}');
 
@@ -308,12 +294,11 @@ class Socket extends EventEmitter {
       ..on('close', (_) => onClose('transport close'));
   }
 
-  /**
-   * Probes a transport.
-   *
-   * @param {String} transport name
-   * @api private
-   */
+  ///
+  /// Probes a transport.
+  ///
+  /// @param {String} transport name
+  /// @api private
   probe(name) {
     _logger.fine('probing transport "$name"');
     var transport = this.createTransport(name, {'probe': true});
@@ -424,11 +409,10 @@ class Socket extends EventEmitter {
     transport.open();
   }
 
-  /**
-   * Called when connection is deemed open.
-   *
-   * @api public
-   */
+  ///
+  /// Called when connection is deemed open.
+  ///
+  /// @api public
   onOpen() {
     _logger.fine('socket open');
     this.readyState = 'open';
@@ -448,11 +432,10 @@ class Socket extends EventEmitter {
     }
   }
 
-  /**
-   * Handles a packet.
-   *
-   * @api private
-   */
+  ///
+  /// Handles a packet.
+  ///
+  /// @api private
   onPacket(Map packet) {
     if ('opening' == this.readyState ||
         'open' == this.readyState ||
@@ -491,12 +474,11 @@ class Socket extends EventEmitter {
     }
   }
 
-  /**
-   * Called upon handshake completion.
-   *
-   * @param {Object} handshake obj
-   * @api private
-   */
+  ///
+  /// Called upon handshake completion.
+  ///
+  /// @param {Object} handshake obj
+  /// @api private
   onHandshake(Map data) {
     this.emit('handshake', data);
     this.id = data['sid'];
@@ -514,30 +496,27 @@ class Socket extends EventEmitter {
     this.on('heartbeat', this.onHeartbeat);
   }
 
-  /**
-   * Resets ping timeout.
-   *
-   * @api private
-   */
+  ///
+  /// Resets ping timeout.
+  ///
+  /// @api private
   onHeartbeat(timeout) {
     this.pingTimeoutTimer?.cancel();
-    this.pingTimeoutTimer = new Timer(
-        new Duration(milliseconds: timeout ?? (pingInterval + pingTimeout)),
-        () {
+    this.pingTimeoutTimer = Timer(
+        Duration(milliseconds: timeout ?? (pingInterval + pingTimeout)), () {
       if ('closed' == readyState) return;
       onClose('ping timeout');
     });
   }
 
-  /**
-   * Pings server every `this.pingInterval` and expects response
-   * within `this.pingTimeout` or closes connection.
-   *
-   * @api private
-   */
+  ///
+  /// Pings server every `this.pingInterval` and expects response
+  /// within `this.pingTimeout` or closes connection.
+  ///
+  /// @api private
   setPing() {
     pingIntervalTimer?.cancel();
-    pingIntervalTimer = new Timer(new Duration(milliseconds: pingInterval), () {
+    pingIntervalTimer = Timer(Duration(milliseconds: pingInterval), () {
       _logger
           .fine('writing ping packet - expecting pong within ${pingTimeout}ms');
       ping();
@@ -545,20 +524,18 @@ class Socket extends EventEmitter {
     });
   }
 
-  /**
-   * Sends a ping packet.
-   *
-   * @api private
-   */
+  ///
+  /// Sends a ping packet.
+  ///
+  /// @api private
   ping() {
     this.sendPacket(type: 'ping', callback: (_) => emit('ping'));
   }
 
-  /**
-   * Called on `drain` event
-   *
-   * @api private
-   */
+  ///
+  /// Called on `drain` event
+  ///
+  /// @api private
   onDrain() {
     this.writeBuffer.removeRange(0, this.prevBufferLen);
 
@@ -567,18 +544,17 @@ class Socket extends EventEmitter {
     // and a nonzero prevBufferLen could cause problems on `drain`
     this.prevBufferLen = 0;
 
-    if (0 == this.writeBuffer.length) {
+    if (this.writeBuffer.isEmpty) {
       this.emit('drain');
     } else {
       this.flush();
     }
   }
 
-  /**
-   * Flush write buffers.
-   *
-   * @api private
-   */
+  ///
+  /// Flush write buffers.
+  ///
+  /// @api private
   flush() {
     if ('closed' != this.readyState &&
         this.transport.writable == true &&
@@ -593,30 +569,28 @@ class Socket extends EventEmitter {
     }
   }
 
-  /**
-   * Sends a message.
-   *
-   * @param {String} message.
-   * @param {Function} callback function.
-   * @param {Object} options.
-   * @return {Socket} for chaining.
-   * @api public
-   */
+  ///
+  /// Sends a message.
+  ///
+  /// @param {String} message.
+  /// @param {Function} callback function.
+  /// @param {Object} options.
+  /// @return {Socket} for chaining.
+  /// @api public
   write(msg, options, [EventHandler fn]) => send(msg, options, fn);
 
   send(msg, options, [EventHandler fn]) {
     this.sendPacket(type: 'message', data: msg, options: options, callback: fn);
   }
 
-  /**
-   * Sends a packet.
-   *
-   * @param {String} packet type.
-   * @param {String} data.
-   * @param {Object} options.
-   * @param {Function} callback function.
-   * @api private
-   */
+  ///
+  /// Sends a packet.
+  ///
+  /// @param {String} packet type.
+  /// @param {String} data.
+  /// @param {Object} options.
+  /// @param {Function} callback function.
+  /// @api private
   sendPacket({type, data, options, EventHandler callback}) {
     if ('closing' == this.readyState || 'closed' == this.readyState) {
       return;
@@ -632,11 +606,10 @@ class Socket extends EventEmitter {
     this.flush();
   }
 
-  /**
-   * Closes the connection.
-   *
-   * @api private
-   */
+  ///
+  /// Closes the connection.
+  ///
+  /// @api private
   close() {
     var close = () {
       onClose('forced close');
@@ -681,11 +654,10 @@ class Socket extends EventEmitter {
     return this;
   }
 
-  /**
-   * Called upon transport error
-   *
-   * @api private
-   */
+  ///
+  /// Called upon transport error
+  ///
+  /// @api private
   onError(err) {
     _logger.fine('socket error $err');
     priorWebsocketSuccess = false;
@@ -693,11 +665,10 @@ class Socket extends EventEmitter {
     this.onClose('transport error', err);
   }
 
-  /**
-   * Called upon transport close.
-   *
-   * @api private
-   */
+  ///
+  /// Called upon transport close.
+  ///
+  /// @api private
   onClose(reason, [desc]) {
     if ('opening' == this.readyState ||
         'open' == this.readyState ||
@@ -733,13 +704,12 @@ class Socket extends EventEmitter {
     }
   }
 
-  /**
-   * Filters upgrades, returning only those matching client transports.
-   *
-   * @param {Array} server upgrades
-   * @api private
-   *
-   */
+  ///
+  /// Filters upgrades, returning only those matching client transports.
+  ///
+  /// @param {Array} server upgrades
+  /// @api private
+  ///
   filterUpgrades(List upgrades) =>
       transports.where((_) => upgrades.contains(_)).toList();
 }

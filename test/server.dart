@@ -14,7 +14,7 @@ import 'package:socket_io/socket_io.dart';
 
 main() {
   // Dart server
-  var io = new Server();
+  var io = Server();
   io.on('connection', (client) {
     final headers = client.handshake['headers'];
     headers.forEach((k, v) => print('$k => $v'));

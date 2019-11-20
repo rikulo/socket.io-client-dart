@@ -1,3 +1,6 @@
+// Copyright (C) 2017 Potix Corporation. All Rights Reserved
+// History:  27/04/2017
+// Author: jumperchen<jumperchen@potix.com>
 import 'dart:async';
 import 'dart:html';
 
@@ -6,20 +9,7 @@ import 'package:logging/logging.dart';
 import 'package:socket_io_common/src/util/event_emitter.dart';
 import 'package:socket_io_client/src/engine/transport/polling_transport.dart';
 
-/**
- * xhr_transport.dart
- *
- * Purpose:
- *
- * Description:
- *
- * History:
- *   27/04/2017, Created by jumperchen
- *
- * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
- */
-
-final Logger _logger = new Logger('socket_io_client:transport.XHRTransport');
+final Logger _logger = Logger('socket_io_client:transport.XHRTransport');
 
 class XHRTransport extends PollingTransport {
   int requestTimeout;
@@ -29,12 +19,11 @@ class XHRTransport extends PollingTransport {
   Request pollXhr;
   Map extraHeaders;
 
-  /**
-   * XHR Polling constructor.
-   *
-   * @param {Object} opts
-   * @api public
-   */
+  ///
+  /// XHR Polling constructor.
+  ///
+  /// @param {Object} opts
+  /// @api public
   XHRTransport(Map opts) : super(opts) {
     this.requestTimeout = opts['requestTimeout'];
     this.extraHeaders = opts['extraHeaders'] ?? <String, dynamic>{};
@@ -52,16 +41,14 @@ class XHRTransport extends PollingTransport {
     this.xs = opts['secure'] != isSSL;
   }
 
-  /**
-   * XHR supports binary
-   */
+  ///
+  /// XHR supports binary
   bool supportsBinary = true;
 
-  /**
-   * Creates a request.
-   *
-   * @api private
-   */
+  ///
+  /// Creates a request.
+  ///
+  /// @api private
   request([Map opts]) {
     opts = opts ?? {};
     opts['uri'] = this.uri();
@@ -84,16 +71,15 @@ class XHRTransport extends PollingTransport {
     // other options for Node.js client
     opts['extraHeaders'] = this.extraHeaders;
 
-    return new Request(opts);
+    return Request(opts);
   }
 
-  /**
-   * Sends data.
-   *
-   * @param {String} data to send.
-   * @param {Function} called upon flush.
-   * @api private
-   */
+  ///
+  /// Sends data.
+  ///
+  /// @param {String} data to send.
+  /// @param {Function} called upon flush.
+  /// @api private
   doWrite(data, fn) {
     var isBinary = data is! String;
     var req =
@@ -105,11 +91,10 @@ class XHRTransport extends PollingTransport {
     this.sendXhr = req;
   }
 
-  /**
-   * Starts a poll cycle.
-   *
-   * @api private
-   */
+  ///
+  /// Starts a poll cycle.
+  ///
+  /// @api private
   doPoll() {
     _logger.fine('xhr poll');
     var req = this.request();
@@ -123,12 +108,12 @@ class XHRTransport extends PollingTransport {
   }
 }
 
-/**
- * Request constructor
- *
- * @param {Object} options
- * @api public
- */
+///
+/// Request constructor
+///
+/// @param {Object} options
+/// @api public
+///
 class Request extends EventEmitter {
   String uri;
   bool xd;
@@ -162,15 +147,14 @@ class Request extends EventEmitter {
     this.create();
   }
 
-  /**
-   * Creates the XHR object and sends the request.
-   *
-   * @api private
-   */
+  ///
+  /// Creates the XHR object and sends the request.
+  ///
+  /// @api private
   create() {
 //var opts = { 'agent': this.agent, 'xdomain': this.xd, 'xscheme': this.xs, 'enablesXDR': this.enablesXDR };
 
-    HttpRequest xhr = this.xhr = new HttpRequest();
+    HttpRequest xhr = this.xhr = HttpRequest();
     var self = this;
 
     try {
@@ -183,7 +167,9 @@ class Request extends EventEmitter {
             xhr.setRequestHeader(k, v);
           });
         }
-      } catch (e) {}
+      } catch (e) {
+        // ignore
+      }
 
       if ('POST' == this.method) {
         try {
@@ -192,12 +178,16 @@ class Request extends EventEmitter {
           } else {
             xhr.setRequestHeader('Content-type', 'text/plain;charset=UTF-8');
           }
-        } catch (e) {}
+        } catch (e) {
+          // ignore
+        }
       }
 
       try {
         xhr.setRequestHeader('Accept', '*/*');
-      } catch (e) {}
+      } catch (e) {
+        // ignore
+      }
 
 // ie6 check
 //if ('withCredentials' in xhr) {
@@ -223,7 +213,9 @@ class Request extends EventEmitter {
           var contentType;
           try {
             contentType = xhr.getResponseHeader('Content-Type');
-          } catch (e) {}
+          } catch (e) {
+            // ignore
+          }
           if (contentType == 'application/octet-stream') {
             xhr.responseType = 'arraybuffer';
           }
@@ -250,41 +242,37 @@ class Request extends EventEmitter {
     }
   }
 
-  /**
-   * Called upon successful response.
-   *
-   * @api private
-   */
+  ///
+  /// Called upon successful response.
+  ///
+  /// @api private
   onSuccess() {
     this.emit('success');
     this.cleanup();
   }
 
-  /**
-   * Called if we have data.
-   *
-   * @api private
-   */
+  ///
+  /// Called if we have data.
+  ///
+  /// @api private
   onData(data) {
     this.emit('data', data);
     this.onSuccess();
   }
 
-  /**
-   * Called upon error.
-   *
-   * @api private
-   */
+  ///
+  /// Called upon error.
+  ///
+  /// @api private
   onError(err) {
     this.emit('error', err);
     this.cleanup(true);
   }
 
-  /**
-   * Cleans up house.
-   *
-   * @api private
-   */
+  ///
+  /// Cleans up house.
+  ///
+  /// @api private
   cleanup([fromError]) {
     if (this.xhr == null) {
       return;
@@ -299,24 +287,27 @@ class Request extends EventEmitter {
     if (fromError != null) {
       try {
         this.xhr.abort();
-      } catch (e) {}
+      } catch (e) {
+        // ignore
+      }
     }
 
     this.xhr = null;
   }
 
-  /**
-   * Called upon load.
-   *
-   * @api private
-   */
+  ///
+  /// Called upon load.
+  ///
+  /// @api private
   onLoad() {
     var data;
     try {
       var contentType;
       try {
         contentType = this.xhr.getResponseHeader('Content-Type');
-      } catch (e) {}
+      } catch (e) {
+        // ignore
+      }
       if (contentType == 'application/octet-stream') {
         data = this.xhr.response ?? this.xhr.responseText;
       } else {
@@ -331,21 +322,19 @@ class Request extends EventEmitter {
     }
   }
 
-  /**
-   * Check if it has XDomainRequest.
-   *
-   * @api private
-   */
+  ///
+  /// Check if it has XDomainRequest.
+  ///
+  /// @api private
   hasXDR() {
     // Todo: handle it in dart way
     return false;
     //  return 'undefined' !== typeof global.XDomainRequest && !this.xs && this.enablesXDR;
   }
 
-  /**
-   * Aborts the request.
-   *
-   * @api public
-   */
+  ///
+  /// Aborts the request.
+  ///
+  /// @api public
   abort() => cleanup();
 }

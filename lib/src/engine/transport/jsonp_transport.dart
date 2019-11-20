@@ -3,30 +3,24 @@ import 'dart:html';
 import 'dart:js';
 import 'package:socket_io_client/src/engine/transport/polling_transport.dart';
 
-/**
- * jsonp_transport.dart
- *
- * Purpose:
- *
- * Description:
- *
- * History:
- *   26/04/2017, Created by jumperchen
- *
- * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
- */
+/// jsonp_transport.dart
+///
+/// Purpose:
+///
+/// Description:
+///
+/// History:
+///   26/04/2017, Created by jumperchen
+///
+/// Copyright (C) 2017 Potix Corporation. All Rights Reserved.
 
-/**
- * Cached regular expressions.
- */
+///
+/// Cached regular expressions.
+final RegExp rNewline = RegExp(r'\n');
+final RegExp rEscapedNewline = RegExp(r'\\n');
 
-final RegExp rNewline = new RegExp(r'\n');
-final RegExp rEscapedNewline = new RegExp(r'\\n');
-
-/**
- * Global JSONP callbacks.
- */
-
+///
+/// Global JSONP callbacks.
 var callbacks;
 
 class JSONPTransport extends PollingTransport {
@@ -38,12 +32,11 @@ class JSONPTransport extends PollingTransport {
   TextAreaElement area;
   String iframeId;
 
-  /**
-   * JSONP Polling constructor.
-   *
-   * @param {Object} opts.
-   * @api public
-   */
+  ///
+  /// JSONP Polling constructor.
+  ///
+  /// @param {Object} opts.
+  /// @api public
   JSONPTransport(Map opts) : super(opts) {
     this.query ??= {};
 
@@ -74,16 +67,13 @@ class JSONPTransport extends PollingTransport {
 //    }
   }
 
-/*
- * JSONP only supports binary as base64 encoded strings
- */
+  /// JSONP only supports binary as base64 encoded strings
   bool supportsBinary = false;
 
-  /**
-   * Closes the socket.
-   *
-   * @api private
-   */
+  ///
+  /// Closes the socket.
+  ///
+  /// @api private
   doClose() {
     if (this.script != null) {
       this.script.remove();
@@ -98,11 +88,10 @@ class JSONPTransport extends PollingTransport {
     super.doClose();
   }
 
-  /**
-   * Starts a poll cycle.
-   *
-   * @api private
-   */
+  ///
+  /// Starts a poll cycle.
+  ///
+  /// @api private
   doPoll() {
     ScriptElement script = document.createElement('script');
 
@@ -126,7 +115,7 @@ class JSONPTransport extends PollingTransport {
     var isUAgecko = window.navigator.userAgent.contains('gecko');
 
     if (isUAgecko) {
-      new Timer(new Duration(milliseconds: 100), () {
+      Timer(Duration(milliseconds: 100), () {
         var iframe = document.createElement('iframe');
         document.body.append(iframe);
         iframe.remove();
@@ -134,13 +123,12 @@ class JSONPTransport extends PollingTransport {
     }
   }
 
-  /**
-   * Writes with a hidden iframe.
-   *
-   * @param {String} data to send
-   * @param {Function} called upon flush.
-   * @api private
-   */
+  ///
+  /// Writes with a hidden iframe.
+  ///
+  /// @param {String} data to send
+  /// @param {Function} called upon flush.
+  /// @api private
   doWrite(data, fn) {
     if (this.form == null) {
       FormElement form = document.createElement('form');
@@ -192,7 +180,9 @@ class JSONPTransport extends PollingTransport {
 
     try {
       this.form.submit();
-    } catch (e) {}
+    } catch (e) {
+      //ignore
+    }
 
     this.iframe.onLoad.listen((_) {
       initIframe();
