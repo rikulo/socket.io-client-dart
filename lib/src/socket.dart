@@ -352,7 +352,12 @@ class Socket extends EventEmitter {
   emitBuffered() {
     var i;
     for (i = 0; i < this.receiveBuffer.length; i++) {
-      Function.apply(this.emit, this.receiveBuffer[i]);
+      List args = this.receiveBuffer[i];
+      if (args.length > 2) {
+        Function.apply(super.emit, [args.first, args.sublist(1)]);
+      } else {
+        Function.apply(super.emit, args);
+      }
     }
     this.receiveBuffer = [];
 
