@@ -321,11 +321,12 @@ class Socket extends EventEmitter {
     if (ack is Function) {
       _logger.fine('''calling ack ${packet['id']} with ${packet['data']}''');
 
-      // Fix for #42
-      if (packet['data'] is List) {
-        Function.apply(ack, [packet['data']]);
+      var args = packet['data'] as List;
+      if (args.length > 1) {
+        // Fix for #42 with nodejs server
+        Function.apply(ack, [args]);
       } else {
-        Function.apply(ack, packet['data']);
+        Function.apply(ack, args);
       }
     } else {
       _logger.fine('''bad ack ${packet['id']}''');
