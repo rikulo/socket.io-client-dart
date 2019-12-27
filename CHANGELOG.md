@@ -1,3 +1,10 @@
+## 0.9.7+2
+
+**New Feature:**
+
+* [#48](https://github.com/rikulo/socket.io-client-dart/issues/48) add links to github repo in pubspec.yaml
+
+
 ## 0.9.7+1
 
 **New Feature:**
