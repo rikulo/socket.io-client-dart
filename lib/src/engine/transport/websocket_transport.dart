@@ -10,47 +10,50 @@ import 'package:socket_io_common/src/engine/parser/parser.dart';
 import 'package:socket_io_client/src/engine/parseqs.dart';
 
 class WebSocketTransport extends Transport {
-  static Logger _logger =
+  static final Logger _logger =
       Logger('socket_io_client:transport.WebSocketTransport');
 
+  @override
   String name = 'websocket';
   var protocols;
 
+  @override
   bool supportsBinary;
   Map perMessageDeflate;
   WebSocket ws;
 
   WebSocketTransport(Map opts) : super(opts) {
     var forceBase64 = (opts != null && opts['forceBase64']);
-    this.supportsBinary = !forceBase64;
-    this.perMessageDeflate = opts['perMessageDeflate'];
-    this.protocols = opts['protocols'];
+    supportsBinary = !forceBase64;
+    perMessageDeflate = opts['perMessageDeflate'];
+    protocols = opts['protocols'];
   }
 
+  @override
   void doOpen() {
     var uri = this.uri();
     var protocols = this.protocols;
 
     try {
-      this.ws = WebSocket(uri, protocols);
+      ws = WebSocket(uri, protocols);
     } catch (err) {
-      return this.emit('error', err);
+      return emit('error', err);
     }
 
-    if (this.ws.binaryType == null) {
-      this.supportsBinary = false;
+    if (ws.binaryType == null) {
+      supportsBinary = false;
     }
 
-    this.ws.binaryType = 'arraybuffer';
+    ws.binaryType = 'arraybuffer';
 
-    this.addEventListeners();
+    addEventListeners();
   }
 
   /// Adds event listeners to the socket
   ///
   /// @api private
   void addEventListeners() {
-    this.ws
+    ws
       ..onOpen.listen((_) => onOpen())
       ..onClose.listen((_) => onClose())
       ..onMessage.listen((MessageEvent evt) => onData(evt.data))
@@ -63,8 +66,9 @@ class WebSocketTransport extends Transport {
   ///
   /// @param {Array} array of packets.
   /// @api private
-  write(List packets) {
-    this.writable = false;
+  @override
+  void write(List packets) {
+    writable = false;
 
     var done = () {
       emit('flush');
@@ -77,7 +81,7 @@ class WebSocketTransport extends Transport {
       });
     };
 
-    int total = packets.length;
+    var total = packets.length;
     // encodePacket efficient as it uses WS framing
     // no need for encodePayload
     packets.forEach((packet) {
@@ -101,16 +105,17 @@ class WebSocketTransport extends Transport {
   /// Closes socket.
   ///
   /// @api private
-  doClose() {
-    this.ws?.close();
+  @override
+  void doClose() {
+    ws?.close();
   }
 
   /// Generates uri for connection.
   ///
   /// @api private
-  uri() {
+  String uri() {
     var query = this.query ?? {};
-    var schema = this.secure ? 'wss' : 'ws';
+    var schema = secure ? 'wss' : 'ws';
     var port = '';
 
     // avoid port if default for schema
@@ -121,13 +126,13 @@ class WebSocketTransport extends Transport {
     }
 
     // append timestamp to URI
-    if (this.timestampRequests == true) {
-      query[this.timestampParam] =
+    if (timestampRequests == true) {
+      query[timestampParam] =
           DateTime.now().millisecondsSinceEpoch.toRadixString(36);
     }
 
     // communicate binary support capabilities
-    if (this.supportsBinary == false) {
+    if (supportsBinary == false) {
       query['b64'] = 1;
     }
 
@@ -138,12 +143,12 @@ class WebSocketTransport extends Transport {
       queryString = '?$queryString';
     }
 
-    var ipv6 = this.hostname.contains(':');
+    var ipv6 = hostname.contains(':');
     return schema +
         '://' +
-        (ipv6 ? '[' + this.hostname + ']' : this.hostname) +
+        (ipv6 ? '[' + hostname + ']' : hostname) +
         port +
-        this.path +
+        path +
         queryString;
   }
 /////

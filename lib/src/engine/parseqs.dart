@@ -10,7 +10,7 @@
 ///
 /// Copyright (C) 2017 Potix Corporation. All Rights Reserved.
 ///
-encode(Map obj) {
+String encode(Map obj) {
   var str = '';
 
   for (var i in obj.keys) {
@@ -27,7 +27,7 @@ encode(Map obj) {
 /// @param {String} qs
 /// @api private
 ///
-decode(qs) {
+Map decode(qs) {
   var qry = <dynamic, dynamic>{};
   var pairs = qs.split('&');
   for (var i = 0, l = pairs.length; i < l; i++) {

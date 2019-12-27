@@ -11,7 +11,7 @@ import 'package:socket_io_common/src/util/event_emitter.dart';
 /// @param {Function} callback
 /// @api public
 ///
-on(EventEmitter obj, String ev, EventHandler fn) {
+Destroyable on(EventEmitter obj, String ev, EventHandler fn) {
   obj.on(ev, fn);
   return Destroyable(() => obj.off(ev, fn));
 }
@@ -19,5 +19,5 @@ on(EventEmitter obj, String ev, EventHandler fn) {
 class Destroyable {
   Function callback;
   Destroyable(this.callback);
-  destroy() => callback();
+  void destroy() => callback();
 }

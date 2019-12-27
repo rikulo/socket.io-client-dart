@@ -13,12 +13,12 @@ import 'dart:async';
  */
 import 'package:socket_io_client/socket_io_client.dart' as io;
 
-main() {
-  io.Socket socket = io.io('http://localhost:3000');
+void main() {
+  var socket = io.io('http://localhost:3000');
   socket.on('connect', (_) {
     print('connect');
     socket.emit('msg', 'init');
-    int count = 0;
+    var count = 0;
     Timer.periodic(const Duration(seconds: 1), (Timer countDownTimer) {
       socket.emit('msg', count++);
     });

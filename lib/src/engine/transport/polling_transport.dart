@@ -20,8 +20,10 @@ final Logger _logger = Logger('socket_io:transport.PollingTransport');
 abstract class PollingTransport extends Transport {
   ///
   /// Transport name.
+  @override
   String name = 'polling';
 
+  @override
   bool supportsBinary;
   bool polling;
 
@@ -33,7 +35,7 @@ abstract class PollingTransport extends Transport {
   PollingTransport(Map opts) : super(opts) {
     var forceBase64 = (opts != null && opts['forceBase64']);
     if (/*!hasXHR2 || */ forceBase64) {
-      this.supportsBinary = false;
+      supportsBinary = false;
     }
   }
 
@@ -42,8 +44,9 @@ abstract class PollingTransport extends Transport {
   /// when the transport is open.
   ///
   /// @api private
-  doOpen() {
-    this.poll();
+  @override
+  void doOpen() {
+    poll();
   }
 
   ///
@@ -51,10 +54,10 @@ abstract class PollingTransport extends Transport {
   ///
   /// @param {Function} callback upon buffers are flushed and transport is paused
   /// @api private
-  pause(onPause) {
+  void pause(onPause) {
     var self = this;
 
-    this.readyState = 'pausing';
+    readyState = 'pausing';
 
     var pause = () {
       _logger.fine('paused');
@@ -62,22 +65,22 @@ abstract class PollingTransport extends Transport {
       onPause();
     };
 
-    if (this.polling == true || this.writable != true) {
+    if (polling == true || writable != true) {
       var total = 0;
 
-      if (this.polling == true) {
+      if (polling == true) {
         _logger.fine('we are currently polling - waiting to pause');
         total++;
-        this.once('pollComplete', (_) {
+        once('pollComplete', (_) {
           _logger.fine('pre-pause polling complete');
           if (--total == 0) pause();
         });
       }
 
-      if (this.writable != true) {
+      if (writable != true) {
         _logger.fine('we are currently writing - waiting to pause');
         total++;
-        this.once('drain', (_) {
+        once('drain', (_) {
           _logger.fine('pre-pause writing complete');
           if (--total == 0) pause();
         });
@@ -91,18 +94,19 @@ abstract class PollingTransport extends Transport {
   /// Starts polling cycle.
   ///
   /// @api public
-  poll() {
+  void poll() {
     _logger.fine('polling');
-    this.polling = true;
-    this.doPoll();
-    this.emit('poll');
+    polling = true;
+    doPoll();
+    emit('poll');
   }
 
   ///
   /// Overloads onData to detect payloads.
   ///
   /// @api private
-  onData(data) {
+  @override
+  void onData(data) {
     var self = this;
     _logger.fine('polling got data $data');
     var callback = (packet, [index, total]) {
@@ -124,18 +128,18 @@ abstract class PollingTransport extends Transport {
 
     // decode payload
     PacketParser.decodePayload(data,
-        binaryType: this.socket.binaryType, callback: callback);
+        binaryType: socket.binaryType, callback: callback);
 
     // if an event did not trigger closing
-    if ('closed' != this.readyState) {
+    if ('closed' != readyState) {
       // if we got data we're not polling
-      this.polling = false;
-      this.emit('pollComplete');
+      polling = false;
+      emit('pollComplete');
 
-      if ('open' == this.readyState) {
-        this.poll();
+      if ('open' == readyState) {
+        poll();
       } else {
-        _logger.fine('ignoring poll - transport state "${this.readyState}"');
+        _logger.fine('ignoring poll - transport state "${readyState}"');
       }
     }
   }
@@ -144,7 +148,8 @@ abstract class PollingTransport extends Transport {
   /// For polling, send a close packet.
   ///
   /// @api private
-  doClose() {
+  @override
+  void doClose() {
     var self = this;
 
     var close = ([_]) {
@@ -154,14 +159,14 @@ abstract class PollingTransport extends Transport {
       ]);
     };
 
-    if ('open' == this.readyState) {
+    if ('open' == readyState) {
       _logger.fine('transport open - closing');
       close();
     } else {
       // in case we're trying to close while
       // handshaking is in progress (GH-164)
       _logger.fine('transport not open - deferring close');
-      this.once('open', close);
+      once('open', close);
     }
   }
 
@@ -171,15 +176,16 @@ abstract class PollingTransport extends Transport {
   /// @param {Array} data packets
   /// @param {Function} drain callback
   /// @api private
-  write(List packets) {
+  @override
+  void write(List packets) {
     var self = this;
-    this.writable = false;
+    writable = false;
     var callbackfn = (_) {
       self.writable = true;
       self.emit('drain');
     };
 
-    PacketParser.encodePayload(packets, supportsBinary: this.supportsBinary,
+    PacketParser.encodePayload(packets, supportsBinary: supportsBinary,
         callback: (data) {
       self.doWrite(data, callbackfn);
     });
@@ -189,18 +195,18 @@ abstract class PollingTransport extends Transport {
   /// Generates uri for connection.
   ///
   /// @api private
-  uri() {
+  String uri() {
     var query = this.query ?? {};
-    var schema = this.secure ? 'https' : 'http';
+    var schema = secure ? 'https' : 'http';
     var port = '';
 
     // cache busting is forced
-    if (this.timestampRequests != false) {
-      query[this.timestampParam] =
+    if (timestampRequests != false) {
+      query[timestampParam] =
           DateTime.now().millisecondsSinceEpoch.toRadixString(36);
     }
 
-    if (this.supportsBinary == false && !query.containsKey('sid')) {
+    if (supportsBinary == false && !query.containsKey('sid')) {
       query['b64'] = 1;
     }
 
@@ -218,12 +224,12 @@ abstract class PollingTransport extends Transport {
       queryString = '?$queryString';
     }
 
-    var ipv6 = this.hostname.contains(':');
+    var ipv6 = hostname.contains(':');
     return schema +
         '://' +
-        (ipv6 ? '[' + this.hostname + ']' : this.hostname) +
+        (ipv6 ? '[' + hostname + ']' : hostname) +
         port +
-        this.path +
+        path +
         queryString;
   }
 

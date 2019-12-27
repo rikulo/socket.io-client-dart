@@ -7,7 +7,7 @@ import 'package:socket_io_common/src/util/event_emitter.dart';
 import 'package:socket_io_client/src/engine/socket.dart';
 
 abstract class Transport extends EventEmitter {
-  static Logger _logger = Logger('socket_io_client:transport.Transport');
+  static final Logger _logger = Logger('socket_io_client:transport.Transport');
 
   String path;
   String hostname;
@@ -25,17 +25,17 @@ abstract class Transport extends EventEmitter {
   bool supportsBinary;
 
   Transport(Map opts) {
-    this.path = opts['path'];
-    this.hostname = opts['hostname'];
-    this.port = opts['port'];
-    this.secure = opts['secure'];
-    this.query = opts['query'];
-    this.timestampParam = opts['timestampParam'];
-    this.timestampRequests = opts['timestampRequests'];
-    this.readyState = '';
-    this.agent = opts['agent || false'];
-    this.socket = opts['socket'];
-    this.enablesXDR = opts['enablesXDR'];
+    path = opts['path'];
+    hostname = opts['hostname'];
+    port = opts['port'];
+    secure = opts['secure'];
+    query = opts['query'];
+    timestampParam = opts['timestampParam'];
+    timestampRequests = opts['timestampRequests'];
+    readyState = '';
+    agent = opts['agent || false'];
+    socket = opts['socket'];
+    enablesXDR = opts['enablesXDR'];
 
     // SSL options for Node.js client
 //    this.pfx = opts['x'];
@@ -59,8 +59,8 @@ abstract class Transport extends EventEmitter {
   /// @return {Transport} for chaining
   /// @api public
   void onError(msg, [desc]) {
-    if (this.hasListeners('error')) {
-      this.emit('error', {'msg': msg, 'desc': desc, 'type': 'TransportError'});
+    if (hasListeners('error')) {
+      emit('error', {'msg': msg, 'desc': desc, 'type': 'TransportError'});
     } else {
       _logger.fine('ignored transport error $msg ($desc)');
     }
@@ -71,9 +71,9 @@ abstract class Transport extends EventEmitter {
   ///
   /// @api public
   void open() {
-    if ('closed' == this.readyState || '' == this.readyState) {
-      this.readyState = 'opening';
-      this.doOpen();
+    if ('closed' == readyState || '' == readyState) {
+      readyState = 'opening';
+      doOpen();
     }
   }
 
@@ -82,9 +82,9 @@ abstract class Transport extends EventEmitter {
   ///
   /// @api private
   void close() {
-    if ('opening' == this.readyState || 'open' == this.readyState) {
-      this.doClose();
-      this.onClose();
+    if ('opening' == readyState || 'open' == readyState) {
+      doClose();
+      onClose();
     }
   }
 
@@ -93,9 +93,9 @@ abstract class Transport extends EventEmitter {
   ///
   /// @param {Array} packets
   /// @api private
-  send(List packets) {
-    if ('open' == this.readyState) {
-      this.write(packets);
+  void send(List packets) {
+    if ('open' == readyState) {
+      write(packets);
     } else {
       throw StateError('Transport not open');
     }
@@ -105,10 +105,10 @@ abstract class Transport extends EventEmitter {
   /// Called upon open
   ///
   /// @api private
-  onOpen() {
-    this.readyState = 'open';
-    this.writable = true;
-    this.emit('open');
+  void onOpen() {
+    readyState = 'open';
+    writable = true;
+    emit('open');
   }
 
   ///
@@ -116,25 +116,25 @@ abstract class Transport extends EventEmitter {
   ///
   /// @param {String} data
   /// @api private
-  onData(data) {
+  void onData(data) {
     var packet =
-        PacketParser.decodePacket(data, binaryType: this.socket.binaryType);
-    this.onPacket(packet);
+        PacketParser.decodePacket(data, binaryType: socket.binaryType);
+    onPacket(packet);
   }
 
   ///
   /// Called with a decoded packet.
-  onPacket(packet) {
-    this.emit('packet', packet);
+  void onPacket(packet) {
+    emit('packet', packet);
   }
 
   ///
   /// Called upon close.
   ///
   /// @api private
-  onClose() {
-    this.readyState = 'closed';
-    this.emit('close');
+  void onClose() {
+    readyState = 'closed';
+    emit('close');
   }
 
   void write(List data);

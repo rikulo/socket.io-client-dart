@@ -12,7 +12,7 @@
  */
 import 'package:socket_io/socket_io.dart';
 
-main() {
+void main() {
   // Dart server
   var io = Server();
   io.on('connection', (client) {
@@ -22,7 +22,7 @@ main() {
     print('connection default namespace');
     client.on('msg', (data) {
       print('data from default => $data');
-      client.emit('fromServer', "$data");
+      client.emit('fromServer', '$data');
     });
   });
   io.listen(3000);

@@ -62,31 +62,31 @@ class Socket extends EventEmitter {
   String id;
 
   Socket(this.io, this.nsp, this.opts) {
-    this.json = this; // compat
-    this.ids = 0;
-    this.acks = {};
-    this.receiveBuffer = [];
-    this.sendBuffer = [];
-    this.connected = false;
-    this.disconnected = true;
+    json = this; // compat
+    ids = 0;
+    acks = {};
+    receiveBuffer = [];
+    sendBuffer = [];
+    connected = false;
+    disconnected = true;
     if (opts != null) {
-      this.query = opts['query'];
+      query = opts['query'];
     }
-    if (this.io.autoConnect) this.open();
+    if (io.autoConnect) open();
   }
 
   ///
   /// Subscribe to open, close and packet events
   ///
   /// @api private
-  subEvents() {
-    if (this.subs?.isEmpty == true) return;
+  void subEvents() {
+    if (subs?.isEmpty == true) return;
 
     var io = this.io;
-    this.subs = [
-      util.on(io, 'open', this.onopen),
-      util.on(io, 'packet', this.onpacket),
-      util.on(io, 'close', this.onclose)
+    subs = [
+      util.on(io, 'open', onopen),
+      util.on(io, 'packet', onpacket),
+      util.on(io, 'close', onclose)
     ];
   }
 
@@ -94,14 +94,14 @@ class Socket extends EventEmitter {
   /// "Opens" the socket.
   ///
   /// @api public
-  open() => connect();
+  Socket open() => connect();
 
-  connect() {
-    if (this.connected == true) return this;
-    this.subEvents();
-    this.io.open(); // ensure open
-    if ('open' == this.io.readyState) this.onopen();
-    this.emit('connecting');
+  Socket connect() {
+    if (connected == true) return this;
+    subEvents();
+    io.open(); // ensure open
+    if ('open' == io.readyState) onopen();
+    emit('connecting');
     return this;
   }
 
@@ -110,8 +110,8 @@ class Socket extends EventEmitter {
   ///
   /// @return {Socket} self
   /// @api public
-  send(List args) {
-    this.emit('message', args);
+  Socket send(List args) {
+    emit('message', args);
     return this;
   }
 
@@ -122,6 +122,7 @@ class Socket extends EventEmitter {
   /// @param {String} event name
   /// @return {Socket} self
   /// @api public
+  @override
   void emit(String event, [data]) {
     emitWithAck(event, data);
   }
@@ -140,7 +141,7 @@ class Socket extends EventEmitter {
     if (EVENTS.contains(event)) {
       super.emit(event, data);
     } else {
-      List sendData = [event];
+      var sendData = <dynamic>[event];
       if (data is Iterable) {
         sendData.addAll(data);
       } else if (data != null) {
@@ -151,23 +152,23 @@ class Socket extends EventEmitter {
         'type': binary ? BINARY_EVENT : EVENT,
         'data': sendData,
         'options': {
-          'compress': this.flags?.isNotEmpty == true && this.flags['compress']
+          'compress': flags?.isNotEmpty == true && flags['compress']
         }
       };
 
       // event ack callback
       if (ack != null) {
         _logger.fine('emitting packet with ack id $ids');
-        this.acks['${this.ids}'] = ack;
-        packet['id'] = '${this.ids++}';
+        acks['${ids}'] = ack;
+        packet['id'] = '${ids++}';
       }
 
-      if (this.connected == true) {
+      if (connected == true) {
         this.packet(packet);
       } else {
-        this.sendBuffer.add(packet);
+        sendBuffer.add(packet);
       }
-      this.flags = null;
+      flags = null;
     }
   }
 
@@ -176,24 +177,24 @@ class Socket extends EventEmitter {
   ///
   /// @param {Object} packet
   /// @api private
-  packet(Map packet) {
-    packet['nsp'] = this.nsp;
-    this.io.packet(packet);
+  void packet(Map packet) {
+    packet['nsp'] = nsp;
+    io.packet(packet);
   }
 
   ///
   /// Called upon engine `open`.
   ///
   /// @api private
-  onopen([_]) {
+  void onopen([_]) {
     _logger.fine('transport is open - connecting');
 
     // write connect packet if necessary
-    if ('/' != this.nsp) {
-      if (this.query?.isNotEmpty == true) {
-        this.packet({'type': CONNECT, 'query': this.query});
+    if ('/' != nsp) {
+      if (query?.isNotEmpty == true) {
+        packet({'type': CONNECT, 'query': query});
       } else {
-        this.packet({'type': CONNECT});
+        packet({'type': CONNECT});
       }
     }
   }
@@ -203,13 +204,13 @@ class Socket extends EventEmitter {
   ///
   /// @param {String} reason
   /// @api private
-  onclose(reason) {
+  void onclose(reason) {
     _logger.fine('close ($reason)');
-    this.emit('disconnecting', reason);
-    this.connected = false;
-    this.disconnected = true;
-    this.id = null;
-    this.emit('disconnect', reason);
+    emit('disconnecting', reason);
+    connected = false;
+    disconnected = true;
+    id = null;
+    emit('disconnect', reason);
   }
 
   ///
@@ -217,36 +218,36 @@ class Socket extends EventEmitter {
   ///
   /// @param {Object} packet
   /// @api private
-  onpacket(packet) {
-    if (packet['nsp'] != this.nsp) return;
+  void onpacket(packet) {
+    if (packet['nsp'] != nsp) return;
 
     switch (packet['type']) {
       case CONNECT:
-        this.onconnect();
+        onconnect();
         break;
 
       case EVENT:
-        this.onevent(packet);
+        onevent(packet);
         break;
 
       case BINARY_EVENT:
-        this.onevent(packet);
+        onevent(packet);
         break;
 
       case ACK:
-        this.onack(packet);
+        onack(packet);
         break;
 
       case BINARY_ACK:
-        this.onack(packet);
+        onack(packet);
         break;
 
       case DISCONNECT:
-        this.ondisconnect();
+        ondisconnect();
         break;
 
       case ERROR:
-        this.emit('error', packet['data']);
+        emit('error', packet['data']);
         break;
     }
   }
@@ -256,24 +257,24 @@ class Socket extends EventEmitter {
   ///
   /// @param {Object} packet
   /// @api private
-  onevent(Map packet) {
+  void onevent(Map packet) {
     List args = packet['data'] ?? [];
 //    debug('emitting event %j', args);
 
     if (null != packet['id']) {
 //      debug('attaching ack callback to event');
-      args.add(this.ack(packet['id']));
+      args.add(ack(packet['id']));
     }
 
     // dart doesn't support "String... rest" syntax.
-    if (this.connected == true) {
+    if (connected == true) {
       if (args.length > 2) {
         Function.apply(super.emit, [args.first, args.sublist(1)]);
       } else {
         Function.apply(super.emit, args);
       }
     } else {
-      this.receiveBuffer.add(args);
+      receiveBuffer.add(args);
     }
   }
 
@@ -302,8 +303,8 @@ class Socket extends EventEmitter {
   ///
   /// @param {Object} packet
   /// @api private
-  onack(Map packet) {
-    var ack = this.acks.remove(packet['id']);
+  void onack(Map packet) {
+    var ack = acks.remove(packet['id']);
     if (ack is Function) {
       _logger.fine('''calling ack ${packet['id']} with ${packet['data']}''');
 
@@ -323,43 +324,43 @@ class Socket extends EventEmitter {
   /// Called upon server connect.
   ///
   /// @api private
-  onconnect() {
-    this.connected = true;
-    this.disconnected = false;
-    this.emit('connect');
-    this.emitBuffered();
+  void onconnect() {
+    connected = true;
+    disconnected = false;
+    emit('connect');
+    emitBuffered();
   }
 
   ///
   /// Emit buffered events (received and emitted).
   ///
   /// @api private
-  emitBuffered() {
+  void emitBuffered() {
     var i;
-    for (i = 0; i < this.receiveBuffer.length; i++) {
-      List args = this.receiveBuffer[i];
+    for (i = 0; i < receiveBuffer.length; i++) {
+      List args = receiveBuffer[i];
       if (args.length > 2) {
         Function.apply(super.emit, [args.first, args.sublist(1)]);
       } else {
         Function.apply(super.emit, args);
       }
     }
-    this.receiveBuffer = [];
+    receiveBuffer = [];
 
-    for (i = 0; i < this.sendBuffer.length; i++) {
-      this.packet(this.sendBuffer[i]);
+    for (i = 0; i < sendBuffer.length; i++) {
+      packet(sendBuffer[i]);
     }
-    this.sendBuffer = [];
+    sendBuffer = [];
   }
 
   ///
   /// Called upon server disconnect.
   ///
   /// @api private
-  ondisconnect() {
-    _logger.fine('server disconnect (${this.nsp})');
-    this.destroy();
-    this.onclose('io server disconnect');
+  void ondisconnect() {
+    _logger.fine('server disconnect (${nsp})');
+    destroy();
+    onclose('io server disconnect');
   }
 
   ///
@@ -369,16 +370,16 @@ class Socket extends EventEmitter {
   ///
   /// @api private.
 
-  destroy() {
-    if (this.subs?.isNotEmpty == true) {
+  void destroy() {
+    if (subs?.isNotEmpty == true) {
       // clean subscriptions to avoid reconnections
-      for (var i = 0; i < this.subs.length; i++) {
-        this.subs[i].destroy();
+      for (var i = 0; i < subs.length; i++) {
+        subs[i].destroy();
       }
-      this.subs = null;
+      subs = null;
     }
 
-    this.io.destroy(this);
+    io.destroy(this);
   }
 
   ///
@@ -386,20 +387,20 @@ class Socket extends EventEmitter {
   ///
   /// @return {Socket} self
   /// @api public
-  close() => disconnect();
+  Socket close() => disconnect();
 
-  disconnect() {
-    if (this.connected == true) {
-      _logger.fine('performing disconnect (${this.nsp})');
-      this.packet({'type': DISCONNECT});
+  Socket disconnect() {
+    if (connected == true) {
+      _logger.fine('performing disconnect (${nsp})');
+      packet({'type': DISCONNECT});
     }
 
     // remove socket from pool
-    this.destroy();
+    destroy();
 
-    if (this.connected == true) {
+    if (connected == true) {
       // fire events
-      this.onclose('io client disconnect');
+      onclose('io client disconnect');
     }
     return this;
   }
@@ -410,9 +411,9 @@ class Socket extends EventEmitter {
   /// @param {Boolean} if `true`, compresses the sending data
   /// @return {Socket} self
   /// @api public
-  compress(compress) {
-    this.flags = this.flags ??= {};
-    this.flags['compress'] = compress;
+  Socket compress(compress) {
+    flags = flags ??= {};
+    flags['compress'] = compress;
     return this;
   }
 }

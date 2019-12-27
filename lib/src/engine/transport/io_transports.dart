@@ -6,8 +6,8 @@ import 'package:socket_io_client/src/engine/transport/transport.dart';
 
 class Transports {
   static List<String> upgradesTo(String from) {
-    if ("polling" == from) {
-      return ["websocket"];
+    if ('polling' == from) {
+      return ['websocket'];
     }
     return [];
   }
