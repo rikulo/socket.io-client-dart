@@ -43,7 +43,7 @@ To connect the socket manually, set the option `autoConnect: false` and call `.c
 
 For example,
 <pre>
-Socket socket = io('http://localhost:3000', <String, dynamic>{
+Socket socket = io('http://localhost:3000', &lt;String, dynamic>{
     'transports': ['websocket'],
     <b>'autoConnect': false</b>,
     'extraHeaders': {'foo': 'bar'} // optional
@@ -145,3 +145,4 @@ If you are new to Git or GitHub, please read [this guide](https://help.github.co
 * Thanks [@Oskang09](https://github.com/Oskang09) for https://github.com/rikulo/socket.io-client-dart/issues/21
 * Thanks [@bruce3x](https://github.com/bruce3x) for https://github.com/rikulo/socket.io-client-dart/issues/25
 * Thanks [@Kavantix](https://github.com/Kavantix) for https://github.com/rikulo/socket.io-client-dart/issues/26
+* Thanks [@luandnguyen](https://github.com/luandnguyen) for https://github.com/rikulo/socket.io-client-dart/issues/59
