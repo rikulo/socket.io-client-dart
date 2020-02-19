@@ -80,7 +80,7 @@ class Socket extends EventEmitter {
   ///
   /// @api private
   void subEvents() {
-    if (subs?.isEmpty == true) return;
+    if (subs?.isNotEmpty == true) return;
 
     var io = this.io;
     subs = [

@@ -1,3 +1,10 @@
+## 0.9.8
+
+**Bug fix:**
+
+* [#33](https://github.com/rikulo/socket.io-client-dart/issues/33) socket.on('receiveMessage',(data)=>print("data")) called twice
+
+
 ## 0.9.7+2
 
 **New Feature:**
