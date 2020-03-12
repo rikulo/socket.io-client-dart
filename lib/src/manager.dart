@@ -574,7 +574,8 @@ class _Backoff {
       ms = ((rand * 10).floor() & 1) == 0 ? ms - deviation : ms + deviation;
     }
     // #39: avoid an overflow with negative value
-    return math.max(math.min(ms, _max), 0);
+    ms = math.min(ms, _max);
+    return ms <= 0 ? _max : ms;
   }
 
   ///

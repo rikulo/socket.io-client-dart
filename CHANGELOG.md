@@ -1,3 +1,9 @@
+## 0.9.9
+
+**Bug fix:**
+
+* [#67](https://github.com/rikulo/socket.io-client-dart/issues/67) Retry connection backoff after 54 tries reconnections every 0 second
+
 ## 0.9.8
 
 **Bug fix:**
