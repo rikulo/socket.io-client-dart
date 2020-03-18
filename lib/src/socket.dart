@@ -142,9 +142,7 @@ class Socket extends EventEmitter {
       super.emit(event, data);
     } else {
       var sendData = <dynamic>[event];
-      if (data is Iterable) {
-        sendData.addAll(data);
-      } else if (data != null) {
+      if (data != null) {
         sendData.add(data);
       }
 
