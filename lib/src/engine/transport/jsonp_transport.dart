@@ -3,30 +3,24 @@ import 'dart:html';
 import 'dart:js';
 import 'package:socket_io_client/src/engine/transport/polling_transport.dart';
 
-/**
- * jsonp_transport.dart
- *
- * Purpose:
- *
- * Description:
- *
- * History:
- *   26/04/2017, Created by jumperchen
- *
- * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
- */
+/// jsonp_transport.dart
+///
+/// Purpose:
+///
+/// Description:
+///
+/// History:
+///   26/04/2017, Created by jumperchen
+///
+/// Copyright (C) 2017 Potix Corporation. All Rights Reserved.
 
-/**
- * Cached regular expressions.
- */
+///
+/// Cached regular expressions.
+final RegExp rNewline = RegExp(r'\n');
+final RegExp rEscapedNewline = RegExp(r'\\n');
 
-final RegExp rNewline = new RegExp(r'\n');
-final RegExp rEscapedNewline = new RegExp(r'\\n');
-
-/**
- * Global JSONP callbacks.
- */
-
+///
+/// Global JSONP callbacks.
 var callbacks;
 
 class JSONPTransport extends PollingTransport {
@@ -38,14 +32,13 @@ class JSONPTransport extends PollingTransport {
   TextAreaElement area;
   String iframeId;
 
-  /**
-   * JSONP Polling constructor.
-   *
-   * @param {Object} opts.
-   * @api public
-   */
+  ///
+  /// JSONP Polling constructor.
+  ///
+  /// @param {Object} opts.
+  /// @api public
   JSONPTransport(Map opts) : super(opts) {
-    this.query ??= {};
+    query ??= {};
 
     // define global callbacks array if not present
     // we do this here (lazily) to avoid unneeded global pollution
@@ -56,7 +49,7 @@ class JSONPTransport extends PollingTransport {
     }
 
     // callback identifier
-    this.index = callbacks.length;
+    index = callbacks.length;
 
     // add callback to jsonp global
     callbacks.add((msg) {
@@ -64,7 +57,7 @@ class JSONPTransport extends PollingTransport {
     });
 
     // append to query string
-    this.query['j'] = this.index;
+    query['j'] = index;
 
     // prevent spurious errors from being emitted when the window is unloaded
 //    if (window.document != null && window.addEventListener != null) {
@@ -74,43 +67,42 @@ class JSONPTransport extends PollingTransport {
 //    }
   }
 
-/*
- * JSONP only supports binary as base64 encoded strings
- */
+  /// JSONP only supports binary as base64 encoded strings
+  @override
   bool supportsBinary = false;
 
-  /**
-   * Closes the socket.
-   *
-   * @api private
-   */
-  doClose() {
-    if (this.script != null) {
-      this.script.remove();
-      this.script = null;
+  ///
+  /// Closes the socket.
+  ///
+  /// @api private
+  @override
+  void doClose() {
+    if (script != null) {
+      script.remove();
+      script = null;
     }
 
-    if (this.form != null) {
-      this.form.remove();
-      this.form = null;
-      this.iframe = null;
+    if (form != null) {
+      form.remove();
+      form = null;
+      iframe = null;
     }
     super.doClose();
   }
 
-  /**
-   * Starts a poll cycle.
-   *
-   * @api private
-   */
-  doPoll() {
+  ///
+  /// Starts a poll cycle.
+  ///
+  /// @api private
+  @override
+  void doPoll() {
     ScriptElement script = document.createElement('script');
 
     this.script?.remove();
     this.script = null;
 
     script.async = true;
-    script.src = this.uri();
+    script.src = uri();
     script.onError.listen((e) {
       onError('jsonp poll error');
     });
@@ -126,7 +118,7 @@ class JSONPTransport extends PollingTransport {
     var isUAgecko = window.navigator.userAgent.contains('gecko');
 
     if (isUAgecko) {
-      new Timer(new Duration(milliseconds: 100), () {
+      Timer(Duration(milliseconds: 100), () {
         var iframe = document.createElement('iframe');
         document.body.append(iframe);
         iframe.remove();
@@ -134,18 +126,18 @@ class JSONPTransport extends PollingTransport {
     }
   }
 
-  /**
-   * Writes with a hidden iframe.
-   *
-   * @param {String} data to send
-   * @param {Function} called upon flush.
-   * @api private
-   */
-  doWrite(data, fn) {
-    if (this.form == null) {
+  ///
+  /// Writes with a hidden iframe.
+  ///
+  /// @param {String} data to send
+  /// @param {Function} called upon flush.
+  /// @api private
+  @override
+  void doWrite(data, fn) {
+    if (form == null) {
       FormElement form = document.createElement('form');
       TextAreaElement area = document.createElement('textarea');
-      var id = this.iframeId = 'eio_iframe_${this.index}';
+      var id = iframeId = 'eio_iframe_${index}';
 
       form.className = 'socketio';
       form.style.position = 'absolute';
@@ -162,7 +154,7 @@ class JSONPTransport extends PollingTransport {
       this.area = area;
     }
 
-    this.form.action = this.uri();
+    form.action = uri();
 
     var initIframe = () {
       if (iframe != null) {
@@ -180,7 +172,7 @@ class JSONPTransport extends PollingTransport {
       iframe.id = iframeId;
 
       form.append(iframe);
-      this.iframe = iframe;
+      iframe = iframe;
     };
 
     initIframe();
@@ -188,13 +180,15 @@ class JSONPTransport extends PollingTransport {
     // escape \n to prevent it from being converted into \r\n by some UAs
     // double escaping is required for escaped new lines because unescaping of new lines can be done safely on server-side
     data = data.replaceAll(rEscapedNewline, '\\\n');
-    this.area.value = data.replaceAll(rNewline, '\\n');
+    area.value = data.replaceAll(rNewline, '\\n');
 
     try {
-      this.form.submit();
-    } catch (e) {}
+      form.submit();
+    } catch (e) {
+      //ignore
+    }
 
-    this.iframe.onLoad.listen((_) {
+    iframe.onLoad.listen((_) {
       initIframe();
       fn();
     });

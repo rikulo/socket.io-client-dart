@@ -22,3 +22,5 @@ doc/api/
 *.iml
 *.ipr
 *.iws
+
+*/node_modules

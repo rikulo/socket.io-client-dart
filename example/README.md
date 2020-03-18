@@ -1,8 +1,9 @@
-# socket.io-client-dart
+# socket.io-client-dart example
 
 Port of awesome JavaScript Node.js library - [Socket.io-client v2.0.1](https://github.com/socketio/socket.io-client) - in Dart
 
 ## Usage
+
 
     import 'package:socket_io/socket_io.dart';
     import 'package:socket_io_client/socket_io_client.dart' as IO;
@@ -37,6 +38,8 @@ Port of awesome JavaScript Node.js library - [Socket.io-client v2.0.1](https://g
         socket.on('disconnect', (_) => print('disconnect'));
         socket.on('fromServer', (_) => print(_));
     }
+    
+
     
 ### Connect manually
 To connect the socket manually, set the option `autoConnect: false` and call `.connect()`.
@@ -109,7 +112,7 @@ socket.on('eventName', (data) {
     ack(null);
 });
 ```
-
+    
 ## Usage (Flutter)
 In Flutter env. it only works with `dart:io` websocket, not with `dart:html` websocket, so in this case
 you have to add `'transports': ['websocket']` when creates the socket instance.
@@ -121,28 +124,3 @@ IO.Socket socket = IO.io('http://localhost:3000', <String, dynamic>{
     'extraHeaders': {'foo': 'bar'} // optional
   });
 ```
-
-## Notes to Contributors
-
-### Fork socket.io-client-dart
-
-If you'd like to contribute back to the core, you can [fork this repository](https://help.github.com/articles/fork-a-repo) and send us a pull request, when it is ready.
-
-If you are new to Git or GitHub, please read [this guide](https://help.github.com/) first.
-
-## Who Uses
-
-* [Quire](https://quire.io) - a simple, collaborative, multi-level task management tool.
-* [KEIKAI](https://keikai.io/) - a web spreadsheet for Big Data.
-
-## Socket.io Dart Server
-
-* [socket.io-dart](https://github.com/rikulo/socket.io-dart)
-
-
-## Contributors
-* Thanks [@felangel](https://github.com/felangel) for https://github.com/rikulo/socket.io-client-dart/issues/7
-* Thanks [@Oskang09](https://github.com/Oskang09) for https://github.com/rikulo/socket.io-client-dart/issues/21
-* Thanks [@bruce3x](https://github.com/bruce3x) for https://github.com/rikulo/socket.io-client-dart/issues/25
-* Thanks [@Kavantix](https://github.com/Kavantix) for https://github.com/rikulo/socket.io-client-dart/issues/26
-* Thanks [@luandnguyen](https://github.com/luandnguyen) for https://github.com/rikulo/socket.io-client-dart/issues/59

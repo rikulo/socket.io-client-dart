@@ -1,4 +1,4 @@
-// Copyright (C) 2019 Potix Corporation. All Rights Reserved 
+// Copyright (C) 2019 Potix Corporation. All Rights Reserved
 // History: 2019-01-21 12:13
 // Author: jumperchen<jumperchen@potix.com>
 
@@ -11,31 +11,37 @@ import 'package:socket_io_common/src/engine/parser/parser.dart';
 import 'package:socket_io_client/src/engine/parseqs.dart';
 
 class IOWebSocketTransport extends Transport {
-  static Logger _logger =
-  new Logger('socket_io_client:transport.IOWebSocketTransport');
+  static final Logger _logger =
+      Logger('socket_io_client:transport.IOWebSocketTransport');
 
+  @override
   String name = 'websocket';
   var protocols;
 
+  @override
   bool supportsBinary;
   Map perMessageDeflate;
+  Map extraHeaders;
   WebSocket ws;
 
   IOWebSocketTransport(Map opts) : super(opts) {
     var forceBase64 = (opts != null && opts['forceBase64']);
-    this.supportsBinary = !forceBase64;
-    this.perMessageDeflate = opts['perMessageDeflate'];
-    this.protocols = opts['protocols'];
+    supportsBinary = !forceBase64;
+    perMessageDeflate = opts['perMessageDeflate'];
+    protocols = opts['protocols'];
+    extraHeaders = opts['extraHeaders'];
   }
 
+  @override
   void doOpen() async {
     var uri = this.uri();
     var protocols = this.protocols;
 
     try {
-      this.ws = await WebSocket.connect(uri, protocols: protocols);
+      ws = await WebSocket.connect(uri,
+          protocols: protocols, headers: extraHeaders);
     } catch (err) {
-      return this.emit('error', err);
+      return emit('error', err);
     }
 
 //    if (this.ws.binaryType == null) {
@@ -44,33 +50,30 @@ class IOWebSocketTransport extends Transport {
 //
 //    this.ws.binaryType = 'arraybuffer';
 
-    this.addEventListeners();
+    addEventListeners();
   }
 
-  /**
-   * Adds event listeners to the socket
-   *
-   * @api private
-   */
+  /// Adds event listeners to the socket
+  ///
+  /// @api private
   void addEventListeners() {
-    bool isOpen = false;
-    this.ws.listen((data) {
+    var isOpen = false;
+    ws.listen((data) {
       if (isOpen != true) {
         onOpen();
         isOpen = true;
       }
       onData(data);
-    }, onDone:  () => onClose(), onError:  (_) => onError('websocket error'));
+    }, onDone: () => onClose(), onError: (_) => onError('websocket error'));
   }
 
-  /**
-   * Writes data to socket.
-   *
-   * @param {Array} array of packets.
-   * @api private
-   */
-  write(List packets) {
-    this.writable = false;
+  /// Writes data to socket.
+  ///
+  /// @param {Array} array of packets.
+  /// @api private
+  @override
+  void write(List packets) {
+    writable = false;
 
     var done = () {
       emit('flush');
@@ -83,44 +86,43 @@ class IOWebSocketTransport extends Transport {
       });
     };
 
-    int total = packets.length;
+    var total = packets.length;
     // encodePacket efficient as it uses WS framing
     // no need for encodePayload
     packets.forEach((packet) {
       PacketParser.encodePacket(packet,
           supportsBinary: supportsBinary, fromClient: true, callback: (data) {
-            // Sometimes the websocket has already been closed but the browser didn't
-            // have a chance of informing us about it yet, in that case send will
-            // throw an error
-            try {
-              // TypeError is thrown when passing the second argument on Safari
-              ws.add(data);
-            } catch (e) {
-              _logger.fine('websocket closed before onclose event');
-            }
+        // Sometimes the websocket has already been closed but the browser didn't
+        // have a chance of informing us about it yet, in that case send will
+        // throw an error
+        try {
+          // TypeError is thrown when passing the second argument on Safari
+          ws.add(data);
+        } catch (e) {
+          _logger.fine('websocket closed before onclose event');
+        }
 
-            if (--total == 0) done();
-          });
+        if (--total == 0) done();
+      });
     });
   }
 
-  /**
-   * Closes socket.
-   *
-   * @api private
-   */
-  doClose() {
-    this.ws?.close();
+  ///
+  /// Closes socket.
+  ///
+  /// @api private
+  @override
+  void doClose() {
+    ws?.close();
   }
 
-  /**
-   * Generates uri for connection.
-   *
-   * @api private
-   */
-  uri() {
+  ///
+  /// Generates uri for connection.
+  ///
+  /// @api private
+  String uri() {
     var query = this.query ?? {};
-    var schema = this.secure ? 'wss' : 'ws';
+    var schema = secure ? 'wss' : 'ws';
     var port = '';
 
     // avoid port if default for schema
@@ -131,13 +133,13 @@ class IOWebSocketTransport extends Transport {
     }
 
     // append timestamp to URI
-    if (this.timestampRequests == true) {
-      query[this.timestampParam] =
-          new DateTime.now().millisecondsSinceEpoch.toRadixString(36);
+    if (timestampRequests == true) {
+      query[timestampParam] =
+          DateTime.now().millisecondsSinceEpoch.toRadixString(36);
     }
 
     // communicate binary support capabilities
-    if (this.supportsBinary == false) {
+    if (supportsBinary == false) {
       query['b64'] = 1;
     }
 
@@ -148,21 +150,21 @@ class IOWebSocketTransport extends Transport {
       queryString = '?$queryString';
     }
 
-    var ipv6 = this.hostname.contains(':');
+    var ipv6 = hostname.contains(':');
     return schema +
         '://' +
-        (ipv6 ? '[' + this.hostname + ']' : this.hostname) +
+        (ipv6 ? '[' + hostname + ']' : hostname) +
         port +
-        this.path +
+        path +
         queryString;
   }
 //
-//  /**
-//   * Feature detection for WebSocket.
-//   *
-//   * @return {Boolean} whether this transport is available.
-//   * @api public
-//   */
+/////
+  ///// Feature detection for WebSocket.
+  /////
+  ///// @return {Boolean} whether this transport is available.
+  ///// @api public
+  //////
 //  check() {
 //    return !!WebSocket && !('__initialize' in WebSocket && this.name === WS.prototype.name);
 //  }

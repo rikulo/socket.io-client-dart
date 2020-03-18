@@ -1,3 +1,6 @@
+// Copyright (C) 2017 Potix Corporation. All Rights Reserved
+// History:  27/04/2017
+// Author: jumperchen<jumperchen@potix.com>
 import 'dart:async';
 import 'dart:html';
 
@@ -6,20 +9,7 @@ import 'package:logging/logging.dart';
 import 'package:socket_io_common/src/util/event_emitter.dart';
 import 'package:socket_io_client/src/engine/transport/polling_transport.dart';
 
-/**
- * xhr_transport.dart
- *
- * Purpose:
- *
- * Description:
- *
- * History:
- *   27/04/2017, Created by jumperchen
- *
- * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
- */
-
-final Logger _logger = new Logger('socket_io_client:transport.XHRTransport');
+final Logger _logger = Logger('socket_io_client:transport.XHRTransport');
 
 class XHRTransport extends PollingTransport {
   int requestTimeout;
@@ -27,16 +17,16 @@ class XHRTransport extends PollingTransport {
   bool xs;
   Request sendXhr;
   Request pollXhr;
+  Map extraHeaders;
 
-  /**
-   * XHR Polling constructor.
-   *
-   * @param {Object} opts
-   * @api public
-   */
+  ///
+  /// XHR Polling constructor.
+  ///
+  /// @param {Object} opts
+  /// @api public
   XHRTransport(Map opts) : super(opts) {
-    this.requestTimeout = opts['requestTimeout'];
-//    this.extraHeaders = opts.extraHeaders;
+    requestTimeout = opts['requestTimeout'];
+    extraHeaders = opts['extraHeaders'] ?? <String, dynamic>{};
 
     var isSSL = 'https:' == window.location.protocol;
     var port = window.location.port;
@@ -46,29 +36,28 @@ class XHRTransport extends PollingTransport {
       port = isSSL ? '443' : '80';
     }
 
-    this.xd = opts['hostname'] != window.location.hostname ||
+    xd = opts['hostname'] != window.location.hostname ||
         int.parse(port) != opts['port'];
-    this.xs = opts['secure'] != isSSL;
+    xs = opts['secure'] != isSSL;
   }
 
-  /**
-   * XHR supports binary
-   */
+  ///
+  /// XHR supports binary
+  @override
   bool supportsBinary = true;
 
-  /**
-   * Creates a request.
-   *
-   * @api private
-   */
-  request([Map opts]) {
+  ///
+  /// Creates a request.
+  ///
+  /// @api private
+  Request request([Map opts]) {
     opts = opts ?? {};
-    opts['uri'] = this.uri();
-    opts['xd'] = this.xd;
-    opts['xs'] = this.xs;
-    opts['agent'] = this.agent ?? false;
-    opts['supportsBinary'] = this.supportsBinary;
-    opts['enablesXDR'] = this.enablesXDR;
+    opts['uri'] = uri();
+    opts['xd'] = xd;
+    opts['xs'] = xs;
+    opts['agent'] = agent ?? false;
+    opts['supportsBinary'] = supportsBinary;
+    opts['enablesXDR'] = enablesXDR;
 
     // SSL options for Node.js client
 //    opts.pfx = this.pfx;
@@ -81,53 +70,53 @@ class XHRTransport extends PollingTransport {
 //    opts.requestTimeout = this.requestTimeout;
 
     // other options for Node.js client
-//    opts.extraHeaders = this.extraHeaders;
+    opts['extraHeaders'] = extraHeaders;
 
-    return new Request(opts);
+    return Request(opts);
   }
 
-  /**
-   * Sends data.
-   *
-   * @param {String} data to send.
-   * @param {Function} called upon flush.
-   * @api private
-   */
-  doWrite(data, fn) {
+  ///
+  /// Sends data.
+  ///
+  /// @param {String} data to send.
+  /// @param {Function} called upon flush.
+  /// @api private
+  @override
+  void doWrite(data, fn) {
     var isBinary = data is! String;
     var req =
-        this.request({'method': 'POST', 'data': data, 'isBinary': isBinary});
+        request({'method': 'POST', 'data': data, 'isBinary': isBinary});
     req.on('success', fn);
     req.on('error', (err) {
       onError('xhr post error', err);
     });
-    this.sendXhr = req;
+    sendXhr = req;
   }
 
-  /**
-   * Starts a poll cycle.
-   *
-   * @api private
-   */
-  doPoll() {
+  ///
+  /// Starts a poll cycle.
+  ///
+  /// @api private
+  @override
+  void doPoll() {
     _logger.fine('xhr poll');
-    var req = this.request();
+    var req = request();
     req.on('data', (data) {
       onData(data);
     });
     req.on('error', (err) {
       onError('xhr poll error', err);
     });
-    this.pollXhr = req;
+    pollXhr = req;
   }
 }
 
-/**
- * Request constructor
- *
- * @param {Object} options
- * @api public
- */
+///
+/// Request constructor
+///
+/// @param {Object} options
+/// @api public
+///
 class Request extends EventEmitter {
   String uri;
   bool xd;
@@ -142,62 +131,66 @@ class Request extends EventEmitter {
   HttpRequest xhr;
   String method;
   StreamSubscription readyStateChange;
+  Map extraHeaders;
 
   Request(Map opts) {
-    this.method = opts['method'] ?? 'GET';
-    this.uri = opts['uri'];
-    this.xd = opts['xd'] == true;
-    this.xs = opts['xs'] == true;
-    this.async = opts['async'] != false;
-    this.data = opts['data'];
-    this.agent = opts['agent'];
-    this.isBinary = opts['isBinary'];
-    this.supportsBinary = opts['supportsBinary'];
-    this.enablesXDR = opts['enablesXDR'];
-    this.requestTimeout = opts['requestTimeout'];
+    method = opts['method'] ?? 'GET';
+    uri = opts['uri'];
+    xd = opts['xd'] == true;
+    xs = opts['xs'] == true;
+    async = opts['async'] != false;
+    data = opts['data'];
+    agent = opts['agent'];
+    isBinary = opts['isBinary'];
+    supportsBinary = opts['supportsBinary'];
+    enablesXDR = opts['enablesXDR'];
+    requestTimeout = opts['requestTimeout'];
+    extraHeaders = opts['extraHeaders'];
 
-    this.create();
+    create();
   }
 
-  /**
-   * Creates the XHR object and sends the request.
-   *
-   * @api private
-   */
-  create() {
+  ///
+  /// Creates the XHR object and sends the request.
+  ///
+  /// @api private
+  void create() {
 //var opts = { 'agent': this.agent, 'xdomain': this.xd, 'xscheme': this.xs, 'enablesXDR': this.enablesXDR };
 
-    HttpRequest xhr = this.xhr = new HttpRequest();
+    var xhr = this.xhr = HttpRequest();
     var self = this;
 
     try {
-      _logger.fine('xhr open ${this.method}: ${this.uri}');
-      xhr.open(this.method, this.uri, async: this.async);
+      _logger.fine('xhr open ${method}: ${uri}');
+      xhr.open(method, uri, async: async);
 
-//try {
-//if (this.extraHeaders) {
-//xhr.setDisableHeaderCheck && xhr.setDisableHeaderCheck(true);
-//for (var i in this.extraHeaders) {
-//if (this.extraHeaders.hasOwnProperty(i)) {
-//xhr.setRequestHeader(i, this.extraHeaders[i]);
-//}
-//}
-//}
-//} catch (e) {}
+      try {
+        if (extraHeaders?.isNotEmpty == true) {
+          extraHeaders.forEach((k, v) {
+            xhr.setRequestHeader(k, v);
+          });
+        }
+      } catch (e) {
+        // ignore
+      }
 
-      if ('POST' == this.method) {
+      if ('POST' == method) {
         try {
-          if (this.isBinary) {
+          if (isBinary) {
             xhr.setRequestHeader('Content-type', 'application/octet-stream');
           } else {
             xhr.setRequestHeader('Content-type', 'text/plain;charset=UTF-8');
           }
-        } catch (e) {}
+        } catch (e) {
+          // ignore
+        }
       }
 
       try {
         xhr.setRequestHeader('Accept', '*/*');
-      } catch (e) {}
+      } catch (e) {
+        // ignore
+      }
 
 // ie6 check
 //if ('withCredentials' in xhr) {
@@ -223,7 +216,9 @@ class Request extends EventEmitter {
           var contentType;
           try {
             contentType = xhr.getResponseHeader('Content-Type');
-          } catch (e) {}
+          } catch (e) {
+            // ignore
+          }
           if (contentType == 'application/octet-stream') {
             xhr.responseType = 'arraybuffer';
           }
@@ -239,8 +234,8 @@ class Request extends EventEmitter {
       });
       /*}*/
 
-      _logger.fine('xhr data ${this.data}');
-      xhr.send(this.data);
+      _logger.fine('xhr data ${data}');
+      xhr.send(data);
     } catch (e) {
 // Need to defer since .create() is called directly fhrom the constructor
 // and thus the 'error' event can only be only bound *after* this exception
@@ -250,47 +245,43 @@ class Request extends EventEmitter {
     }
   }
 
-  /**
-   * Called upon successful response.
-   *
-   * @api private
-   */
-  onSuccess() {
-    this.emit('success');
-    this.cleanup();
+  ///
+  /// Called upon successful response.
+  ///
+  /// @api private
+  void onSuccess() {
+    emit('success');
+    cleanup();
   }
 
-  /**
-   * Called if we have data.
-   *
-   * @api private
-   */
-  onData(data) {
-    this.emit('data', data);
-    this.onSuccess();
+  ///
+  /// Called if we have data.
+  ///
+  /// @api private
+  void onData(data) {
+    emit('data', data);
+    onSuccess();
   }
 
-  /**
-   * Called upon error.
-   *
-   * @api private
-   */
-  onError(err) {
-    this.emit('error', err);
-    this.cleanup(true);
+  ///
+  /// Called upon error.
+  ///
+  /// @api private
+  void onError(err) {
+    emit('error', err);
+    cleanup(true);
   }
 
-  /**
-   * Cleans up house.
-   *
-   * @api private
-   */
-  cleanup([fromError]) {
-    if (this.xhr == null) {
+  ///
+  /// Cleans up house.
+  ///
+  /// @api private
+  void cleanup([fromError]) {
+    if (xhr == null) {
       return;
     }
     // xmlhttprequest
-    if (this.hasXDR()) {
+    if (hasXDR()) {
     } else {
       readyStateChange?.cancel();
       readyStateChange = null;
@@ -298,54 +289,55 @@ class Request extends EventEmitter {
 
     if (fromError != null) {
       try {
-        this.xhr.abort();
-      } catch (e) {}
+        xhr.abort();
+      } catch (e) {
+        // ignore
+      }
     }
 
-    this.xhr = null;
+    xhr = null;
   }
 
-  /**
-   * Called upon load.
-   *
-   * @api private
-   */
-  onLoad() {
+  ///
+  /// Called upon load.
+  ///
+  /// @api private
+  void onLoad() {
     var data;
     try {
       var contentType;
       try {
-        contentType = this.xhr.getResponseHeader('Content-Type');
-      } catch (e) {}
+        contentType = xhr.getResponseHeader('Content-Type');
+      } catch (e) {
+        // ignore
+      }
       if (contentType == 'application/octet-stream') {
-        data = this.xhr.response ?? this.xhr.responseText;
+        data = xhr.response ?? xhr.responseText;
       } else {
-        data = this.xhr.responseText;
+        data = xhr.responseText;
       }
     } catch (e) {
-      this.onError(e);
+      onError(e);
     }
     if (null != data) {
       if (data is ByteBuffer) data = data.asUint8List();
-      this.onData(data);
+      onData(data);
     }
   }
 
-  /**
-   * Check if it has XDomainRequest.
-   *
-   * @api private
-   */
-  hasXDR() {
+  ///
+  /// Check if it has XDomainRequest.
+  ///
+  /// @api private
+  bool hasXDR() {
     // Todo: handle it in dart way
     return false;
     //  return 'undefined' !== typeof global.XDomainRequest && !this.xs && this.enablesXDR;
   }
 
-  /**
-   * Aborts the request.
-   *
-   * @api public
-   */
-  abort() => cleanup();
+  ///
+  /// Aborts the request.
+  ///
+  /// @api public
+  void abort() => cleanup();
 }
