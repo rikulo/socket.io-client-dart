@@ -1,3 +1,9 @@
+## 0.9.10
+
+**Bug fix:**
+
+* [#72](https://github.com/rikulo/socket.io-client-dart/issues/72) Can't send Iterable as one packet
+
 ## 0.9.9
 
 **Bug fix:**

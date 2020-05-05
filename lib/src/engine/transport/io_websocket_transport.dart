@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 //import 'dart:html';
 import 'package:logging/logging.dart';
 import 'package:socket_io_client/src/engine/transport/transport.dart';
@@ -97,7 +98,11 @@ class IOWebSocketTransport extends Transport {
         // throw an error
         try {
           // TypeError is thrown when passing the second argument on Safari
-          ws.add(data);
+          if (data is ByteBuffer) {
+            ws.add(data.asUint8List());
+          } else {
+            ws.add(data);
+          }
         } catch (e) {
           _logger.fine('websocket closed before onclose event');
         }

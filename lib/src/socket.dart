@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 ///
 /// socket.dart
 ///
@@ -142,7 +144,9 @@ class Socket extends EventEmitter {
       super.emit(event, data);
     } else {
       var sendData = <dynamic>[event];
-      if (data is Iterable) {
+      if (data is ByteBuffer || data is List<int>) {
+        sendData.add(data);
+      } else if (data is Iterable) {
         sendData.addAll(data);
       } else if (data != null) {
         sendData.add(data);
