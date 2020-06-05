@@ -126,7 +126,7 @@ IO.Socket socket = IO.io('http://localhost:3000', <String, dynamic>{
 
 ### Cannot connect "https" server or self-signed certificate server
 * Refer to https://github.com/dart-lang/sdk/issues/34284 issue.
-The workround is to use the following code provided by @lehno on #84
+The workround is to use the following code provided by [@lehno](https://github.com/lehno) on [#84](https://github.com/rikulo/socket.io-client-dart/issues/84)
 ```
 class MyHttpOverrides extends HttpOverrides {
   @override
