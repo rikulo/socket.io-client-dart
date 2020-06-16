@@ -4,40 +4,42 @@ Port of awesome JavaScript Node.js library - [Socket.io-client v2.0.1](https://g
 
 ## Usage
 
-    import 'package:socket_io/socket_io.dart';
-    import 'package:socket_io_client/socket_io_client.dart' as IO;
+```dart
+import 'package:socket_io/socket_io.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
-    main() {
-        // Dart server
-        var io = new Server();
-        var nsp = io.of('/some');
-        nsp.on('connection', (Socket client) {
-          print('connection /some');
-          client.on('msg', (data) {
-            print('data from /some => $data');
-            client.emit('fromServer', "ok 2");
-          });
+main() {
+    // Dart server
+    var io = new Server();
+    var nsp = io.of('/some');
+    nsp.on('connection', (Socket client) {
+      print('connection /some');
+      client.on('msg', (data) {
+        print('data from /some => $data');
+        client.emit('fromServer', "ok 2");
+      });
+    });
+      io.on('connection', (Socket client) {
+        print('connection default namespace');
+        client.on('msg', (data) {
+          print('data from default => $data');
+          client.emit('fromServer', "ok");
         });
-          io.on('connection', (Socket client) {
-            print('connection default namespace');
-            client.on('msg', (data) {
-              print('data from default => $data');
-              client.emit('fromServer', "ok");
-            });
-          });
-          io.listen(3000);
+      });
+      io.listen(3000);
 
-        // Dart client
-        IO.Socket socket = IO.io('http://localhost:3000');
-        socket.on('connect', (_) {
-         print('connect');
-         socket.emit('msg', 'test');
-        });
-        socket.on('event', (data) => print(data));
-        socket.on('disconnect', (_) => print('disconnect'));
-        socket.on('fromServer', (_) => print(_));
-    }
-    
+    // Dart client
+    IO.Socket socket = IO.io('http://localhost:3000');
+    socket.on('connect', (_) {
+     print('connect');
+     socket.emit('msg', 'test');
+    });
+    socket.on('event', (data) => print(data));
+    socket.on('disconnect', (_) => print('disconnect'));
+    socket.on('fromServer', (_) => print(_));
+}
+```
+
 ### Connect manually
 To connect the socket manually, set the option `autoConnect: false` and call `.connect()`.
 
@@ -54,14 +56,16 @@ Socket socket = io('http://localhost:3000', &lt;String, dynamic>{
 Note that `.connect()` should not be called if `autoConnect: true`, as this will cause all event handlers to get registered/fired twice. See [Issue #33](https://github.com/rikulo/socket.io-client-dart/issues/33).
 
 ### Update the extra headers
-```
+
+```dart
 Socket socket = ... // Create socket.
 socket.io.options['extraHeaders'] = {'foo': 'bar'}; // Update the extra headers.
 socket.io..disconnect()..connect(); // Reconnect the socket manually.
 ```
 
 ### Emit with acknowledgement
-```
+
+```dart
 Socket socket = ... // Create socket.
 socket.on('connect', (_) {
     print('connect');
@@ -77,8 +81,10 @@ socket.on('connect', (_) {
 ```
 
 ### Socket connection events
+
 These events can be listened on.
-```
+
+```dart
 const List EVENTS = [
   'connect',
   'connect_error',
@@ -102,7 +108,8 @@ socket.on('connect', (_) {
 ```
 
 ### Acknowledge with the socket server that an event has been received.
-```
+
+```dart
 socket.on('eventName', (data) {
     final dataList = data as List;
     final ack = dataList.last as Function;
@@ -115,7 +122,8 @@ In Flutter env. it only works with `dart:io` websocket, not with `dart:html` web
 you have to add `'transports': ['websocket']` when creates the socket instance.
 
 For example,
-```
+
+```dart
 IO.Socket socket = IO.io('http://localhost:3000', <String, dynamic>{
     'transports': ['websocket'],
     'extraHeaders': {'foo': 'bar'} // optional
@@ -127,7 +135,8 @@ IO.Socket socket = IO.io('http://localhost:3000', <String, dynamic>{
 ### Cannot connect "https" server or self-signed certificate server
 * Refer to https://github.com/dart-lang/sdk/issues/34284 issue.
 The workround is to use the following code provided by [@lehno](https://github.com/lehno) on [#84](https://github.com/rikulo/socket.io-client-dart/issues/84)
-```
+
+```dart
 class MyHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext context) {
