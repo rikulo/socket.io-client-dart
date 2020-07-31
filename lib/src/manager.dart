@@ -56,8 +56,7 @@ class Manager extends EventEmitter {
     subs = [];
     this.options = options;
     reconnection = options['reconnection'] != false;
-    reconnectionAttempts =
-        options['reconnectionAttempts'] ?? double.infinity;
+    reconnectionAttempts = options['reconnectionAttempts'] ?? double.infinity;
     reconnectionDelay = options['reconnectionDelay'] ?? 1000;
     reconnectionDelayMax = options['reconnectionDelayMax'] ?? 5000;
     randomizationFactor = options['randomizationFactor'] ?? 0.5;
@@ -179,9 +178,7 @@ class Manager extends EventEmitter {
   ///
   void maybeReconnectOnOpen() {
     // Only try to reconnect if it's the first time we're connecting
-    if (!reconnecting &&
-        _reconnection &&
-        backoff.attempts == 0) {
+    if (!reconnecting && _reconnection && backoff.attempts == 0) {
       // keeps reconnection from firing twice for the same reconnection loop
       reconnect();
     }

@@ -84,8 +84,7 @@ class XHRTransport extends PollingTransport {
   @override
   void doWrite(data, fn) {
     var isBinary = data is! String;
-    var req =
-        request({'method': 'POST', 'data': data, 'isBinary': isBinary});
+    var req = request({'method': 'POST', 'data': data, 'isBinary': isBinary});
     req.on('success', fn);
     req.on('error', (err) {
       onError('xhr post error', err);

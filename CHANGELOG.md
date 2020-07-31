@@ -1,3 +1,7 @@
+## 0.9.10+2
+
+* Fix dart analyzer warning for formatting issues.
+
 ## 0.9.10+1
 
 * Fix dart analyzer warning.

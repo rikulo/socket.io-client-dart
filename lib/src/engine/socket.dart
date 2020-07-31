@@ -216,8 +216,7 @@ class Socket extends EventEmitter {
       'jsonp': options['jsonp'] ?? jsonp,
       'forceBase64': options['forceBase64'] ?? forceBase64,
       'enablesXDR': options['enablesXDR'] ?? enablesXDR,
-      'timestampRequests':
-          options['timestampRequests'] ?? timestampRequests,
+      'timestampRequests': options['timestampRequests'] ?? timestampRequests,
       'timestampParam': options['timestampParam'] ?? timestampParam,
       'policyPort': options['policyPort'] ?? policyPort,
 //  'pfx: options.pfx || this.pfx,
@@ -227,8 +226,7 @@ class Socket extends EventEmitter {
 //  'ca: options.ca || this.ca,
 //  'ciphers: options.ciphers || this.ciphers,
 //  'rejectUnauthorized: options.rejectUnauthorized || this.rejectUnauthorized,
-      'perMessageDeflate':
-          options['perMessageDeflate'] ?? perMessageDeflate,
+      'perMessageDeflate': options['perMessageDeflate'] ?? perMessageDeflate,
       'extraHeaders': options['extraHeaders'] ?? extraHeaders,
 //  'forceNode: options.forceNode || this.forceNode,
 //  'localAddress: options.localAddress || this.localAddress,
@@ -469,8 +467,7 @@ class Socket extends EventEmitter {
           break;
       }
     } else {
-      _logger
-          .fine('packet received with socket readyState "${readyState}"');
+      _logger.fine('packet received with socket readyState "${readyState}"');
     }
   }
 

@@ -117,8 +117,7 @@ abstract class Transport extends EventEmitter {
   /// @param {String} data
   /// @api private
   void onData(data) {
-    var packet =
-        PacketParser.decodePacket(data, binaryType: socket.binaryType);
+    var packet = PacketParser.decodePacket(data, binaryType: socket.binaryType);
     onPacket(packet);
   }
 
