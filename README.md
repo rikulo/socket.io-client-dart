@@ -152,6 +152,9 @@ void main() {
 }
 ```
 
+### Memory leak issues in iOS when closing socket.
+* Refer to https://github.com/rikulo/socket.io-client-dart/issues/108 issue.
+Please use `socket.dispose()` instead of `socket.close()` or `socket.disconnect()` to solve the memory leak issue on iOS.
 
 ## Notes to Contributors
 

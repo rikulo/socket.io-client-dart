@@ -407,6 +407,16 @@ class Socket extends EventEmitter {
     return this;
   }
 
+  /// Disposes the socket manually which will destroy, close, disconnect the socket connection
+  /// and clear all the event listeners. Unlike [close] or [disconnect] which won't clear
+  /// all the event listeners
+  ///
+  /// @since 0.9.11
+  void dispose() {
+    disconnect();
+    clearListeners();
+  }
+
   ///
   /// Sets the compress flag.
   ///

@@ -1,3 +1,9 @@
+## 0.9.11
+
+**New Feature:**
+
+* [#108](https://github.com/rikulo/socket.io-client-dart/issues/108) Need dispose method for clearing resources
+
 ## 0.9.10+2
 
 * Fix dart analyzer warning for formatting issues.
