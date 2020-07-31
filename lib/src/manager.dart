@@ -1,15 +1,6 @@
-/**
- * manager.dart
- *
- * Purpose:
- *
- * Description:
- *
- * History:
- *   26/04/2017, Created by jumperchen
- *
- * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
- */
+/// Copyright (C) 2017 Potix Corporation. All Rights Reserved
+/// History: 2017-04-26 15:27
+/// Author: jumperchen<jumperchen@potix.com>
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -548,7 +539,7 @@ class Manager extends EventEmitter {
 class _Backoff {
   num _ms;
   num _max;
-  num _factor;
+  final num _factor;
   num _jitter;
   num attempts;
 

@@ -1,6 +1,6 @@
-// Copyright (C) 2019 Potix Corporation. All Rights Reserved
-// History: 2019-01-21 12:27
-// Author: jumperchen<jumperchen@potix.com>
+/// Copyright (C) 2019 Potix Corporation. All Rights Reserved
+/// History: 2019-01-21 12:27
+/// Author: jumperchen<jumperchen@potix.com>
 import 'package:logging/logging.dart';
 import 'package:socket_io_common/src/engine/parser/parser.dart';
 import 'package:socket_io_common/src/util/event_emitter.dart';

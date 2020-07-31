@@ -1,13 +1,13 @@
 name: socket_io_client
 description: Dartlang port of socket.io-client for web, flutter, dartvm to use
-version: 0.9.10
+version: 0.9.10+1
 author: jumperchen <jumperchen@potix.com>
 homepage: https://www.zkoss.org
 repository: https://github.com/rikulo/socket.io-client-dart
 issue_tracker: https://github.com/rikulo/socket.io-client-dart/issues
 
 environment:
-  sdk: ">=2.2.0 <3.0.0"
+  sdk: ">=2.7.0 <3.0.0"
 
 dependencies:
   logging: ^0.11.3+2
@@ -15,8 +15,8 @@ dependencies:
 
 dev_dependencies:
   test: ">=1.3.0 <2.0.0"
-  build_runner: ^1.0.0
-  build_web_compilers: ^0.4.4
+  build_runner: any
+  build_web_compilers: any
   socket_io: any
   pedantic: ^1.9.0
 

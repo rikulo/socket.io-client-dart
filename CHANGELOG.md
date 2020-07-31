@@ -1,3 +1,7 @@
+## 0.9.10+1
+
+* Fix dart analyzer warning.
+
 ## 0.9.10
 
 **Bug fix:**

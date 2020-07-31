@@ -1,16 +1,6 @@
-/**
- * transports.dart
- *
- * Purpose:
- *
- * Description:
- *
- * History:
- *   26/04/2017, Created by jumperchen
- *
- * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
- */
-
+/// Copyright (C) 2017 Potix Corporation. All Rights Reserved
+/// History: 2017-04-26 12:27
+/// Author: jumperchen<jumperchen@potix.com>
 import 'package:socket_io_client/src/engine/transport/jsonp_transport.dart';
 import 'package:socket_io_client/src/engine/transport/transport.dart';
 import 'package:socket_io_client/src/engine/transport/websocket_transport.dart';
