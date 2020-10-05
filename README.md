@@ -41,9 +41,11 @@ main() {
 ```
 
 ### Connect manually
+
 To connect the socket manually, set the option `autoConnect: false` and call `.connect()`.
 
 For example,
+
 <pre>
 Socket socket = io('http://localhost:3000', &lt;String, dynamic>{
     'transports': ['websocket'],
@@ -118,6 +120,7 @@ socket.on('eventName', (data) {
 ```
 
 ## Usage (Flutter)
+
 In Flutter env. it only works with `dart:io` websocket, not with `dart:html` websocket, so in this case
 you have to add `'transports': ['websocket']` when creates the socket instance.
 
@@ -130,11 +133,72 @@ IO.Socket socket = IO.io('http://localhost:3000', <String, dynamic>{
   });
 ```
 
+## Usage with stream and streambuilder in Flutter
+
+```dart
+import 'dart:async';
+
+
+// STEP1:  Stream setup
+class StreamSocket{
+  final _socketResponse= StreamController<String>();
+
+  void Function(String) get addResponse => _socketResponse.sink.add;
+
+  Stream<String> get getResponse => _socketResponse.stream;
+
+  void dispose(){
+    _socketResponse.close();
+  }
+}
+
+StreamSocket streamSocket =StreamSocket();
+
+//STEP2: Add this function in main function in main.dart file and add incoming data to the stream
+void connectAndListen(){
+  IO.Socket socket = IO.Socket socket = IO.io('http://localhost:3000', <String, dynamic>{
+    'transports': ['websocket'],
+  });
+
+    socket.on('connect', (_) {
+     print('connect');
+     socket.emit('msg', 'test');
+    });
+
+    //When an event recieved from server, data is added to the stream
+    socket.on('event', (data) => streamSocket.addResponse);
+    socket.on('disconnect', (_) => print('disconnect'));
+
+}
+
+//Step3: Build widgets with streambuilder
+
+class BuildWithSocketStream extends StatelessWidget {
+  const BuildWithSocketStream({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: StreamBuilder(
+        stream: streamSocket.getResponse ,
+        builder: (BuildContext context, AsyncSnapshot<String> snapshot){
+          return Container(
+            child: snapshot.data,
+          );
+        },
+      ),
+    );
+  }
+}
+
+```
+
 ## Troubleshooting
 
 ### Cannot connect "https" server or self-signed certificate server
-* Refer to https://github.com/dart-lang/sdk/issues/34284 issue.
-The workround is to use the following code provided by [@lehno](https://github.com/lehno) on [#84](https://github.com/rikulo/socket.io-client-dart/issues/84)
+
+- Refer to https://github.com/dart-lang/sdk/issues/34284 issue.
+  The workround is to use the following code provided by [@lehno](https://github.com/lehno) on [#84](https://github.com/rikulo/socket.io-client-dart/issues/84)
 
 ```dart
 class MyHttpOverrides extends HttpOverrides {
@@ -153,8 +217,9 @@ void main() {
 ```
 
 ### Memory leak issues in iOS when closing socket.
-* Refer to https://github.com/rikulo/socket.io-client-dart/issues/108 issue.
-Please use `socket.dispose()` instead of `socket.close()` or `socket.disconnect()` to solve the memory leak issue on iOS.
+
+- Refer to https://github.com/rikulo/socket.io-client-dart/issues/108 issue.
+  Please use `socket.dispose()` instead of `socket.close()` or `socket.disconnect()` to solve the memory leak issue on iOS.
 
 ## Notes to Contributors
 
@@ -166,17 +231,17 @@ If you are new to Git or GitHub, please read [this guide](https://help.github.co
 
 ## Who Uses
 
-* [Quire](https://quire.io) - a simple, collaborative, multi-level task management tool.
-* [KEIKAI](https://keikai.io/) - a web spreadsheet for Big Data.
+- [Quire](https://quire.io) - a simple, collaborative, multi-level task management tool.
+- [KEIKAI](https://keikai.io/) - a web spreadsheet for Big Data.
 
 ## Socket.io Dart Server
 
-* [socket.io-dart](https://github.com/rikulo/socket.io-dart)
-
+- [socket.io-dart](https://github.com/rikulo/socket.io-dart)
 
 ## Contributors
-* Thanks [@felangel](https://github.com/felangel) for https://github.com/rikulo/socket.io-client-dart/issues/7
-* Thanks [@Oskang09](https://github.com/Oskang09) for https://github.com/rikulo/socket.io-client-dart/issues/21
-* Thanks [@bruce3x](https://github.com/bruce3x) for https://github.com/rikulo/socket.io-client-dart/issues/25
-* Thanks [@Kavantix](https://github.com/Kavantix) for https://github.com/rikulo/socket.io-client-dart/issues/26
-* Thanks [@luandnguyen](https://github.com/luandnguyen) for https://github.com/rikulo/socket.io-client-dart/issues/59
+
+- Thanks [@felangel](https://github.com/felangel) for https://github.com/rikulo/socket.io-client-dart/issues/7
+- Thanks [@Oskang09](https://github.com/Oskang09) for https://github.com/rikulo/socket.io-client-dart/issues/21
+- Thanks [@bruce3x](https://github.com/bruce3x) for https://github.com/rikulo/socket.io-client-dart/issues/25
+- Thanks [@Kavantix](https://github.com/Kavantix) for https://github.com/rikulo/socket.io-client-dart/issues/26
+- Thanks [@luandnguyen](https://github.com/luandnguyen) for https://github.com/rikulo/socket.io-client-dart/issues/59
