@@ -221,6 +221,17 @@ void main() {
 - Refer to https://github.com/rikulo/socket.io-client-dart/issues/108 issue.
   Please use `socket.dispose()` instead of `socket.close()` or `socket.disconnect()` to solve the memory leak issue on iOS.
 
+### Connect_error on MacOS with SocketException: Connection failed
+* Refer to https://github.com/flutter/flutter/issues/47606#issuecomment-568522318 issue.
+           
+By adding the following key into the to file `*.entitlements` under directory `macos/Runner/`
+```
+<key>com.apple.security.network.client</key>
+<true/>
+```
+
+For more details, please take a look at https://flutter.dev/desktop#setting-up-entitlements
+
 ## Notes to Contributors
 
 ### Fork socket.io-client-dart
