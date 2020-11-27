@@ -1,3 +1,9 @@
+## 0.9.12
+
+**New Feature:**
+
+* [#46](https://github.com/rikulo/socket.io-client-dart/issues/46) Make this library more "Darty"
+
 ## 0.9.11
 
 **New Feature:**

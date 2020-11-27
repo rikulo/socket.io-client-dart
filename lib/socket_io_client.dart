@@ -20,6 +20,7 @@ import 'package:socket_io_client/src/engine/parseqs.dart';
 import 'package:socket_io_client/src/manager.dart';
 
 export 'package:socket_io_client/src/socket.dart';
+export 'package:socket_io_client/src/darty.dart';
 
 // Protocol version
 final protocol = parser.protocol;

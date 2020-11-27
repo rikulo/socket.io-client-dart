@@ -30,12 +30,12 @@ main() {
 
     // Dart client
     IO.Socket socket = IO.io('http://localhost:3000');
-    socket.on('connect', (_) {
+    socket.onConnect((_) {
      print('connect');
      socket.emit('msg', 'test');
     });
     socket.on('event', (data) => print(data));
-    socket.on('disconnect', (_) => print('disconnect'));
+    socket.onDisconnect((_) => print('disconnect'));
     socket.on('fromServer', (_) => print(_));
 }
 ```
@@ -47,15 +47,18 @@ To connect the socket manually, set the option `autoConnect: false` and call `.c
 For example,
 
 <pre>
-Socket socket = io('http://localhost:3000', &lt;String, dynamic>{
-    'transports': ['websocket'],
-    <b>'autoConnect': false</b>,
-    'extraHeaders': {'foo': 'bar'} // optional
+Socket socket = io('http://localhost:3000', 
+    OptionBuilder()
+      .setTransports(['websocket']) // for Flutter or Dart VM
+      .<b>disableAutoConnect()</b>  // disable auto-connection
+      .setExtraHeaders({'foo': 'bar'}) // optional
+      .build()) 
   });
 <b>socket.connect();</b>
 </pre>
 
-Note that `.connect()` should not be called if `autoConnect: true`, as this will cause all event handlers to get registered/fired twice. See [Issue #33](https://github.com/rikulo/socket.io-client-dart/issues/33).
+Note that `.connect()` should not be called if `autoConnect: true` 
+(by default, it's enabled to true), as this will cause all event handlers to get registered/fired twice. See [Issue #33](https://github.com/rikulo/socket.io-client-dart/issues/33).
 
 ### Update the extra headers
 
@@ -69,7 +72,7 @@ socket.io..disconnect()..connect(); // Reconnect the socket manually.
 
 ```dart
 Socket socket = ... // Create socket.
-socket.on('connect', (_) {
+socket.onConnect((_) {
     print('connect');
     socket.emitWithAck('msg', 'init', ack: (data) {
         print('ack $data') ;
@@ -103,10 +106,10 @@ const List EVENTS = [
   'pong'
 ];
 
-// Replace 'connect' with any of the above events.
-socket.on('connect', (_) {
+// Replace 'onConnect' with any of the above events.
+socket.onConnect((_) {
     print('connect');
-}
+});
 ```
 
 ### Acknowledge with the socket server that an event has been received.
@@ -121,16 +124,18 @@ socket.on('eventName', (data) {
 
 ## Usage (Flutter)
 
-In Flutter env. it only works with `dart:io` websocket, not with `dart:html` websocket, so in this case
-you have to add `'transports': ['websocket']` when creates the socket instance.
+In Flutter env. not (Flutter Web env.) it only works with `dart:io` websocket,
+ not with `dart:html` websocket or Ajax (XHR), so in this case
+you have to add `setTransports(['websocket'])` when creates the socket instance.
 
 For example,
 
 ```dart
-IO.Socket socket = IO.io('http://localhost:3000', <String, dynamic>{
-    'transports': ['websocket'],
-    'extraHeaders': {'foo': 'bar'} // optional
-  });
+IO.Socket socket = IO.io('http://localhost:3000',
+  OptionBuilder()
+      .setTransports(['websocket']) // for Flutter or Dart VM
+      .setExtraHeaders({'foo': 'bar'}) // optional
+      .build());
 ```
 
 ## Usage with stream and streambuilder in Flutter
@@ -156,18 +161,18 @@ StreamSocket streamSocket =StreamSocket();
 
 //STEP2: Add this function in main function in main.dart file and add incoming data to the stream
 void connectAndListen(){
-  IO.Socket socket = IO.Socket socket = IO.io('http://localhost:3000', <String, dynamic>{
-    'transports': ['websocket'],
-  });
+  IO.Socket socket = IO.io('http://localhost:3000',
+      OptionBuilder()
+       .setTransports(['websocket']).build());
 
-    socket.on('connect', (_) {
+    socket.onConnect((_) {
      print('connect');
      socket.emit('msg', 'test');
     });
 
     //When an event recieved from server, data is added to the stream
     socket.on('event', (data) => streamSocket.addResponse);
-    socket.on('disconnect', (_) => print('disconnect'));
+    socket.onDisconnect((_) => print('disconnect'));
 
 }
 
@@ -220,6 +225,17 @@ void main() {
 
 - Refer to https://github.com/rikulo/socket.io-client-dart/issues/108 issue.
   Please use `socket.dispose()` instead of `socket.close()` or `socket.disconnect()` to solve the memory leak issue on iOS.
+
+### Connect_error on MacOS with SocketException: Connection failed
+* Refer to https://github.com/flutter/flutter/issues/47606#issuecomment-568522318 issue.
+           
+By adding the following key into the to file `*.entitlements` under directory `macos/Runner/`
+```
+<key>com.apple.security.network.client</key>
+<true/>
+```
+
+For more details, please take a look at https://flutter.dev/desktop#setting-up-entitlements
 
 ## Notes to Contributors
 
