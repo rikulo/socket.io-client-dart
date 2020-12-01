@@ -29,44 +29,44 @@ final Logger _logger = Logger('socket_io_client:engine.Socket');
 /// @api public
 ///
 class Socket extends EventEmitter {
-  Map opts;
-  Uri uri;
-  bool secure;
-  bool agent;
-  String hostname;
-  int port;
-  Map query;
-  bool upgrade;
-  String path;
-  bool forceJSONP;
-  bool jsonp;
-  bool forceBase64;
-  bool enablesXDR;
-  String timestampParam;
+  late Map opts;
+  late Uri uri;
+  late bool secure;
+  bool? agent;
+  late String hostname;
+  int? port;
+  late Map query;
+  bool? upgrade;
+  late String path;
+  bool? forceJSONP;
+  bool? jsonp;
+  bool? forceBase64;
+  bool? enablesXDR;
+  String? timestampParam;
   var timestampRequests;
-  List<String> transports;
-  Map transportOptions;
-  String readyState;
-  List writeBuffer;
-  int prevBufferLen;
-  int policyPort;
-  bool rememberUpgrade;
+  late List<String> transports;
+  late Map transportOptions;
+  String readyState = '';
+  List writeBuffer = [];
+  int prevBufferLen = 0;
+  int? policyPort;
+  bool? rememberUpgrade;
   var binaryType;
-  bool onlyBinaryUpgrades;
-  Map perMessageDeflate;
-  String id;
-  List upgrades;
-  int pingInterval;
-  int pingTimeout;
-  Timer pingIntervalTimer;
-  Timer pingTimeoutTimer;
-  int requestTimeout;
-  Transport transport;
-  bool supportsBinary;
-  bool upgrading;
-  Map extraHeaders;
+  bool? onlyBinaryUpgrades;
+  late Map perMessageDeflate;
+  String? id;
+  late List upgrades;
+  late int pingInterval;
+  late int pingTimeout;
+  Timer? pingIntervalTimer;
+  Timer? pingTimeoutTimer;
+  int? requestTimeout;
+  Transport? transport;
+  bool? supportsBinary;
+  bool? upgrading;
+  Map? extraHeaders;
 
-  Socket(String uri, Map opts) {
+  Socket(String uri, Map? opts) {
     opts = opts ?? <dynamic, dynamic>{};
 
     if (uri.isNotEmpty) {
@@ -115,9 +115,6 @@ class Socket extends EventEmitter {
     timestampRequests = opts['timestampRequests'];
     transports = opts['transports'] ?? ['polling', 'websocket'];
     transportOptions = opts['transportOptions'] ?? {};
-    readyState = '';
-    writeBuffer = [];
-    prevBufferLen = 0;
     policyPort = opts['policyPort'] ?? 843;
     rememberUpgrade = opts['rememberUpgrade'] ?? false;
     binaryType = null;
@@ -277,8 +274,8 @@ class Socket extends EventEmitter {
     _logger.fine('setting transport ${transport?.name}');
 
     if (this.transport != null) {
-      _logger.fine('clearing existing transport ${this.transport?.name}');
-      this.transport.clearListeners();
+      _logger.fine('clearing existing transport ${this.transport!.name}');
+      this.transport!.clearListeners();
     }
 
     // set up transport
@@ -299,7 +296,7 @@ class Socket extends EventEmitter {
   /// @api private
   void probe(name) {
     _logger.fine('probing transport "$name"');
-    var transport = createTransport(name, {'probe': true});
+    Transport? transport = createTransport(name, {'probe': true});
     var failed = false;
     var cleanup;
     priorWebsocketSuccess = false;
@@ -307,23 +304,23 @@ class Socket extends EventEmitter {
     var onTransportOpen = (_) {
       if (onlyBinaryUpgrades == true) {
         var upgradeLosesBinary =
-            supportsBinary == false && transport.supportsBinary;
+            supportsBinary == false && transport!.supportsBinary == false;
         failed = failed || upgradeLosesBinary;
       }
       if (failed) return;
 
       _logger.fine('probe transport "$name" opened');
-      transport.send([
+      transport!.send([
         {'type': 'ping', 'data': 'probe'}
       ]);
-      transport.once('packet', (msg) {
+      transport!.once('packet', (msg) {
         if (failed) return;
         if ('pong' == msg['type'] && 'probe' == msg['data']) {
           _logger.fine('probe transport "$name" pong');
           upgrading = true;
           emit('upgrading', transport);
           if (transport == null) return;
-          priorWebsocketSuccess = 'websocket' == transport.name;
+          priorWebsocketSuccess = 'websocket' == transport!.name;
 
           _logger.fine('pausing current transport "${transport?.name}"');
           if (this.transport is PollingTransport) {
@@ -335,7 +332,7 @@ class Socket extends EventEmitter {
               cleanup();
 
               setTransport(transport);
-              transport.send([
+              transport!.send([
                 {'type': 'upgrade'}
               ]);
               emit('upgrade', transport);
@@ -347,7 +344,7 @@ class Socket extends EventEmitter {
         } else {
           _logger.fine('probe transport "$name" failed');
           emit('upgradeError',
-              {'error': 'probe error', 'transport': transport.name});
+              {'error': 'probe error', 'transport': transport!.name});
         }
       });
     };
@@ -360,7 +357,7 @@ class Socket extends EventEmitter {
 
       cleanup();
 
-      transport.close();
+      transport!.close();
       transport = null;
     };
 
@@ -372,7 +369,7 @@ class Socket extends EventEmitter {
       _logger.fine('probe transport "$name" failed because of error: $err');
 
       emit('upgradeError',
-          {'error': 'probe error: $err', 'transport': oldTransport.name});
+          {'error': 'probe error: $err', 'transport': oldTransport!.name});
     };
 
     var onTransportClose = (_) => onerror('transport closed');
@@ -382,7 +379,7 @@ class Socket extends EventEmitter {
 
     // When the socket is upgraded while we're probing
     var onupgrade = (to) {
-      if (transport != null && to.name != transport.name) {
+      if (transport != null && to.name != transport!.name) {
         _logger.fine('"${to?.name}" works - aborting "${transport?.name}"');
         freezeTransport();
       }
@@ -390,21 +387,21 @@ class Socket extends EventEmitter {
 
     // Remove all listeners on the transport and on self
     cleanup = () {
-      transport.off('open', onTransportOpen);
-      transport.off('error', onerror);
-      transport.off('close', onTransportClose);
+      transport!.off('open', onTransportOpen);
+      transport!.off('error', onerror);
+      transport!.off('close', onTransportClose);
       off('close', onclose);
       off('upgrading', onupgrade);
     };
 
-    transport.once('open', onTransportOpen);
-    transport.once('error', onerror);
-    transport.once('close', onTransportClose);
+    transport!.once('open', onTransportOpen);
+    transport!.once('error', onerror);
+    transport!.once('close', onTransportClose);
 
     once('close', onclose);
     once('upgrading', onupgrade);
 
-    transport.open();
+    transport!.open();
   }
 
   ///
@@ -414,7 +411,7 @@ class Socket extends EventEmitter {
   void onOpen() {
     _logger.fine('socket open');
     readyState = 'open';
-    priorWebsocketSuccess = 'websocket' == transport.name;
+    priorWebsocketSuccess = 'websocket' == transport!.name;
     emit('open');
     flush();
 
@@ -479,7 +476,7 @@ class Socket extends EventEmitter {
   void onHandshake(Map data) {
     emit('handshake', data);
     id = data['sid'];
-    transport.query['sid'] = data['sid'];
+    transport!.query!['sid'] = data['sid'];
     upgrades = filterUpgrades(data['upgrades']);
     pingInterval = data['pingInterval'];
     pingTimeout = data['pingTimeout'];
@@ -554,11 +551,11 @@ class Socket extends EventEmitter {
   /// @api private
   void flush() {
     if ('closed' != readyState &&
-        transport.writable == true &&
+        transport!.writable == true &&
         upgrading != true &&
         writeBuffer.isNotEmpty) {
       _logger.fine('flushing ${writeBuffer.length} packets in socket');
-      transport.send(writeBuffer);
+      transport!.send(writeBuffer);
       // keep track of current length of writeBuffer
       // splice writeBuffer and callbackBuffer on `drain`
       prevBufferLen = writeBuffer.length;
@@ -574,9 +571,9 @@ class Socket extends EventEmitter {
   /// @param {Object} options.
   /// @return {Socket} for chaining.
   /// @api public
-  Socket write(msg, options, [EventHandler fn]) => send(msg, options, fn);
+  Socket write(msg, options, [EventHandler? fn]) => send(msg, options, fn);
 
-  Socket send(msg, options, [EventHandler fn]) {
+  Socket send(msg, options, [EventHandler? fn]) {
     sendPacket(type: 'message', data: msg, options: options, callback: fn);
     return this;
   }
@@ -589,7 +586,7 @@ class Socket extends EventEmitter {
   /// @param {Object} options.
   /// @param {Function} callback function.
   /// @api private
-  void sendPacket({type, data, options, EventHandler callback}) {
+  void sendPacket({type, data, options, EventHandler? callback}) {
     if ('closing' == readyState || 'closed' == readyState) {
       return;
     }
@@ -612,7 +609,7 @@ class Socket extends EventEmitter {
     var close = () {
       onClose('forced close');
       _logger.fine('socket closing - telling transport to close');
-      transport.close();
+      transport!.close();
     };
 
     var temp;
@@ -678,13 +675,13 @@ class Socket extends EventEmitter {
       pingTimeoutTimer?.cancel();
 
       // stop event from firing again for transport
-      transport.off('close');
+      transport!.off('close');
 
       // ensure transport won't stay open
-      transport.close();
+      transport!.close();
 
       // ignore further transport communication
-      transport.clearListeners();
+      transport!.clearListeners();
 
       // set ready state
       readyState = 'closed';

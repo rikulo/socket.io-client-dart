@@ -21,11 +21,11 @@ abstract class PollingTransport extends Transport {
   ///
   /// Transport name.
   @override
-  String name = 'polling';
+  String? name = 'polling';
 
   @override
-  bool supportsBinary;
-  bool polling;
+  bool? supportsBinary;
+  bool? polling;
 
   ///
   /// Polling interface.
@@ -33,7 +33,7 @@ abstract class PollingTransport extends Transport {
   /// @param {Object} opts
   /// @api private
   PollingTransport(Map opts) : super(opts) {
-    var forceBase64 = (opts != null && opts['forceBase64']);
+    var forceBase64 = opts['forceBase64'];
     if (/*!hasXHR2 || */ forceBase64) {
       supportsBinary = false;
     }
@@ -128,7 +128,7 @@ abstract class PollingTransport extends Transport {
 
     // decode payload
     PacketParser.decodePayload(data,
-        binaryType: socket.binaryType, callback: callback);
+        binaryType: socket?.binaryType != true, callback: callback);
 
     // if an event did not trigger closing
     if ('closed' != readyState) {
@@ -185,7 +185,7 @@ abstract class PollingTransport extends Transport {
       self.emit('drain');
     };
 
-    PacketParser.encodePayload(packets, supportsBinary: supportsBinary,
+    PacketParser.encodePayload(packets, supportsBinary: supportsBinary != false,
         callback: (data) {
       self.doWrite(data, callbackfn);
     });

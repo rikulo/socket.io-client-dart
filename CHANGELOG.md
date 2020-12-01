@@ -1,3 +1,10 @@
+## 1.0.0-nullsafety.0
+
+**New Feature:**
+
+* [#132](https://github.com/rikulo/socket.io-client-dart/issues/132) Migrating to null safety for Dart
+
+
 ## 0.9.12
 
 **New Feature:**

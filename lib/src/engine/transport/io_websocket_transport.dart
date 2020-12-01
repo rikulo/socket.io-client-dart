@@ -16,17 +16,17 @@ class IOWebSocketTransport extends Transport {
       Logger('socket_io_client:transport.IOWebSocketTransport');
 
   @override
-  String name = 'websocket';
+  String? name = 'websocket';
   var protocols;
 
   @override
-  bool supportsBinary;
-  Map perMessageDeflate;
-  Map extraHeaders;
-  WebSocket ws;
+  bool? supportsBinary;
+  Map? perMessageDeflate;
+  Map<String, dynamic>? extraHeaders;
+  WebSocket? ws;
 
   IOWebSocketTransport(Map opts) : super(opts) {
-    var forceBase64 = (opts != null && opts['forceBase64']);
+    var forceBase64 = opts['forceBase64'];
     supportsBinary = !forceBase64;
     perMessageDeflate = opts['perMessageDeflate'];
     protocols = opts['protocols'];
@@ -45,11 +45,11 @@ class IOWebSocketTransport extends Transport {
       return emit('error', err);
     }
 
-//    if (this.ws.binaryType == null) {
+//    if (this.ws?.binaryType == null) {
 //      this.supportsBinary = false;
 //    }
 //
-//    this.ws.binaryType = 'arraybuffer';
+//    this.ws?.binaryType = 'arraybuffer';
 
     addEventListeners();
   }
@@ -59,7 +59,7 @@ class IOWebSocketTransport extends Transport {
   /// @api private
   void addEventListeners() {
     var isOpen = false;
-    ws.listen((data) {
+    ws?.listen((data) {
       if (isOpen != true) {
         onOpen();
         isOpen = true;
@@ -99,9 +99,9 @@ class IOWebSocketTransport extends Transport {
         try {
           // TypeError is thrown when passing the second argument on Safari
           if (data is ByteBuffer) {
-            ws.add(data.asUint8List());
+            ws?.add(data.asUint8List());
           } else {
-            ws.add(data);
+            ws?.add(data);
           }
         } catch (e) {
           _logger.fine('websocket closed before onclose event');
@@ -127,7 +127,7 @@ class IOWebSocketTransport extends Transport {
   /// @api private
   String uri() {
     var query = this.query ?? {};
-    var schema = secure ? 'wss' : 'ws';
+    var schema = secure == true ? 'wss' : 'ws';
     var port = '';
 
     // avoid port if default for schema

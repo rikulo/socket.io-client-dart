@@ -14,16 +14,16 @@ class WebSocketTransport extends Transport {
       Logger('socket_io_client:transport.WebSocketTransport');
 
   @override
-  String name = 'websocket';
-  var protocols;
+  String? name = 'websocket';
+  late var protocols;
 
   @override
-  bool supportsBinary;
-  Map perMessageDeflate;
-  WebSocket ws;
+  bool? supportsBinary;
+  late Map perMessageDeflate;
+  WebSocket? ws;
 
   WebSocketTransport(Map opts) : super(opts) {
-    var forceBase64 = (opts != null && opts['forceBase64']);
+    var forceBase64 = opts['forceBase64'];
     supportsBinary = !forceBase64;
     perMessageDeflate = opts['perMessageDeflate'];
     protocols = opts['protocols'];
@@ -40,11 +40,11 @@ class WebSocketTransport extends Transport {
       return emit('error', err);
     }
 
-    if (ws.binaryType == null) {
+    if (ws!.binaryType == null) {
       supportsBinary = false;
     }
 
-    ws.binaryType = 'arraybuffer';
+    ws!.binaryType = 'arraybuffer';
 
     addEventListeners();
   }
@@ -53,7 +53,7 @@ class WebSocketTransport extends Transport {
   ///
   /// @api private
   void addEventListeners() {
-    ws
+    ws!
       ..onOpen.listen((_) => onOpen())
       ..onClose.listen((_) => onClose())
       ..onMessage.listen((MessageEvent evt) => onData(evt.data))
@@ -92,7 +92,7 @@ class WebSocketTransport extends Transport {
         // throw an error
         try {
           // TypeError is thrown when passing the second argument on Safari
-          ws.send(data);
+          ws!.send(data);
         } catch (e) {
           _logger.fine('websocket closed before onclose event');
         }

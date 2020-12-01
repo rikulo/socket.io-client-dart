@@ -9,20 +9,20 @@ import 'package:socket_io_client/src/engine/socket.dart';
 abstract class Transport extends EventEmitter {
   static final Logger _logger = Logger('socket_io_client:transport.Transport');
 
-  String path;
-  String hostname;
-  int port;
-  bool secure;
-  Map query;
-  String timestampParam;
-  bool timestampRequests;
-  String readyState;
-  bool agent;
-  Socket socket;
-  bool enablesXDR;
-  bool writable;
-  String name;
-  bool supportsBinary;
+  late String path;
+  late String hostname;
+  int? port;
+  late bool secure;
+  Map? query;
+  String? timestampParam;
+  bool? timestampRequests;
+  String? readyState;
+  bool? agent;
+  Socket? socket;
+  bool? enablesXDR;
+  bool? writable;
+  String? name;
+  bool? supportsBinary;
 
   Transport(Map opts) {
     path = opts['path'];
@@ -117,7 +117,8 @@ abstract class Transport extends EventEmitter {
   /// @param {String} data
   /// @api private
   void onData(data) {
-    var packet = PacketParser.decodePacket(data, binaryType: socket.binaryType);
+    var packet = PacketParser.decodePacket(data,
+        binaryType: socket?.binaryType, utf8decode: false);
     onPacket(packet);
   }
 

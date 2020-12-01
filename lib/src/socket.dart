@@ -48,31 +48,25 @@ final Logger _logger = Logger('socket_io_client:Socket');
 /// @api public
 class Socket extends EventEmitter {
   String nsp;
-  Map opts;
+  Map? opts;
 
   Manager io;
-  Socket json;
-  num ids;
-  Map acks;
-  bool connected;
-  bool disconnected;
-  List sendBuffer;
-  List receiveBuffer;
-  String query;
-  List subs;
-  Map flags;
-  String id;
+  late Socket json;
+  num ids = 0;
+  Map acks = {};
+  bool connected = false;
+  bool disconnected = true;
+  List sendBuffer = [];
+  List receiveBuffer = [];
+  String? query;
+  List? subs;
+  Map? flags;
+  String? id;
 
   Socket(this.io, this.nsp, this.opts) {
     json = this; // compat
-    ids = 0;
-    acks = {};
-    receiveBuffer = [];
-    sendBuffer = [];
-    connected = false;
-    disconnected = true;
     if (opts != null) {
-      query = opts['query'];
+      query = opts!['query'];
     }
     if (io.autoConnect) open();
   }
@@ -139,7 +133,7 @@ class Socket extends EventEmitter {
   /// @return {Socket} self
   /// @api public
   void emitWithAck(String event, dynamic data,
-      {Function ack, bool binary = false}) {
+      {Function? ack, bool binary = false}) {
     if (EVENTS.contains(event)) {
       super.emit(event, data);
     } else {
@@ -155,7 +149,7 @@ class Socket extends EventEmitter {
       var packet = {
         'type': binary ? BINARY_EVENT : EVENT,
         'data': sendData,
-        'options': {'compress': flags?.isNotEmpty == true && flags['compress']}
+        'options': {'compress': flags?.isNotEmpty == true && flags!['compress']}
       };
 
       // event ack callback
@@ -375,8 +369,8 @@ class Socket extends EventEmitter {
   void destroy() {
     if (subs?.isNotEmpty == true) {
       // clean subscriptions to avoid reconnections
-      for (var i = 0; i < subs.length; i++) {
-        subs[i].destroy();
+      for (var i = 0; i < subs!.length; i++) {
+        subs![i].destroy();
       }
       subs = null;
     }
@@ -425,7 +419,7 @@ class Socket extends EventEmitter {
   /// @api public
   Socket compress(compress) {
     flags = flags ??= {};
-    flags['compress'] = compress;
+    flags!['compress'] = compress;
     return this;
   }
 }
