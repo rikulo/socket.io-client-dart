@@ -1,3 +1,11 @@
+## 2.0.0-beta.0
+
+**New Feature:**
+
+* [#130](https://github.com/rikulo/socket.io-client-dart/issues/130) Cannot connect to socket.io V3
+* [#106](https://github.com/rikulo/socket.io-client-dart/issues/106) Can we combine emitWithBinary to emit?
+
+
 ## 0.9.12
 
 **New Feature:**

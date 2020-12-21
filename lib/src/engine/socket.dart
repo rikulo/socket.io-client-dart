@@ -452,8 +452,9 @@ class Socket extends EventEmitter {
           onHandshake(json.decode(data ?? 'null'));
           break;
 
-        case 'pong':
-          setPing();
+        case 'ping':
+          resetPingTimeout();
+          sendPacket(type: 'pong');
           emit('pong');
           break;
 
@@ -472,6 +473,18 @@ class Socket extends EventEmitter {
   }
 
   ///
+  ///Sets and resets ping timeout timer based on server pings.
+  /// @api private
+  ///
+  void resetPingTimeout() {
+    pingTimeoutTimer?.cancel();
+    pingTimeoutTimer =
+        Timer(Duration(milliseconds: pingInterval + pingTimeout), () {
+      onClose('ping timeout');
+    });
+  }
+
+  ///
   /// Called upon handshake completion.
   ///
   /// @param {Object} handshake obj
@@ -486,48 +499,33 @@ class Socket extends EventEmitter {
     onOpen();
     // In case open handler closes socket
     if ('closed' == readyState) return;
-    setPing();
+    resetPingTimeout();
 
     // Prolong liveness of socket on heartbeat
-    off('heartbeat', onHeartbeat);
-    on('heartbeat', onHeartbeat);
+    // off('heartbeat', onHeartbeat);
+    // on('heartbeat', onHeartbeat);
   }
 
   ///
   /// Resets ping timeout.
   ///
   /// @api private
-  void onHeartbeat(timeout) {
-    pingTimeoutTimer?.cancel();
-    pingTimeoutTimer = Timer(
-        Duration(milliseconds: timeout ?? (pingInterval + pingTimeout)), () {
-      if ('closed' == readyState) return;
-      onClose('ping timeout');
-    });
-  }
-
-  ///
-  /// Pings server every `this.pingInterval` and expects response
-  /// within `this.pingTimeout` or closes connection.
-  ///
-  /// @api private
-  void setPing() {
-    pingIntervalTimer?.cancel();
-    pingIntervalTimer = Timer(Duration(milliseconds: pingInterval), () {
-      _logger
-          .fine('writing ping packet - expecting pong within ${pingTimeout}ms');
-      ping();
-      onHeartbeat(pingTimeout);
-    });
-  }
+  // void onHeartbeat(timeout) {
+  //   pingTimeoutTimer?.cancel();
+  //   pingTimeoutTimer = Timer(
+  //       Duration(milliseconds: timeout ?? (pingInterval + pingTimeout)), () {
+  //     if ('closed' == readyState) return;
+  //     onClose('ping timeout');
+  //   });
+  // }
 
   ///
   /// Sends a ping packet.
   ///
   /// @api private
-  void ping() {
-    sendPacket(type: 'ping', callback: (_) => emit('ping'));
-  }
+  // void ping() {
+  //   sendPacket(type: 'ping', callback: (_) => emit('ping'));
+  // }
 
   ///
   /// Called on `drain` event
