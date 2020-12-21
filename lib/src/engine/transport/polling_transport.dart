@@ -127,8 +127,7 @@ abstract class PollingTransport extends Transport {
     };
 
     // decode payload
-    PacketParser.decodePayload(data,
-        binaryType: socket?.binaryType != true, callback: callback);
+    PacketParser.decodePayload(data, socket!.binaryType).forEach(callback);
 
     // if an event did not trigger closing
     if ('closed' != readyState) {
@@ -185,8 +184,7 @@ abstract class PollingTransport extends Transport {
       self.emit('drain');
     };
 
-    PacketParser.encodePayload(packets, supportsBinary: supportsBinary != false,
-        callback: (data) {
+    PacketParser.encodePayload(packets, callback: (data) {
       self.doWrite(data, callbackfn);
     });
   }

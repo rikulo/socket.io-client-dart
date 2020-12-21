@@ -257,7 +257,7 @@ class Manager extends EventEmitter {
     var socket = engine;
     subs.add(util.on(socket, 'data', ondata));
     subs.add(util.on(socket, 'ping', onping));
-    subs.add(util.on(socket, 'pong', onpong));
+    // subs.add(util.on(socket, 'pong', onpong));
     subs.add(util.on(socket, 'error', onerror));
     subs.add(util.on(socket, 'close', onclose));
     subs.add(util.on(decoder, 'decoded', ondecoded));
@@ -278,9 +278,9 @@ class Manager extends EventEmitter {
   ///
   /// @api private
   ///
-  void onpong([_]) {
-    emitAll('pong', DateTime.now().millisecondsSinceEpoch - lastPing!);
-  }
+  // void onpong([_]) {
+  //   emitAll('pong', DateTime.now().millisecondsSinceEpoch - lastPing);
+  // }
 
   ///
   /// Called with data.
@@ -366,20 +366,18 @@ class Manager extends EventEmitter {
       packet['nsp'] += '''?${packet['query']}''';
     }
 
-    if (encoding != true) {
-      // encode, then write to engine with result
-      encoding = true;
-      encoder.encode(packet, (encodedPackets) {
-        for (var i = 0; i < encodedPackets.length; i++) {
-          engine.write(encodedPackets[i], packet['options']);
-        }
-        encoding = false;
-        processPacketQueue();
-      });
-    } else {
-      // add packet to the queue
-      packetBuffer.add(packet);
+    // if (encoding != true) {
+    // encode, then write to engine with result
+    // encoding = true;
+    var encodedPackets = encoder.encode(packet);
+
+    for (var i = 0; i < encodedPackets.length; i++) {
+      engine.write(encodedPackets[i], packet['options']);
     }
+    // } else {
+    // add packet to the queue
+    // packetBuffer.add(packet);
+    // }
   }
 
   ///

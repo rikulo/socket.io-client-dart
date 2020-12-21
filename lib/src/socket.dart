@@ -123,10 +123,6 @@ class Socket extends EventEmitter {
     emitWithAck(event, data);
   }
 
-  void emitWithBinary(String event, [data]) {
-    emitWithAck(event, data, binary: true);
-  }
-
   ///
   /// Emits to this client.
   ///
@@ -147,7 +143,7 @@ class Socket extends EventEmitter {
       }
 
       var packet = {
-        'type': binary ? BINARY_EVENT : EVENT,
+        'type': EVENT,
         'data': sendData,
         'options': {'compress': flags?.isNotEmpty == true && flags!['compress']}
       };
@@ -186,13 +182,13 @@ class Socket extends EventEmitter {
     _logger.fine('transport is open - connecting');
 
     // write connect packet if necessary
-    if ('/' != nsp) {
-      if (query?.isNotEmpty == true) {
-        packet({'type': CONNECT, 'query': query});
-      } else {
-        packet({'type': CONNECT});
-      }
+    // if ('/' != nsp) {
+    if (query?.isNotEmpty == true) {
+      packet({'type': CONNECT, 'query': query});
+    } else {
+      packet({'type': CONNECT});
     }
+    // }
   }
 
   ///
@@ -242,7 +238,7 @@ class Socket extends EventEmitter {
         ondisconnect();
         break;
 
-      case ERROR:
+      case CONNECT_ERROR:
         emit('error', packet['data']);
         break;
     }

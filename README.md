@@ -1,6 +1,13 @@
 # socket.io-client-dart
 
-Port of awesome JavaScript Node.js library - [Socket.io-client v2.0.1](https://github.com/socketio/socket.io-client) - in Dart
+Port of awesome JavaScript Node.js library - [Socket.io-client v2.0.1~v3.0.3](https://github.com/socketio/socket.io-client) - in Dart
+
+### Version info:
+
+| socket.io-client-dart | Socket.io Server
+-------------------|----------------
+`v0.9.*` ~ `v1.* ` | `v2.*`
+`v2.*`             | `v3.*`
 
 ## Usage
 

@@ -10,6 +10,7 @@
  *
  * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
  */
+ /// Socket.io-dart server does not support Socket.io v3 spec.
 import 'package:socket_io/socket_io.dart';
 
 void main() {
