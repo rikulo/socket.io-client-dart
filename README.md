@@ -4,7 +4,7 @@ Port of awesome JavaScript Node.js library - [Socket.io-client v2.0.1~v3.0.3](ht
 
 ### Version info:
 
-| socket_io_common | Socket.io Server
+| socket.io-client-dart | Socket.io Server
 -------------------|----------------
 `v0.9.*` ~ `v1.* ` | `v2.*`
 `v2.*`             | `v3.*`
