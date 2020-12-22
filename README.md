@@ -11,39 +11,46 @@ Port of awesome JavaScript Node.js library - [Socket.io-client v2.0.1~v3.0.3](ht
 
 ## Usage
 
+**Dart Server**
 ```dart
 import 'package:socket_io/socket_io.dart';
+
+main() {
+  // Dart server
+  var io = new Server();
+  var nsp = io.of('/some');
+  nsp.on('connection', (client) {
+    print('connection /some');
+    client.on('msg', (data) {
+      print('data from /some => $data');
+      client.emit('fromServer', "ok 2");
+    });
+  });
+  io.on('connection', (client) {
+    print('connection default namespace');
+    client.on('msg', (data) {
+      print('data from default => $data');
+      client.emit('fromServer', "ok");
+    });
+  });
+  io.listen(3000);
+}
+```
+**Dart Client**
+```dart
+
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 main() {
-    // Dart server
-    var io = new Server();
-    var nsp = io.of('/some');
-    nsp.on('connection', (Socket client) {
-      print('connection /some');
-      client.on('msg', (data) {
-        print('data from /some => $data');
-        client.emit('fromServer', "ok 2");
-      });
-    });
-      io.on('connection', (Socket client) {
-        print('connection default namespace');
-        client.on('msg', (data) {
-          print('data from default => $data');
-          client.emit('fromServer', "ok");
-        });
-      });
-      io.listen(3000);
-
-    // Dart client
-    IO.Socket socket = IO.io('http://localhost:3000');
-    socket.onConnect((_) {
-     print('connect');
-     socket.emit('msg', 'test');
-    });
-    socket.on('event', (data) => print(data));
-    socket.onDisconnect((_) => print('disconnect'));
-    socket.on('fromServer', (_) => print(_));
+  // Dart client
+  IO.Socket socket = IO.io('http://localhost:3000');
+  socket.onConnect((_) {
+    print('connect');
+    socket.emit('msg', 'test');
+  });
+  socket.on('event', (data) => print(data));
+  socket.onDisconnect((_) => print('disconnect'));
+  socket.on('fromServer', (_) => print(_));
 }
 ```
 
