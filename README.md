@@ -59,8 +59,8 @@ Socket socket = io('http://localhost:3000',
       .setTransports(['websocket']) // for Flutter or Dart VM
       .<b>disableAutoConnect()</b>  // disable auto-connection
       .setExtraHeaders({'foo': 'bar'}) // optional
-      .build()) 
-  });
+      .build()
+  );
 <b>socket.connect();</b>
 </pre>
 
