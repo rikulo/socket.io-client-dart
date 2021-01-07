@@ -302,7 +302,7 @@ class Socket extends EventEmitter {
   /// @param {Object} packet
   /// @api private
   void onack(Map packet) {
-    var ack = acks.remove(packet['id']);
+    var ack = acks.remove('${packet['id']}');
     if (ack is Function) {
       _logger.fine('''calling ack ${packet['id']} with ${packet['data']}''');
 

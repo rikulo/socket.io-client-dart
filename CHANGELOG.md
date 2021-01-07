@@ -1,3 +1,9 @@
+## 2.0.0-beta.2
+
+**Bug fix:**
+
+* [#140](https://github.com/rikulo/socket.io-client-dart/issues/140) getting Error on emitWithAck() in v2 beta
+
 ## 2.0.0-beta.1
 
 **New Feature:**
