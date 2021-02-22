@@ -189,11 +189,11 @@ class Socket extends EventEmitter {
 
     // write connect packet if necessary
     // if ('/' != nsp) {
-    if (query?.isNotEmpty == true) {
-      packet({'type': CONNECT, 'query': query});
-    } else {
+    // if (query?.isNotEmpty == true) {
+    //   packet({'type': CONNECT, 'query': query});
+    // } else {
       packet({'type': CONNECT});
-    }
+    // }
     // }
   }
 

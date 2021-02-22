@@ -1,3 +1,9 @@
+## 2.0.0-beta.3
+
+**Bug fix:**
+
+* [#150](https://github.com/rikulo/socket.io-client-dart/issues/150) Problem with setQuery in socket io version 3.0
+
 ## 2.0.0-beta.2
 
 **Bug fix:**
