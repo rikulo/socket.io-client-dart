@@ -1,3 +1,9 @@
+## 2.0.0-beta.3-nullsafety.0
+
+**New Feature:**
+
+* [#163](https://github.com/rikulo/socket.io-client-dart/issues/163) Null safety support for 2.0.0-beta
+
 ## 2.0.0-beta.3
 
 **Bug fix:**
@@ -17,6 +23,11 @@
 * [#130](https://github.com/rikulo/socket.io-client-dart/issues/130) Cannot connect to socket.io V3
 * [#106](https://github.com/rikulo/socket.io-client-dart/issues/106) Can we combine emitWithBinary to emit?
 
+## 1.0.0-nullsafety.0
+
+**New Feature:**
+
+* [#132](https://github.com/rikulo/socket.io-client-dart/issues/132) Migrating to null safety for Dart
 
 ## 0.9.12
 
