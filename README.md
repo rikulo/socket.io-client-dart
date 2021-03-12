@@ -251,6 +251,13 @@ By adding the following key into the to file `*.entitlements` under directory `m
 
 For more details, please take a look at https://flutter.dev/desktop#setting-up-entitlements
 
+### Can't connect socket server on Flutter with Insecure HTTP connection
+* Refer to https://flutter.dev/docs/release/breaking-changes/network-policy-ios-android
+
+The HTTP connections are disabled by default on iOS and Android, so here is a workaround to this issue,
+which mentioned on [stack overflow](https://stackoverflow.com/a/65730723)
+
+
 ## Notes to Contributors
 
 ### Fork socket.io-client-dart

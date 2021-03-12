@@ -53,6 +53,7 @@ main() {
   socket.on('fromServer', (_) => print(_));
 }
 ```
+
 ### Connect manually
 
 To connect the socket manually, set the option `autoConnect: false` and call `.connect()`.
@@ -70,7 +71,7 @@ Socket socket = io('http://localhost:3000',
 <b>socket.connect();</b>
 </pre>
 
-Note that `.connect()` should not be called if `autoConnect: true` 
+Note that `.connect()` should not be called if `autoConnect: true`
 (by default, it's enabled to true), as this will cause all event handlers to get registered/fired twice. See [Issue #33](https://github.com/rikulo/socket.io-client-dart/issues/33).
 
 ### Update the extra headers
@@ -138,7 +139,7 @@ socket.on('eventName', (data) {
 ## Usage (Flutter)
 
 In Flutter env. not (Flutter Web env.) it only works with `dart:io` websocket,
- not with `dart:html` websocket or Ajax (XHR), so in this case
+not with `dart:html` websocket or Ajax (XHR), so in this case
 you have to add `setTransports(['websocket'])` when creates the socket instance.
 
 For example,
@@ -241,7 +242,7 @@ void main() {
 
 ### Connect_error on MacOS with SocketException: Connection failed
 * Refer to https://github.com/flutter/flutter/issues/47606#issuecomment-568522318 issue.
-           
+
 By adding the following key into the to file `*.entitlements` under directory `macos/Runner/`
 ```
 <key>com.apple.security.network.client</key>
@@ -249,6 +250,13 @@ By adding the following key into the to file `*.entitlements` under directory `m
 ```
 
 For more details, please take a look at https://flutter.dev/desktop#setting-up-entitlements
+
+### Can't connect socket server on Flutter with Insecure HTTP connection
+* Refer to https://flutter.dev/docs/release/breaking-changes/network-policy-ios-android
+
+The HTTP connections are disabled by default on iOS and Android, so here is a workaround to this issue,
+which mentioned on [stack overflow](https://stackoverflow.com/a/65730723)
+
 
 ## Notes to Contributors
 
