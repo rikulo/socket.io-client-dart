@@ -72,7 +72,7 @@ class Manager extends EventEmitter {
   List packetBuffer = [];
   bool reconnecting = false;
 
-  late engine_socket.Socket engine;
+  engine_socket.Socket? engine;
   Encoder encoder = Encoder();
   Decoder decoder = Decoder();
   late bool autoConnect;
@@ -130,7 +130,7 @@ class Manager extends EventEmitter {
   ///
   String generateId(String nsp) {
     if (nsp.startsWith('/')) nsp = nsp.substring(1);
-    return (nsp.isEmpty ? '' : (nsp + '#')) + (engine.id ?? '');
+    return (nsp.isEmpty ? '' : (nsp + '#')) + (engine?.id ?? '');
   }
 
   num? get randomizationFactor => _randomizationFactor;
@@ -182,7 +182,7 @@ class Manager extends EventEmitter {
 
     _logger.fine('opening $uri');
     engine = engine_socket.Socket(uri, options);
-    var socket = engine;
+    var socket = engine!;
     readyState = 'opening';
     skipReconnect = false;
 
@@ -244,7 +244,7 @@ class Manager extends EventEmitter {
     emit('open');
 
     // add subs
-    var socket = engine;
+    var socket = engine!;
     subs.add(util.on(socket, 'data', ondata));
     subs.add(util.on(socket, 'ping', onping));
     // subs.add(util.on(socket, 'pong', onpong));
@@ -362,7 +362,7 @@ class Manager extends EventEmitter {
     var encodedPackets = encoder.encode(packet);
 
     for (var i = 0; i < encodedPackets.length; i++) {
-      engine.write(encodedPackets[i], packet['options']);
+      engine!.write(encodedPackets[i], packet['options']);
     }
     // } else {
     // add packet to the queue
@@ -422,7 +422,7 @@ class Manager extends EventEmitter {
     }
     backoff!.reset();
     readyState = 'closed';
-    engine.close();
+    engine?.close();
   }
 
   ///
