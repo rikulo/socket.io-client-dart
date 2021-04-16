@@ -59,6 +59,7 @@ class Socket extends EventEmitter {
   List sendBuffer = [];
   List receiveBuffer = [];
   String? query;
+  Map? auth;
   List? subs;
   Map? flags;
   String? id;
@@ -67,6 +68,7 @@ class Socket extends EventEmitter {
     json = this; // compat
     if (opts != null) {
       query = opts!['query'];
+      auth = opts!['auth'];
     }
     if (io.autoConnect) open();
   }
@@ -186,9 +188,15 @@ class Socket extends EventEmitter {
     // if (query?.isNotEmpty == true) {
     //   packet({'type': CONNECT, 'query': query});
     // } else {
-    packet({'type': CONNECT});
+    // packet({'type': CONNECT});
     // }
     // }
+
+    if (auth != null) {
+      packet({'type': CONNECT, 'data': auth});
+    } else {
+      packet({'type': CONNECT});
+    }
   }
 
   ///
