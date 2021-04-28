@@ -1,3 +1,13 @@
+## 2.0.0-beta.4-nullsafety.0
+
+**New Feature:**
+
+* [#177](https://github.com/rikulo/socket.io-client-dart/pull/177) Send credentials with the auth option
+
+**Bug fix:**
+
+* [#172](https://github.com/rikulo/socket.io-client-dart/issues/172) socket id's not synced
+
 ## 2.0.0-beta.3-nullsafety.0
 
 **New Feature:**

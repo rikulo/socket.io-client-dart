@@ -59,9 +59,9 @@ class Socket extends EventEmitter {
   List sendBuffer = [];
   List receiveBuffer = [];
   String? query;
-  Map? auth;
+  dynamic? auth;
   List? subs;
-  Map? flags;
+  Map flags = {};
   String? id;
 
   Socket(this.io, this.nsp, this.opts) {
@@ -84,8 +84,14 @@ class Socket extends EventEmitter {
     subs = [
       util.on(io, 'open', onopen),
       util.on(io, 'packet', onpacket),
+      util.on(io, 'error', onerror),
       util.on(io, 'close', onclose)
     ];
+  }
+
+  /// Whether the Socket will try to reconnect when its Manager connects or reconnects
+  bool get active {
+    return subs != null;
   }
 
   ///
@@ -95,11 +101,12 @@ class Socket extends EventEmitter {
   Socket open() => connect();
 
   Socket connect() {
-    if (connected == true) return this;
+    if (connected) return this;
     subEvents();
-    io.open(); // ensure open
+    if (!io.reconnecting) {
+      io.open(); // ensure open
+    }
     if ('open' == io.readyState) onopen();
-    emit('connecting');
     return this;
   }
 
@@ -147,7 +154,7 @@ class Socket extends EventEmitter {
       var packet = {
         'type': EVENT,
         'data': sendData,
-        'options': {'compress': flags?.isNotEmpty == true && flags!['compress']}
+        'options': {'compress': flags.isNotEmpty == true && flags['compress']}
       };
 
       // event ack callback
@@ -156,13 +163,21 @@ class Socket extends EventEmitter {
         acks['$ids'] = ack;
         packet['id'] = '${ids++}';
       }
+      final isTransportWritable = io.engine != null &&
+          io.engine!.transport != null &&
+          io.engine!.transport!.writable == true;
 
-      if (connected == true) {
+      final discardPacket =
+          flags['volatile'] != null && (!isTransportWritable || !connected);
+      if (discardPacket) {
+        _logger
+            .fine('discard packet as the transport is not currently writable');
+      } else if (connected) {
         this.packet(packet);
       } else {
         sendBuffer.add(packet);
       }
-      flags = null;
+      flags = {};
     }
   }
 
@@ -193,9 +208,22 @@ class Socket extends EventEmitter {
     // }
 
     if (auth != null) {
-      packet({'type': CONNECT, 'data': auth});
+      if (auth is Function) {
+        auth((data) {
+          packet({'type': CONNECT, 'data': data});
+        });
+      } else {
+        packet({'type': CONNECT, 'data': auth});
+      }
     } else {
       packet({'type': CONNECT});
+    }
+  }
+
+  /// Called upon engine or manager `error`
+  void onerror(err) {
+    if (!connected) {
+      emit('connect_error', err);
     }
   }
 
@@ -223,7 +251,13 @@ class Socket extends EventEmitter {
 
     switch (packet['type']) {
       case CONNECT:
-        onconnect();
+        if (packet['data'] != null && packet['data']['sid'] != null) {
+          final id = packet['data']['sid'];
+          onconnect(id);
+        } else {
+          emit('connect_error',
+              'It seems you are trying to reach a Socket.IO server in v2.x with a v3.x client, but they are not compatible (more information here: https://socket.io/docs/v3/migrating-from-2-x-to-3-0/)');
+        }
         break;
 
       case EVENT:
@@ -324,7 +358,8 @@ class Socket extends EventEmitter {
   /// Called upon server connect.
   ///
   /// @api private
-  void onconnect() {
+  void onconnect(id) {
+    this.id = id;
     connected = true;
     disconnected = false;
     emit('connect');
@@ -371,10 +406,12 @@ class Socket extends EventEmitter {
   /// @api private.
 
   void destroy() {
-    if (subs?.isNotEmpty == true) {
+    final _subs = subs;
+    if (_subs != null && _subs.isNotEmpty) {
       // clean subscriptions to avoid reconnections
-      for (var i = 0; i < subs!.length; i++) {
-        subs![i].destroy();
+
+      for (var i = 0; i < _subs.length; i++) {
+        _subs[i].destroy();
       }
       subs = null;
     }
@@ -422,8 +459,7 @@ class Socket extends EventEmitter {
   /// @return {Socket} self
   /// @api public
   Socket compress(compress) {
-    flags = flags ??= {};
-    flags!['compress'] = compress;
+    flags['compress'] = compress;
     return this;
   }
 }
