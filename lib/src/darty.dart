@@ -159,5 +159,10 @@ class OptionBuilder {
     return this;
   }
 
+  OptionBuilder setAuth(Map auth) {
+    _opts['auth'] = auth;
+    return this;
+  }
+
   Map<String, dynamic> build() => _opts;
 }
