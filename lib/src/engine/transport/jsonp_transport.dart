@@ -145,7 +145,7 @@ class JSONPTransport extends PollingTransport {
     if (form == null) {
       var form = document.createElement('form') as FormElement;
       var area = document.createElement('textarea') as TextAreaElement;
-      var id = iframeId = 'eio_iframe_${index}';
+      var id = iframeId = 'eio_iframe_$index';
 
       form.className = 'socketio';
       form.style.position = 'absolute';

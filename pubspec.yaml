@@ -1,20 +1,18 @@
 name: socket_io_client
 description: Dartlang port of socket.io-client for web, flutter, dartvm to use
-version: 1.0.0-nullsafety.0
+version: 1.0.0
 homepage: https://www.zkoss.org
 repository: https://github.com/rikulo/socket.io-client-dart
 issue_tracker: https://github.com/rikulo/socket.io-client-dart/issues
 
 environment:
-  sdk: '>=2.12.0-0 <3.0.0'
+  sdk: '>=2.12.0 <3.0.0'
 
 dependencies:
-  socket_io_common: '^1.0.0-nullsafety.1'
-  js: '^0.6.3-nullsafety.3'
-  logging: '^1.0.0-nullsafety.0'
+  socket_io_common: '^1.0.0'
+  js: '^0.6.3'
+  logging: '^1.0.1'
 
-dependency_overrides:
-  logging: '^1.0.0-nullsafety.0'
 
 dev_dependencies:
   socket_io: any

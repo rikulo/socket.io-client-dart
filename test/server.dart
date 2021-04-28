@@ -1,15 +1,13 @@
-/**
- * server.dart
- *
- * Purpose:
- *
- * Description:
- *
- * History:
- *   26/07/2017, Created by jumperchen
- *
- * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
- */
+/// server.dart
+///
+/// Purpose:
+///
+/// Description:
+///
+/// History:
+///   26/07/2017, Created by jumperchen
+///
+/// Copyright (C) 2017 Potix Corporation. All Rights Reserved.
 import 'package:socket_io/socket_io.dart';
 
 void main() {

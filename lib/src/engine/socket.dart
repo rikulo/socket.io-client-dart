@@ -464,7 +464,7 @@ class Socket extends EventEmitter {
           break;
       }
     } else {
-      _logger.fine('packet received with socket readyState "${readyState}"');
+      _logger.fine('packet received with socket readyState "$readyState"');
     }
   }
 

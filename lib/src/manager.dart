@@ -27,12 +27,34 @@ class Manager extends EventEmitter {
   List subs = [];
   late Map options;
 
-  bool? _reconnection;
-  num? _reconnectionAttempts;
-  num? _reconnectionDelay;
+  ///
+  /// Sets the `reconnection` config.
+  ///
+  /// @param {Boolean} true/false if it should automatically reconnect
+  /// @return {Manager} self or value
+  /// @api public
+  ///
+  bool? reconnection;
+
+  ///
+  /// Sets the reconnection attempts config.
+  ///
+  /// @param {Number} max reconnection attempts before giving up
+  /// @return {Manager} self or value
+  /// @api public
+  ///
+  num? reconnectionAttempts;
+  num? reconnectionDelay;
   num? _randomizationFactor;
   num? _reconnectionDelayMax;
-  num? _timeout;
+
+  ///
+  /// Sets the connection timeout. `false` to disable
+  ///
+  /// @return {Manager} self or value
+  /// @api public
+  ///
+  num? timeout;
   _Backoff? backoff;
   String readyState = 'closed';
   late String uri;
@@ -103,36 +125,6 @@ class Manager extends EventEmitter {
     return (nsp.isEmpty ? '' : (nsp + '#')) + (engine.id ?? '');
   }
 
-  ///
-  /// Sets the `reconnection` config.
-  ///
-  /// @param {Boolean} true/false if it should automatically reconnect
-  /// @return {Manager} self or value
-  /// @api public
-  ///
-  bool? get reconnection => _reconnection;
-  set reconnection(bool? v) => _reconnection = v;
-
-  ///
-  /// Sets the reconnection attempts config.
-  ///
-  /// @param {Number} max reconnection attempts before giving up
-  /// @return {Manager} self or value
-  /// @api public
-  ///
-  num? get reconnectionAttempts => _reconnectionAttempts;
-  set reconnectionAttempts(num? v) => _reconnectionAttempts = v;
-
-  ///
-  /// Sets the delay between reconnections.
-  ///
-  /// @param {Number} delay
-  /// @return {Manager} self or value
-  /// @api public
-  ///
-  num? get reconnectionDelay => _reconnectionDelay;
-  set reconnectionDelay(num? v) => _reconnectionDelay = v;
-
   num? get randomizationFactor => _randomizationFactor;
   set randomizationFactor(num? v) {
     _randomizationFactor = v;
@@ -153,15 +145,6 @@ class Manager extends EventEmitter {
   }
 
   ///
-  /// Sets the connection timeout. `false` to disable
-  ///
-  /// @return {Manager} self or value
-  /// @api public
-  ///
-  num? get timeout => _timeout;
-  set timeout(num? v) => _timeout = v;
-
-  ///
   /// Starts trying to reconnect if reconnection is enabled and we have not
   /// started reconnecting yet
   ///
@@ -169,7 +152,7 @@ class Manager extends EventEmitter {
   ///
   void maybeReconnectOnOpen() {
     // Only try to reconnect if it's the first time we're connecting
-    if (!reconnecting && _reconnection == true && backoff!.attempts == 0) {
+    if (!reconnecting && reconnection == true && backoff!.attempts == 0) {
       // keeps reconnection from firing twice for the same reconnection loop
       reconnect();
     }
@@ -216,8 +199,8 @@ class Manager extends EventEmitter {
     });
 
     // emit `connect_timeout`
-    if (_timeout != null) {
-      var timeout = _timeout!;
+    var timeout = this.timeout;
+    if (timeout != null) {
       _logger.fine('connect attempt will timeout after $timeout');
 
       // set timer
@@ -450,7 +433,7 @@ class Manager extends EventEmitter {
     readyState = 'closed';
     emit('close', error['reason']);
 
-    if (_reconnection == true && !skipReconnect!) {
+    if (reconnection == true && !skipReconnect!) {
       reconnect();
     }
   }
@@ -463,7 +446,7 @@ class Manager extends EventEmitter {
   Manager reconnect() {
     if (reconnecting || skipReconnect!) return this;
 
-    if (backoff!.attempts >= _reconnectionAttempts!) {
+    if (backoff!.attempts >= reconnectionAttempts!) {
       _logger.fine('reconnect failed');
       backoff!.reset();
       emitAll('reconnect_failed');
