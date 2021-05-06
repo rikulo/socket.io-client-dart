@@ -529,7 +529,7 @@ class _Backoff {
   /// @api public
   ///
   num get duration {
-    var ms = _ms * math.pow(_factor, attempts++);
+    var ms = math.min(_ms * math.pow(_factor, attempts++), 1e100);
     if (_jitter > 0) {
       var rand = math.Random().nextDouble();
       var deviation = (rand * _jitter * ms).floor();
