@@ -1,3 +1,9 @@
+## 1.0.1
+
+**Bug fix:**
+
+* [#188](https://github.com/rikulo/socket.io-client-dart/pull/188) Fixbug for Backoff when many attempts: "UnsupportedError: Unsupported operation: Infinity or NaN toInt"
+
 ## 2.0.0-beta.4-nullsafety.0
 
 **New Feature:**
@@ -33,7 +39,35 @@
 * [#130](https://github.com/rikulo/socket.io-client-dart/issues/130) Cannot connect to socket.io V3
 * [#106](https://github.com/rikulo/socket.io-client-dart/issues/106) Can we combine emitWithBinary to emit?
 
-## 1.0.0-nullsafety.0
+## 1.0.0
+
+* [#172](https://github.com/rikulo/socket.io-client-dart/issues/172) socket id's not synced
+
+## 2.0.0-beta.3-nullsafety.0
+
+**New Feature:**
+
+* [#163](https://github.com/rikulo/socket.io-client-dart/issues/163) Null safety support for 2.0.0-beta
+
+## 2.0.0-beta.3
+
+**Bug fix:**
+
+* [#150](https://github.com/rikulo/socket.io-client-dart/issues/150) Problem with setQuery in socket io version 3.0
+
+## 2.0.0-beta.2
+
+**Bug fix:**
+
+* [#140](https://github.com/rikulo/socket.io-client-dart/issues/140) getting Error on emitWithAck() in v2 beta
+
+## 2.0.0-beta.1
+
+**New Feature:**
+
+* [#130](https://github.com/rikulo/socket.io-client-dart/issues/130) Cannot connect to socket.io V3
+* [#106](https://github.com/rikulo/socket.io-client-dart/issues/106) Can we combine emitWithBinary to emit?
+
 
 **New Feature:**
 

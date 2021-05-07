@@ -1,16 +1,14 @@
-/**
- * server.dart
- *
- * Purpose:
- *
- * Description:
- *
- * History:
- *   26/07/2017, Created by jumperchen
- *
- * Copyright (C) 2017 Potix Corporation. All Rights Reserved.
- */
- /// Socket.io-dart server does not support Socket.io v3 spec.
+/// server.dart
+///
+/// Purpose:
+///
+/// Description:
+///
+/// History:
+///   26/07/2017, Created by jumperchen
+///
+/// Copyright (C) 2017 Potix Corporation. All Rights Reserved.
+/// Socket.io-dart server does not support Socket.io v3 spec.
 import 'package:socket_io/socket_io.dart';
 
 void main() {
