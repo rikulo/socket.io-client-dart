@@ -55,7 +55,7 @@ Socket _lookup(uri, opts) {
       false == opts['multiplex'] ||
       sameNamespace;
 
-  var io;
+  late Manager io;
 
   if (newConnection) {
     _logger.fine('ignoring socket cache for $uri');

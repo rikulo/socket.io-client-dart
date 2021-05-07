@@ -1,3 +1,9 @@
+## 1.0.1
+
+**Bug fix:**
+
+* [#188](https://github.com/rikulo/socket.io-client-dart/pull/188) Fixbug for Backoff when many attempts: "UnsupportedError: Unsupported operation: Infinity or NaN toInt"
+
 ## 1.0.0
 
 **New Feature:**
