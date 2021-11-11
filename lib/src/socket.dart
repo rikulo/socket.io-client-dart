@@ -280,16 +280,25 @@ class Socket extends EventEmitter {
   /// @api private
   Function ack(id) {
     var sent = false;
-    return (_) {
+    return (dynamic data) {
       // prevent double callbacks
       if (sent) return;
       sent = true;
-      _logger.fine('sending ack $_');
+      _logger.fine('sending ack $data');
+
+      var sendData = <dynamic>[];
+      if (data is ByteBuffer || data is List<int>) {
+        sendData.add(data);
+      } else if (data is Iterable) {
+        sendData.addAll(data);
+      } else if (data != null) {
+        sendData.add(data);
+      }
 
       packet({
         'type': ACK,
         'id': id,
-        'data': [_]
+        'data': sendData
       });
     };
   }
