@@ -295,11 +295,7 @@ class Socket extends EventEmitter {
         sendData.add(data);
       }
 
-      packet({
-        'type': ACK,
-        'id': id,
-        'data': sendData
-      });
+      packet({'type': ACK, 'id': id, 'data': sendData});
     };
   }
 

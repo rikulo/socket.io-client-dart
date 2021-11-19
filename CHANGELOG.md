@@ -1,3 +1,9 @@
+## 1.0.2
+
+**New Feature:**
+
+* [#237](https://github.com/rikulo/socket.io-client-dart/pull/237) Allow sending an ack with multiple data items (making it consistent with emit)
+
 ## 1.0.1
 
 **Bug fix:**
