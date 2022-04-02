@@ -17,7 +17,7 @@ import 'package:socket_io/socket_io.dart';
 
 main() {
   // Dart server
-  var io = new Server();
+  var io = Server();
   var nsp = io.of('/some');
   nsp.on('connection', (client) {
     print('connection /some');
@@ -230,7 +230,7 @@ class MyHttpOverrides extends HttpOverrides {
 }
 
 void main() {
-  HttpOverrides.global = new MyHttpOverrides();
+  HttpOverrides.global = MyHttpOverrides();
   runApp(MyApp());
 }
 ```
