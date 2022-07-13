@@ -9,7 +9,7 @@ environment:
   sdk: '>=2.12.0 <3.0.0'
 
 dependencies:
-  logging: '^1.0.0'
+  logging: '^1.0.1'
   socket_io_common: '^2.0.0-beta.1-nullsafety.0'
   js: '^0.6.3'
 
