@@ -164,5 +164,10 @@ class OptionBuilder {
     return this;
   }
 
+  OptionBuilder setAuthFn(void Function(void Function(Map auth) callback) authFn) {
+    _opts['auth'] = authFn;
+    return this;
+  }
+
   Map<String, dynamic> build() => _opts;
 }
