@@ -28,23 +28,23 @@ extension DartySocket on Socket {
   }
 
   void onError(EventHandler handler) {
-    on('error', handler);
+    this.io.on('error', handler);
   }
 
   void onReconnect(EventHandler handler) {
-    on('reconnect', handler);
+    this.io.on('reconnect', handler);
   }
 
   void onReconnectAttempt(EventHandler handler) {
-    on('reconnect_attempt', handler);
+    this.io.on('reconnect_attempt', handler);
   }
 
   void onReconnectFailed(EventHandler handler) {
-    on('reconnect_failed', handler);
+    this.io.on('reconnect_failed', handler);
   }
 
   void onReconnectError(EventHandler handler) {
-    on('reconnect_error', handler);
+    this.io.on('reconnect_error', handler);
   }
 
   void onReconnecting(EventHandler handler) {
@@ -52,7 +52,7 @@ extension DartySocket on Socket {
   }
 
   void onPing(EventHandler handler) {
-    on('ping', handler);
+    this.io.on('ping', handler);
   }
 
   void onPong(EventHandler handler) {
