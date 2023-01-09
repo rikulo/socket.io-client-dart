@@ -286,3 +286,5 @@ If you are new to Git or GitHub, please read [this guide](https://help.github.co
 - Thanks [@fzyzcjy](https://github.com/fzyzcjy) for https://github.com/rikulo/socket.io-client-dart/pull/188
 - Thanks [@darwin-morocho](https://github.com/darwin-morocho) for https://github.com/rikulo/socket.io-client-dart/pull/189
 - Thanks [@chatziko](https://github.com/chatziko) for https://github.com/rikulo/socket.io-client-dart/pull/237
+- Thanks [@Astray-git](https://github.com/Astray-git) for https://github.com/rikulo/socket.io-client-dart/pull/313
+- Thanks [@Astray-git](https://github.com/Astray-git) for https://github.com/rikulo/socket.io-client-dart/pull/310

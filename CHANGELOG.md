@@ -1,3 +1,13 @@
+## 2.0.1
+
+**New Feature:**
+
+* [#310](https://github.com/rikulo/socket.io-client-dart/pull/310) Add setAuthFn for OptionBuilder
+
+**Bug fix:**
+
+* [#287](https://github.com/rikulo/socket.io-client-dart/issues/287) reconnecting event is not triggered
+
 ## 2.0.0
 
 **New Feature:**
