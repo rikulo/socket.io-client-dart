@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 ///
@@ -130,6 +131,21 @@ class Socket extends EventEmitter {
   @override
   void emit(String event, [data]) {
     emitWithAck(event, data);
+  }
+
+  Future<dynamic> emitWithAckAsync(
+    String event,
+    dynamic data, {
+    Function? ack,
+    bool bynary = false,
+  }) async {
+    Completer completer = Completer();
+
+    emitWithAck(event, data, ack: completer.complete);
+
+    final response = await completer.future;
+
+    return response;
   }
 
   ///
