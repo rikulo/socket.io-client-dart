@@ -1,3 +1,9 @@
+## 2.0.2
+
+**Bug fix:**
+
+* [#330](https://github.com/rikulo/socket.io-client-dart/issues/330) Client throws error when buffer is received
+
 ## 2.0.1
 
 **New Feature:**
