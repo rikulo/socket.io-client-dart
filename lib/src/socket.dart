@@ -63,6 +63,8 @@ class Socket extends EventEmitter {
   List? subs;
   Map flags = {};
   String? id;
+  String? pid;
+  String? lastOffset;
 
   Socket(this.io, this.nsp, this.opts) {
     json = this; // compat
@@ -207,17 +209,30 @@ class Socket extends EventEmitter {
     // }
     // }
 
-    if (auth != null) {
-      if (auth is Function) {
-        auth((data) {
-          packet({'type': CONNECT, 'data': data});
-        });
-      } else {
-        packet({'type': CONNECT, 'data': auth});
-      }
+    if (auth is Function) {
+      auth((data) {
+        sendConnectPacket(data);
+      });
     } else {
-      packet({'type': CONNECT});
+      sendConnectPacket(auth);
     }
+  }
+
+  /// Sends a CONNECT packet to initiate the Socket.IO session.
+  /// 
+  /// @param {data}
+  /// @api private
+  void sendConnectPacket(Map? data) {
+    packet({
+      'type': CONNECT,
+      'data': pid != null
+          ? {
+              'pid': pid,
+              'offset': lastOffset,
+              ...(data ?? {}),
+            }
+          : data,
+    });
   }
 
   /// Called upon engine or manager `error`
@@ -253,7 +268,8 @@ class Socket extends EventEmitter {
       case CONNECT:
         if (packet['data'] != null && packet['data']['sid'] != null) {
           final id = packet['data']['sid'];
-          onconnect(id);
+          final pid = packet['data']['pid'];
+          onconnect(id, pid);
         } else {
           emit('connect_error',
               'It seems you are trying to reach a Socket.IO server in v2.x with a v3.x client, but they are not compatible (more information here: https://socket.io/docs/v3/migrating-from-2-x-to-3-0/)');
@@ -304,6 +320,9 @@ class Socket extends EventEmitter {
     if (connected == true) {
       if (args.length > 2) {
         Function.apply(super.emit, [args.first, args.sublist(1)]);
+        if (this.pid != null && args[args.length - 1] is String) {
+          this.lastOffset = args[args.length - 1];
+        }
       } else {
         Function.apply(super.emit, args);
       }
@@ -363,8 +382,9 @@ class Socket extends EventEmitter {
   /// Called upon server connect.
   ///
   /// @api private
-  void onconnect(id) {
+  void onconnect(id, pid) {
     this.id = id;
+    this.pid = pid; // defined only if connection state recovery is enabled
     connected = true;
     disconnected = false;
     emit('connect');
