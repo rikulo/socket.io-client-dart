@@ -1,3 +1,9 @@
+## 2.0.3
+
+**New Feature:**
+
+* [#338](https://github.com/rikulo/socket.io-client-dart/pull/338) feat: implement connection state recovery
+
 ## 2.0.2
 
 **Bug fix:**
