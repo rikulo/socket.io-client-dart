@@ -1,3 +1,7 @@
+## 2.0.3+1
+
+Fix dart analyzing issues
+
 ## 2.0.3
 
 **New Feature:**

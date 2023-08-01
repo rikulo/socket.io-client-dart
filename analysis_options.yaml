@@ -1,4 +1,4 @@
-include: package:pedantic/analysis_options.yaml
+include: package:lints/recommended.yaml
 
 analyzer:
 #   exclude:
@@ -16,3 +16,5 @@ linter:
     test_types_in_equals: true
     unrelated_type_equality_checks: true
     valid_regexps: true
+    implementation_imports: false
+    overridden_fields: false

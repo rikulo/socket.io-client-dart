@@ -59,11 +59,11 @@ abstract class PollingTransport extends Transport {
 
     readyState = 'pausing';
 
-    var pause = () {
+    pause() {
       _logger.fine('paused');
       self.readyState = 'paused';
       onPause();
-    };
+    }
 
     if (polling == true || writable != true) {
       var total = 0;
@@ -109,7 +109,7 @@ abstract class PollingTransport extends Transport {
   void onData(data) {
     var self = this;
     _logger.fine('polling got data $data');
-    var callback = (packet, [index, total]) {
+    callback(packet, [index, total]) {
       // if its the first message we consider the transport open
       if ('opening' == self.readyState) {
         self.onOpen();
@@ -124,7 +124,7 @@ abstract class PollingTransport extends Transport {
       // otherwise bypass onData and handle the message
       self.onPacket(packet);
       return null;
-    };
+    }
 
     // decode payload
     PacketParser.decodePayload(data, socket!.binaryType).forEach(callback);
@@ -151,12 +151,12 @@ abstract class PollingTransport extends Transport {
   void doClose() {
     var self = this;
 
-    var close = ([_]) {
+    close([_]) {
       _logger.fine('writing close packet');
       self.write([
         {'type': 'close'}
       ]);
-    };
+    }
 
     if ('open' == readyState) {
       _logger.fine('transport open - closing');
@@ -179,10 +179,10 @@ abstract class PollingTransport extends Transport {
   void write(List packets) {
     var self = this;
     writable = false;
-    var callbackfn = (_) {
+    callbackfn(_) {
       self.writable = true;
       self.emit('drain');
-    };
+    }
 
     PacketParser.encodePayload(packets, callback: (data) {
       self.doWrite(data, callbackfn);
@@ -223,12 +223,7 @@ abstract class PollingTransport extends Transport {
     }
 
     var ipv6 = hostname.contains(':');
-    return schema +
-        '://' +
-        (ipv6 ? '[' + hostname + ']' : hostname) +
-        port +
-        path +
-        queryString;
+    return '$schema://${ipv6 ? '[$hostname]' : hostname}$port$path$queryString';
   }
 
   void doWrite(data, callback);

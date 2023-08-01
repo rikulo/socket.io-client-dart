@@ -17,7 +17,7 @@ class IOWebSocketTransport extends Transport {
 
   @override
   String? name = 'websocket';
-  var protocols;
+  dynamic protocols;
 
   @override
   bool? supportsBinary;
@@ -76,7 +76,7 @@ class IOWebSocketTransport extends Transport {
   void write(List packets) {
     writable = false;
 
-    var done = () {
+    done() {
       emit('flush');
 
       // fake drain
@@ -85,12 +85,12 @@ class IOWebSocketTransport extends Transport {
         writable = true;
         emit('drain');
       });
-    };
+    }
 
     var total = packets.length;
     // encodePacket efficient as it uses WS framing
     // no need for encodePayload
-    packets.forEach((packet) {
+    for (var packet in packets) {
       PacketParser.encodePacket(packet,
           supportsBinary: supportsBinary, fromClient: true, callback: (data) {
         // Sometimes the websocket has already been closed but the browser didn't
@@ -109,7 +109,7 @@ class IOWebSocketTransport extends Transport {
 
         if (--total == 0) done();
       });
-    });
+    }
   }
 
   ///
@@ -156,12 +156,7 @@ class IOWebSocketTransport extends Transport {
     }
 
     var ipv6 = hostname.contains(':');
-    return schema +
-        '://' +
-        (ipv6 ? '[' + hostname + ']' : hostname) +
-        port +
-        path +
-        queryString;
+    return '$schema://${ipv6 ? '[$hostname]' : hostname}$port$path$queryString';
   }
 //
 /////

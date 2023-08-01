@@ -15,7 +15,7 @@ String encode(Map obj) {
 
   for (var i in obj.keys) {
     if (str.isNotEmpty) str += '&';
-    str += Uri.encodeComponent('$i') + '=' + Uri.encodeComponent('${obj[i]}');
+    str += '${Uri.encodeComponent('$i')}=${Uri.encodeComponent('${obj[i]}')}';
   }
 
   return str;

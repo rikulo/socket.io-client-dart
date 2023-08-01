@@ -24,7 +24,7 @@ final RegExp rEscapedNewline = RegExp(r'\\n');
 
 ///
 /// Global JSONP callbacks.
-var callbacks;
+dynamic callbacks;
 
 class JSONPTransport extends PollingTransport {
 //  static var empty = (_) => '';
@@ -164,7 +164,7 @@ class JSONPTransport extends PollingTransport {
 
     form!.action = uri();
 
-    var initIframe = () {
+    initIframe() {
       if (iframe != null) {
         try {
           iframe!.remove();
@@ -181,7 +181,7 @@ class JSONPTransport extends PollingTransport {
 
       form!.append(iframe!);
       iframe = iframe;
-    };
+    }
 
     initIframe();
 

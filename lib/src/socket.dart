@@ -24,7 +24,7 @@ import 'package:socket_io_common/src/parser/parser.dart';
 /// @api private
 ///
 
-const List EVENTS = [
+const List events = [
   'connect',
   'connect_error',
   'connect_timeout',
@@ -59,7 +59,7 @@ class Socket extends EventEmitter {
   List sendBuffer = [];
   List receiveBuffer = [];
   String? query;
-  dynamic? auth;
+  dynamic auth;
   List? subs;
   Map flags = {};
   String? id;
@@ -141,7 +141,7 @@ class Socket extends EventEmitter {
   /// @api public
   void emitWithAck(String event, dynamic data,
       {Function? ack, bool binary = false}) {
-    if (EVENTS.contains(event)) {
+    if (events.contains(event)) {
       super.emit(event, data);
     } else {
       var sendData = <dynamic>[event];
@@ -320,8 +320,8 @@ class Socket extends EventEmitter {
     if (connected == true) {
       if (args.length > 2) {
         Function.apply(super.emit, [args.first, args.sublist(1)]);
-        if (this.pid != null && args[args.length - 1] is String) {
-          this.lastOffset = args[args.length - 1];
+        if (pid != null && args[args.length - 1] is String) {
+          lastOffset = args[args.length - 1];
         }
       } else {
         Function.apply(super.emit, args);
@@ -396,7 +396,7 @@ class Socket extends EventEmitter {
   ///
   /// @api private
   void emitBuffered() {
-    var i;
+    int i;
     for (i = 0; i < receiveBuffer.length; i++) {
       List args = receiveBuffer[i];
       if (args.length > 2) {
@@ -431,12 +431,12 @@ class Socket extends EventEmitter {
   /// @api private.
 
   void destroy() {
-    final _subs = subs;
-    if (_subs != null && _subs.isNotEmpty) {
+    final subs0 = subs;
+    if (subs0 != null && subs0.isNotEmpty) {
       // clean subscriptions to avoid reconnections
 
-      for (var i = 0; i < _subs.length; i++) {
-        _subs[i].destroy();
+      for (var i = 0; i < subs0.length; i++) {
+        subs0[i].destroy();
       }
       subs = null;
     }

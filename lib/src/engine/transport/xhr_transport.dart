@@ -121,7 +121,7 @@ class Request extends EventEmitter {
   late bool xd;
   late bool xs;
   late bool async;
-  late var data;
+  late dynamic data;
   late bool agent;
   bool? isBinary;
   late bool supportsBinary;
@@ -212,7 +212,7 @@ class Request extends EventEmitter {
       } else {*/
       readyStateChange = xhr.onReadyStateChange.listen((evt) {
         if (xhr.readyState == 2) {
-          var contentType;
+          dynamic contentType;
           try {
             contentType = xhr.getResponseHeader('Content-Type');
           } catch (e) {
@@ -302,9 +302,9 @@ class Request extends EventEmitter {
   ///
   /// @api private
   void onLoad() {
-    var data;
+    dynamic data;
     try {
-      var contentType;
+      dynamic contentType;
       try {
         contentType = xhr!.getResponseHeader('Content-Type');
       } catch (e) {

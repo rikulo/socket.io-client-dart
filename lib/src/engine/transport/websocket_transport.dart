@@ -15,7 +15,7 @@ class WebSocketTransport extends Transport {
 
   @override
   String? name = 'websocket';
-  late var protocols;
+  late dynamic protocols;
 
   @override
   bool? supportsBinary;
@@ -70,7 +70,7 @@ class WebSocketTransport extends Transport {
   void write(List packets) {
     writable = false;
 
-    var done = () {
+    done() {
       emit('flush');
 
       // fake drain
@@ -79,12 +79,12 @@ class WebSocketTransport extends Transport {
         writable = true;
         emit('drain');
       });
-    };
+    }
 
     var total = packets.length;
     // encodePacket efficient as it uses WS framing
     // no need for encodePayload
-    packets.forEach((packet) {
+    for (var packet in packets) {
       PacketParser.encodePacket(packet,
           supportsBinary: supportsBinary, fromClient: true, callback: (data) {
         // Sometimes the websocket has already been closed but the browser didn't
@@ -99,7 +99,7 @@ class WebSocketTransport extends Transport {
 
         if (--total == 0) done();
       });
-    });
+    }
   }
 
   /// Closes socket.
@@ -144,12 +144,7 @@ class WebSocketTransport extends Transport {
     }
 
     var ipv6 = hostname.contains(':');
-    return schema +
-        '://' +
-        (ipv6 ? '[' + hostname + ']' : hostname) +
-        port +
-        path +
-        queryString;
+    return '$schema://${ipv6 ? '[$hostname]' : hostname}$port$path$queryString';
   }
 /////
 ///// Feature detection for WebSocket.

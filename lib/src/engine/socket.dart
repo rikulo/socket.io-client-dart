@@ -43,7 +43,7 @@ class Socket extends EventEmitter {
   bool? forceBase64;
   bool? enablesXDR;
   String? timestampParam;
-  var timestampRequests;
+  dynamic timestampRequests;
   late List<String> transports;
   late Map transportOptions;
   String readyState = '';
@@ -51,7 +51,7 @@ class Socket extends EventEmitter {
   int prevBufferLen = 0;
   int? policyPort;
   bool? rememberUpgrade;
-  var binaryType;
+  dynamic binaryType;
   bool? onlyBinaryUpgrades;
   late Map perMessageDeflate;
   String? id;
@@ -103,10 +103,9 @@ class Socket extends EventEmitter {
     }
 
     upgrade = opts['upgrade'] != false;
-    path = (opts['path'] ?? '/engine.io')
+    path = '${(opts['path'] ?? '/engine.io')
             .toString()
-            .replaceFirst(RegExp(r'\/$'), '') +
-        '/';
+            .replaceFirst(RegExp(r'\/$'), '')}/';
     forceJSONP = opts['forceJSONP'] == true;
     jsonp = opts['jsonp'] != false;
     forceBase64 = opts['forceBase64'] == true;
@@ -239,7 +238,7 @@ class Socket extends EventEmitter {
   ///
   /// @api private
   void open() {
-    var transport;
+    dynamic transport;
     if (rememberUpgrade != null &&
         priorWebsocketSuccess &&
         transports.contains('websocket')) {
@@ -298,10 +297,10 @@ class Socket extends EventEmitter {
     _logger.fine('probing transport "$name"');
     Transport? transport = createTransport(name, {'probe': true});
     var failed = false;
-    var cleanup;
+    dynamic cleanup;
     priorWebsocketSuccess = false;
 
-    var onTransportOpen = (_) {
+    onTransportOpen(_) {
       if (onlyBinaryUpgrades == true) {
         var upgradeLosesBinary =
             supportsBinary == false && transport!.supportsBinary == false;
@@ -347,9 +346,9 @@ class Socket extends EventEmitter {
               {'error': 'probe error', 'transport': transport!.name});
         }
       });
-    };
+    }
 
-    var freezeTransport = () {
+    freezeTransport() {
       if (failed) return;
 
       // Any callback called by transport should be ignored since now
@@ -359,10 +358,10 @@ class Socket extends EventEmitter {
 
       transport!.close();
       transport = null;
-    };
+    }
 
     // Handle any error that happens while probing
-    var onerror = (err) {
+    onerror(err) {
       final oldTransport = transport;
       freezeTransport();
 
@@ -370,20 +369,20 @@ class Socket extends EventEmitter {
 
       emit('upgradeError',
           {'error': 'probe error: $err', 'transport': oldTransport!.name});
-    };
+    }
 
-    var onTransportClose = (_) => onerror('transport closed');
+    onTransportClose(_) => onerror('transport closed');
 
     // When the socket is closed while we're probing
-    var onclose = (_) => onerror('socket closed');
+    onclose(_) => onerror('socket closed');
 
     // When the socket is upgraded while we're probing
-    var onupgrade = (to) {
+    onupgrade(to) {
       if (transport != null && to.name != transport!.name) {
         _logger.fine('"${to?.name}" works - aborting "${transport?.name}"');
         freezeTransport();
       }
-    };
+    }
 
     // Remove all listeners on the transport and on self
     cleanup = () {
@@ -604,27 +603,27 @@ class Socket extends EventEmitter {
   ///
   /// @api private
   Socket close() {
-    var close = () {
+    close() {
       onClose('forced close');
       _logger.fine('socket closing - telling transport to close');
       transport!.close();
-    };
+    }
 
-    var temp;
-    var cleanupAndClose = (_) {
+    dynamic temp;
+    cleanupAndClose(_) {
       off('upgrade', temp);
       off('upgradeError', temp);
       close();
-    };
+    }
 
     // a workaround for dart to access the local variable;
     temp = cleanupAndClose;
 
-    var waitForUpgrade = () {
+    waitForUpgrade() {
       // wait for upgrade to finish since we can't send packets while pausing a transport
       once('upgrade', cleanupAndClose);
       once('upgradeError', cleanupAndClose);
-    };
+    }
 
     if ('opening' == readyState || 'open' == readyState) {
       readyState = 'closing';
