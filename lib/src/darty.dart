@@ -164,7 +164,8 @@ class OptionBuilder {
     return this;
   }
 
-  OptionBuilder setAuthFn(void Function(void Function(Map auth) callback) authFn) {
+  OptionBuilder setAuthFn(
+      void Function(void Function(Map auth) callback) authFn) {
     _opts['auth'] = authFn;
     return this;
   }

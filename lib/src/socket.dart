@@ -219,7 +219,7 @@ class Socket extends EventEmitter {
   }
 
   /// Sends a CONNECT packet to initiate the Socket.IO session.
-  /// 
+  ///
   /// @param {data}
   /// @api private
   void sendConnectPacket(Map? data) {
