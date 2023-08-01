@@ -266,6 +266,7 @@ If you'd like to contribute back to the core, you can [fork this repository](htt
 
 If you are new to Git or GitHub, please read [this guide](https://help.github.com/) first.
 
+Contribution of all kinds is welcome. Please read [Contributing.md](https://github.com/rikulo/socket.io-client-dart/blob/master/contributing.md) in this repository.
 ## Who Uses
 
 - [Quire](https://quire.io) - a simple, collaborative, multi-level task management tool.
