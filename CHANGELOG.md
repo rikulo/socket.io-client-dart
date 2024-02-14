@@ -3,7 +3,7 @@
 **New Feature:**
 
 * [#55](https://github.com/rikulo/socket.io-client-dart/issues/55) how to custom parser
-
+* [#322](https://github.com/rikulo/socket.io-client-dart/pull/322) added emitWithAckAsync
 
 ## 2.0.3+1
 

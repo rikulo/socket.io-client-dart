@@ -198,6 +198,29 @@ class Socket extends EventEmitter {
     flags = {};
 
   }
+
+  /// Emits an event and waits for an acknowledgement
+  Future emitWithAckAsync(String event, dynamic data,
+      {Function? ack, bool binary = false}) {
+    var withErr = flags['timeout'] != null || _opts!['ackTimeout'] != null;
+    var completer = Completer();
+
+    emitWithAck(event, data, ack: (arg1, [arg2]) {
+      if (withErr) {
+        if (arg1 != null) {
+          completer.completeError(arg1);
+        } else {
+          if (ack != null) ack(arg2);
+          completer.complete(arg2);
+        }
+      } else {
+        if (ack != null) ack(arg1);
+        completer.complete(arg1);
+      }
+    }, binary: binary);
+    return completer.future;
+  }
+
   void _addToQueue(List<dynamic> args) {
     Function? ack;
     if (args.last is Function) {
@@ -262,25 +285,26 @@ class Socket extends EventEmitter {
     emitWithAck(evt, args, ack: ack);
   }
   void _registerAckCallback(int id, Function ack) {
+    final sid = '$id';
     final timeout = flags['timeout'] ?? _opts?['ackTimeout'];
     if (timeout == null) {
-      acks[id] = ack;
+      acks[sid] = ack;
       return;
     }
 
     var timer = Timer(Duration(milliseconds: timeout), () {
-      acks.remove(id);
+      acks.remove(sid);
       for (int i = 0; i < sendBuffer.length; i++) {
-        if (sendBuffer[i]['id'] == id) {
-          _logger.fine("removing packet with ack id $id from the buffer");
+        if (sendBuffer[i]['id'] == sid) {
+          _logger.fine("removing packet with ack id $sid from the buffer");
           sendBuffer.removeAt(i);
         }
       }
-      _logger.fine("event with ack id $id has timed out after $timeout ms");
+      _logger.fine("event with ack id $sid has timed out after $timeout ms");
       ack(Exception("operation has timed out"));
     });
 
-    acks[id] = (args) {
+    acks[sid] = (args) {
       timer.cancel();
       Function.apply(ack, [null, ...args]);
     };
