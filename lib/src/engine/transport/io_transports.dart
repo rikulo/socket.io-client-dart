@@ -2,7 +2,7 @@
 // History: 2019-01-21 12:15
 // Author: jumperchen<jumperchen@potix.com>
 import 'package:socket_io_client/src/engine/transport/io_websocket_transport.dart';
-import 'package:socket_io_client/src/engine/transport/transport.dart';
+import 'package:socket_io_client/src/engine/transport.dart';
 
 class Transports {
   static List<String> upgradesTo(String from) {

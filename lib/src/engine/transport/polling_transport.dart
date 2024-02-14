@@ -1,5 +1,3 @@
-import 'package:socket_io_client/src/engine/parseqs.dart';
-
 ///
 /// polling_transport.dart
 ///
@@ -11,31 +9,62 @@ import 'package:socket_io_client/src/engine/parseqs.dart';
 ///   26/04/2017, Created by jumperchen
 ///
 /// Copyright (C) 2017 Potix Corporation. All Rights Reserved.
+import 'dart:async';
+import 'dart:html';
+
 import 'package:logging/logging.dart';
-import 'package:socket_io_client/src/engine/transport/transport.dart';
+import 'package:socket_io_client/src/engine/transport.dart';
 import 'package:socket_io_common/src/engine/parser/parser.dart';
+import 'package:socket_io_common/src/util/event_emitter.dart';
+
 
 final Logger _logger = Logger('socket_io:transport.PollingTransport');
 
-abstract class PollingTransport extends Transport {
+bool _hasXHR2() {
+  try {
+    // Dart's HttpRequest doesn't expose a direct way to check for XHR2 features,
+    // but attempting to use features like setting `responseType` could serve as a proxy.
+    final xhr = HttpRequest();
+    xhr.responseType = 'arraybuffer'; // Attempting to set a responseType supported by XHR2
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+class PollingTransport extends Transport {
   ///
   /// Transport name.
   @override
   String? name = 'polling';
 
-  @override
-  bool? supportsBinary;
-  bool? polling;
+  bool polling = false;
+  dynamic? pollXhr;
+  dynamic? cookieJar;
+  late bool xd;
 
   ///
-  /// Polling interface.
-  ///
-  /// @param {Object} opts
-  /// @api private
+  /// XHR Polling constructor.
   PollingTransport(Map opts) : super(opts) {
-    var forceBase64 = opts['forceBase64'];
-    if (/*!hasXHR2 || */ forceBase64) {
-      supportsBinary = false;
+    final isSSL = window.location.protocol == 'https:';
+    String port = window.location.port;
+
+    if (port.isEmpty) {
+      port = isSSL ? '443' : '80';
+    }
+
+    xd = opts['hostname'] != window.location.hostname || port != opts['port'];
+    // Force base64 is a specific strategy that might not have a direct equivalent in Dart.
+    // Assuming it's a flag that disables binary data transfer in favor of base64 encoded strings.
+    final forceBase64 = opts.containsKey('forceBase64') && opts['forceBase64'];
+    supportsBinary = _hasXHR2() && !forceBase64;
+
+    if (opts.containsKey('withCredentials') && opts['withCredentials']) {
+      // Dart in a browser environment handles cookies automatically,
+      // and you might not need to manually manage a cookie jar.
+      // However, for setting credentials like cookies in requests, you would use the
+      // `withCredentials` property of `HttpRequest`.
+      // this.cookieJar = createCookieJar();
     }
   }
 
@@ -98,7 +127,7 @@ abstract class PollingTransport extends Transport {
     _logger.fine('polling');
     polling = true;
     doPoll();
-    emit('poll');
+    emitReserved('poll');
   }
 
   ///
@@ -111,19 +140,18 @@ abstract class PollingTransport extends Transport {
     _logger.fine('polling got data $data');
     callback(packet, [index, total]) {
       // if its the first message we consider the transport open
-      if ('opening' == self.readyState) {
+      if ('opening' == self.readyState && packet['type'] == 'open') {
         self.onOpen();
       }
 
       // if its a close packet, we close the ongoing requests
       if ('close' == packet['type']) {
-        self.onClose();
+        self.onClose({'description': "transport closed by the server"});
         return false;
       }
 
       // otherwise bypass onData and handle the message
       self.onPacket(packet);
-      return null;
     }
 
     // decode payload
@@ -133,7 +161,7 @@ abstract class PollingTransport extends Transport {
     if ('closed' != readyState) {
       // if we got data we're not polling
       polling = false;
-      emit('pollComplete');
+      emitReserved('pollComplete');
 
       if ('open' == readyState) {
         poll();
@@ -179,13 +207,12 @@ abstract class PollingTransport extends Transport {
   void write(List packets) {
     var self = this;
     writable = false;
-    callbackfn(_) {
-      self.writable = true;
-      self.emit('drain');
-    }
 
     PacketParser.encodePayload(packets, callback: (data) {
-      self.doWrite(data, callbackfn);
+      self.doWrite(data, (_) {
+        self.writable = true;
+        self.emitReserved('drain');
+      });
     });
   }
 
@@ -194,13 +221,12 @@ abstract class PollingTransport extends Transport {
   ///
   /// @api private
   String uri() {
-    var query = this.query ?? {};
-    var schema = secure ? 'https' : 'http';
-    var port = '';
+    final query = this.query ?? {};
+    var schema = this.opts['secure'] ? 'https' : 'http';
 
     // cache busting is forced
-    if (timestampRequests != false) {
-      query[timestampParam] =
+    if (this.opts['timestampRequests'] != false) {
+      query[this.opts['timestampRequests']] =
           DateTime.now().millisecondsSinceEpoch.toRadixString(36);
     }
 
@@ -208,24 +234,207 @@ abstract class PollingTransport extends Transport {
       query['b64'] = 1;
     }
 
-    // avoid port if default for schema
-    if (this.port != null &&
-        (('https' == schema && this.port != 443) ||
-            ('http' == schema && this.port != 80))) {
-      port = ':${this.port}';
-    }
-
-    var queryString = encode(query);
-
-    // prepend ? to query
-    if (queryString.isNotEmpty) {
-      queryString = '?$queryString';
-    }
-
-    var ipv6 = hostname.contains(':');
-    return '$schema://${ipv6 ? '[$hostname]' : hostname}$port$path$queryString';
+    return createUri(schema, query);
   }
 
-  void doWrite(data, callback);
-  void doPoll();
+  Request request([Map? opts]) {
+    opts = opts ?? {};
+    final mergedOpts = {
+      ...opts,
+      xd: this.xd,
+      cookieJar: this.cookieJar,
+      ...this.opts
+    };
+    return Request(this.uri(), mergedOpts);
+  }
+  ///
+  /// Sends data.
+  ///
+  /// @param {String} data to send.
+  /// @param {Function} called upon flush.
+  /// @api private
+  @override
+  void doWrite(data, fn) {
+    var isBinary = data is! String;
+    var req = request({'method': 'POST', 'data': data, 'isBinary': isBinary});
+    req.on('success', fn);
+    req.on('error', (err) {
+      onError('xhr post error', err);
+    });
+  }
+
+  ///
+  /// Starts a poll cycle.
+  ///
+  /// @api private
+  @override
+  void doPoll() {
+    _logger.fine('xhr poll');
+    var req = request();
+    req.on('data', (data) {
+      onData(data);
+    });
+    req.on('error', (xhrStatus) {
+      onError('xhr poll error', xhrStatus);
+    });
+    pollXhr = req;
+  }
+}
+class Request extends EventEmitter {
+  late Map opts;
+  late String method;
+  late String uri;
+  late dynamic data;
+
+  HttpRequest? xhr;
+  int? index;
+  StreamSubscription? readyStateChange;
+
+  Request(uri, Map opts) {
+    this.opts = opts;
+    this.method = opts['method'] ?? 'GET';
+    this.uri = uri;
+    this.data = opts['data'];
+
+    create();
+  }
+
+  ///
+  /// Creates the XHR object and sends the request.
+  ///
+  /// @api private
+  void create() {
+    final opts = {
+      'agent': this.opts['agent'],
+      'pfx': this.opts['pfx'],
+      'key': this.opts['key'],
+      'passphrase': this.opts['passphrase'],
+      'cert': this.opts['cert'],
+      'ca': this.opts['ca'],
+      'ciphers': this.opts['ciphers'],
+      'rejectUnauthorized': this.opts['rejectUnauthorized'],
+      'autoUnref': this.opts['autoUnref'],
+    };
+    opts['xdomain'] = this.opts['xd'] ?? false;
+
+    var xhr = this.xhr = HttpRequest();
+    var self = this;
+
+    try {
+      _logger.fine('xhr open $method: $uri');
+      xhr.open(method, uri, async: true);
+
+      try {
+        if (this.opts.containsKey('extraHeaders') && this.opts['extraHeaders']?.isNotEmpty == true) {
+          this.opts['extraHeaders'].forEach((k, v) {
+            xhr.setRequestHeader(k, v);
+          });
+        }
+      } catch (e) {
+        // ignore
+      }
+
+      if ('POST' == method) {
+        try {
+            xhr.setRequestHeader('Content-type', 'text/plain;charset=UTF-8');
+        } catch (e) {
+          // ignore
+        }
+      }
+
+      try {
+        xhr.setRequestHeader('Accept', '*/*');
+      } catch (e) {
+        // ignore
+      }
+      this.opts['cookieJar']?.addCookies(xhr);
+
+      if (this.opts.containsKey('requestTimeout')) {
+        xhr.timeout = this.opts['requestTimeout'];
+      }
+
+      readyStateChange = xhr.onReadyStateChange.listen((evt) {
+        if (xhr.readyState == 2) {
+          dynamic contentType;
+          try {
+            contentType = xhr.getResponseHeader('Content-Type');
+          } catch (e) {
+            // ignore
+          }
+          if (contentType == 'application/octet-stream') {
+            xhr.responseType = 'arraybuffer';
+          }
+        }
+        if (4 != xhr.readyState) return;
+        if (200 == xhr.status || 1223 == xhr.status) {
+          self.onLoad();
+        } else {
+          // make sure the `error` event handler that's user-set
+          // does not throw in the same tick and gets caught here
+          Timer.run(() => self.onError(xhr.status));
+        }
+      });
+
+      _logger.fine('xhr data $data');
+      xhr.send(data);
+    } catch (e) {
+      // Need to defer since .create() is called directly fhrom the constructor
+      // and thus the 'error' event can only be only bound *after* this exception
+      // occurs.  Therefore, also, we cannot throw here at all.
+      Timer.run(() => onError(e));
+      return;
+    }
+  }
+
+  ///
+  /// Called upon error.
+  ///
+  /// @api private
+  void onError(err) {
+    emitReserved('error', err);
+    cleanup(true);
+  }
+
+  ///
+  /// Cleans up house.
+  ///
+  /// @api private
+  void cleanup([fromError]) {
+    if (xhr == null) {
+      return;
+    }
+
+    readyStateChange?.cancel();
+    readyStateChange = null;
+
+    if (fromError != null) {
+      try {
+        xhr!.abort();
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    xhr = null;
+  }
+
+  ///
+  /// Called upon load.
+  ///
+  /// @api private
+  void onLoad() {
+    final data = xhr!.responseText;
+    if (data != null) {
+      emitReserved('data', data);
+      emitReserved('success');
+      cleanup();
+    }
+  }
+
+  ///
+  /// Aborts the request.
+  ///
+  /// @api public
+  void abort() => cleanup();
+
 }

@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 ///
 /// socket.dart
 ///
@@ -11,34 +9,24 @@ import 'dart:typed_data';
 ///   26/04/2017, Created by jumperchen
 ///
 /// Copyright (C) 2017 Potix Corporation. All Rights Reserved.
+import 'dart:async';
+import 'dart:typed_data';
+
 import 'package:logging/logging.dart';
 import 'package:socket_io_common/src/util/event_emitter.dart';
 import 'package:socket_io_client/src/manager.dart';
 import 'package:socket_io_client/src/on.dart' as util;
 import 'package:socket_io_common/src/parser/parser.dart';
 
-///
-/// Internal events (blacklisted).
-/// These events can't be emitted by the user.
-///
-/// @api private
-///
 
-const List events = [
-  'connect',
-  'connect_error',
-  'connect_timeout',
-  'connecting',
-  'disconnect',
-  'error',
-  'reconnect',
-  'reconnect_attempt',
-  'reconnect_failed',
-  'reconnect_error',
-  'reconnecting',
-  'ping',
-  'pong'
-];
+const reservedEvents = <String, int>{
+  'connect': 1,
+  'connect_error': 1,
+  'disconnect': 1,
+  'disconnecting': 1,
+  'newListener': 1,
+  'removeListener': 1,
+};
 
 final Logger _logger = Logger('socket_io_client:Socket');
 
@@ -47,33 +35,50 @@ final Logger _logger = Logger('socket_io_client:Socket');
 ///
 /// @api public
 class Socket extends EventEmitter {
-  String nsp;
-  Map? opts;
-
   Manager io;
-  late Socket json;
+  String? id;
+  String? _pid;
+  String? _lastOffset;
+  bool connected = false;
+  bool recovered = false;
+  dynamic auth;
+  List receiveBuffer = [];
+  List sendBuffer = [];
+  List _queue = [];
+  int _queueSeq = 0;
+
+  String nsp;
+  Map? _opts;
   num ids = 0;
   Map acks = {};
-  bool connected = false;
-  bool disconnected = true;
-  List sendBuffer = [];
-  List receiveBuffer = [];
-  String? query;
-  dynamic auth;
   List? subs;
   Map flags = {};
-  String? id;
-  String? pid;
-  String? lastOffset;
+  String? query;
+  List _anyListeners = [];
+  List _anyOutgoingListeners = [];
 
-  Socket(this.io, this.nsp, this.opts) {
-    json = this; // compat
-    if (opts != null) {
-      query = opts!['query'];
-      auth = opts!['auth'];
+  Socket(this.io, this.nsp, this._opts) {
+    if (_opts != null) {
+      query = _opts!['query'];
+      auth = _opts!['auth'];
     }
+    _opts ??= {};
     if (io.autoConnect) open();
   }
+
+  /// Whether the socket is currently disconnected
+  ///
+  /// @example
+  /// const socket = io();
+  ///
+  /// socket.on("connect", () => {
+  ///   console.log(socket.disconnected); // false
+  /// });
+  ///
+  /// socket.on("disconnect", () => {
+  ///   console.log(socket.disconnected); // true
+  /// });
+  bool get disconnected => !connected;
 
   ///
   /// Subscribe to open, close and packet events
@@ -141,45 +146,152 @@ class Socket extends EventEmitter {
   /// @api public
   void emitWithAck(String event, dynamic data,
       {Function? ack, bool binary = false}) {
-    if (events.contains(event)) {
-      super.emit(event, data);
-    } else {
-      var sendData = <dynamic>[event];
-      if (data is ByteBuffer || data is List<int>) {
-        sendData.add(data);
-      } else if (data is Iterable) {
-        sendData.addAll(data);
-      } else if (data != null) {
-        sendData.add(data);
-      }
+    if (reservedEvents.containsKey(event)) {
+      throw Exception('"$event" is a reserved event name');
+    }
+    var sendData = <dynamic>[event];
+    if (data is ByteBuffer || data is List<int>) {
+      sendData.add(data);
+    } else if (data is Iterable) {
+      sendData.addAll(data);
+    } else if (data != null) {
+      sendData.add(data);
+    }
 
-      var packet = {
-        'type': EVENT,
-        'data': sendData,
-        'options': {'compress': flags.isNotEmpty == true && flags['compress']}
-      };
-
-      // event ack callback
+    if (_opts?['retries'] != null && !flags.containsKey('fromQueue') && !flags.containsKey('volatile')) {
       if (ack != null) {
-        _logger.fine('emitting packet with ack id $ids');
-        acks['$ids'] = ack;
-        packet['id'] = '${ids++}';
+        sendData.add(ack);
       }
-      final isTransportWritable = io.engine != null &&
-          io.engine!.transport != null &&
-          io.engine!.transport!.writable == true;
+      _addToQueue(sendData);
+      return;
+    }
 
-      final discardPacket =
-          flags['volatile'] != null && (!isTransportWritable || !connected);
-      if (discardPacket) {
-        _logger
-            .fine('discard packet as the transport is not currently writable');
-      } else if (connected) {
-        this.packet(packet);
-      } else {
-        sendBuffer.add(packet);
+
+    var packet = {
+      'type': EVENT,
+      'data': sendData,
+      'options': {'compress': flags.isNotEmpty == true && flags['compress']}
+    };
+
+    // event ack callback
+    if (ack != null) {
+      _logger.fine('emitting packet with ack id $ids');
+      final id = ids++;
+      _registerAckCallback(id.toInt(), ack);
+      packet['id'] = '$id';
+    }
+    final isTransportWritable = io.engine != null &&
+        io.engine!.transport != null &&
+        io.engine!.transport!.writable == true;
+
+    final discardPacket =
+        flags['volatile'] != null && (!isTransportWritable || !connected);
+    if (discardPacket) {
+      _logger
+          .fine('discard packet as the transport is not currently writable');
+    } else if (connected) {
+      notifyOutgoingListeners(packet);
+      this.packet(packet);
+    } else {
+      sendBuffer.add(packet);
+    }
+    flags = {};
+
+  }
+  void _addToQueue(List<dynamic> args) {
+    Function? ack;
+    if (args.last is Function) {
+      ack = args.removeLast() as Function?;
+    }
+
+    var packet = {
+      'id': _queueSeq++,
+      'tryCount': 0,
+      'pending': false,
+      'args': args,
+      'flags': {...flags, 'fromQueue': true},
+    };
+
+    args.add((err, responseArgs) {
+      if (packet != _queue.first) {
+        // the packet has already been acknowledged
+        return;
       }
-      flags = {};
+      var hasError = err != null;
+      if (hasError) {
+        if (packet['tryCount'] is int &&
+            _opts!['retries'] is int &&
+            (packet['tryCount'] as int) > (_opts!['retries'] as int)) {
+          _logger.fine("packet [${packet['id']}] is discarded after ${packet['tryCount']} tries");
+          _queue.removeAt(0);
+          if (ack != null) {
+            ack(err);
+          }
+        }
+      } else {
+        _logger.fine("packet [${packet['id']}] was successfully sent");
+        _queue.removeAt(0);
+        if (ack != null) {
+          ack(null, responseArgs);
+        }
+      }
+      packet['pending'] = false;
+      return _drainQueue();
+    });
+
+    _queue.add(packet);
+    _drainQueue();
+  }
+  void _drainQueue([bool force = false]) {
+    _logger.fine("draining queue");
+    if (!connected || _queue.isEmpty) {
+      return;
+    }
+    var packet = _queue.first;
+    if (packet['pending'] && !force) {
+      _logger.fine("packet [${packet['id']}] has already been sent and is waiting for an ack");
+      return;
+    }
+    packet['pending'] = true;
+    packet['tryCount']++;
+    _logger.fine("sending packet [${packet['id']}] (try n°${packet['tryCount']})");
+    flags = packet['flags'];
+    var args = packet['args'] as List;
+    final evt = args.removeAt(0);
+    final ack = args.last is Function ? args.removeLast() : null;
+    emitWithAck(evt, args, ack: ack);
+  }
+  void _registerAckCallback(int id, Function ack) {
+    final timeout = flags['timeout'] ?? _opts?['ackTimeout'];
+    if (timeout == null) {
+      acks[id] = ack;
+      return;
+    }
+
+    var timer = Timer(Duration(milliseconds: timeout), () {
+      acks.remove(id);
+      for (int i = 0; i < sendBuffer.length; i++) {
+        if (sendBuffer[i]['id'] == id) {
+          _logger.fine("removing packet with ack id $id from the buffer");
+          sendBuffer.removeAt(i);
+        }
+      }
+      _logger.fine("event with ack id $id has timed out after $timeout ms");
+      ack(Exception("operation has timed out"));
+    });
+
+    acks[id] = (args) {
+      timer.cancel();
+      Function.apply(ack, [null, ...args]);
+    };
+  }
+
+  void notifyOutgoingListeners(Map packet) {
+    if (_anyOutgoingListeners.isNotEmpty) {
+      final listeners = List.from(_anyOutgoingListeners);
+      for (final listener in listeners) {
+        Function.apply(listener, [packet['data']]);
+      }
     }
   }
 
@@ -200,15 +312,6 @@ class Socket extends EventEmitter {
   void onopen([_]) {
     _logger.fine('transport is open - connecting');
 
-    // write connect packet if necessary
-    // if ('/' != nsp) {
-    // if (query?.isNotEmpty == true) {
-    //   packet({'type': CONNECT, 'query': query});
-    // } else {
-    // packet({'type': CONNECT});
-    // }
-    // }
-
     if (auth is Function) {
       auth((data) {
         sendConnectPacket(data);
@@ -225,10 +328,10 @@ class Socket extends EventEmitter {
   void sendConnectPacket(Map? data) {
     packet({
       'type': CONNECT,
-      'data': pid != null
+      'data': _pid != null
           ? {
-              'pid': pid,
-              'offset': lastOffset,
+              'pid': _pid,
+              'offset': _lastOffset,
               ...(data ?? {}),
             }
           : data,
@@ -238,7 +341,7 @@ class Socket extends EventEmitter {
   /// Called upon engine or manager `error`
   void onerror(err) {
     if (!connected) {
-      emit('connect_error', err);
+      emitReserved('connect_error', err);
     }
   }
 
@@ -249,11 +352,10 @@ class Socket extends EventEmitter {
   /// @api private
   void onclose(reason) {
     _logger.fine('close ($reason)');
-    emit('disconnecting', reason);
+    emitReserved('disconnecting', reason);
     connected = false;
-    disconnected = true;
     id = null;
-    emit('disconnect', reason);
+    emitReserved('disconnect', reason);
   }
 
   ///
@@ -271,23 +373,17 @@ class Socket extends EventEmitter {
           final pid = packet['data']['pid'];
           onconnect(id, pid);
         } else {
-          emit('connect_error',
+          emitReserved('connect_error',
               'It seems you are trying to reach a Socket.IO server in v2.x with a v3.x client, but they are not compatible (more information here: https://socket.io/docs/v3/migrating-from-2-x-to-3-0/)');
         }
         break;
 
       case EVENT:
-        onevent(packet);
-        break;
-
       case BINARY_EVENT:
         onevent(packet);
         break;
 
       case ACK:
-        onack(packet);
-        break;
-
       case BINARY_ACK:
         onack(packet);
         break;
@@ -297,7 +393,8 @@ class Socket extends EventEmitter {
         break;
 
       case CONNECT_ERROR:
-        emit('error', packet['data']);
+        destroy();
+        emitReserved('error', packet['data']);
         break;
     }
   }
@@ -309,25 +406,36 @@ class Socket extends EventEmitter {
   /// @api private
   void onevent(Map packet) {
     List args = packet['data'] ?? [];
-//    debug('emitting event %j', args);
+    _logger.fine('emitting event $args');
 
     if (null != packet['id']) {
-//      debug('attaching ack callback to event');
+      _logger.fine('attaching ack callback to event');
       args.add(ack(packet['id']));
     }
 
     // dart doesn't support "String... rest" syntax.
     if (connected == true) {
-      if (args.length > 2) {
-        Function.apply(super.emit, [args.first, args.sublist(1)]);
-        if (pid != null && args[args.length - 1] is String) {
-          lastOffset = args[args.length - 1];
-        }
-      } else {
-        Function.apply(super.emit, args);
-      }
+      emitEvent(args);
     } else {
       receiveBuffer.add(args);
+    }
+  }
+
+  void emitEvent(List<dynamic> args) {
+    if (_anyListeners.isNotEmpty) {
+      final listeners = List.from(_anyListeners);
+      for (final listener in listeners) {
+        Function.apply(listener, args);
+      }
+    }
+    // Assuming `super.emit` is analogous to calling an inherited or mixin method.
+    if (args.length > 2) {
+      Function.apply(super.emit, [args.first, args.sublist(1)]);
+    } else {
+      Function.apply(super.emit, args);
+    }
+    if (_pid != null && args.isNotEmpty && args.last.runtimeType == String) {
+      _lastOffset = args.last;
     }
   }
 
@@ -384,11 +492,12 @@ class Socket extends EventEmitter {
   /// @api private
   void onconnect(id, pid) {
     this.id = id;
-    this.pid = pid; // defined only if connection state recovery is enabled
+    recovered = pid != null && _pid == pid;
+    _pid = pid; // defined only if connection state recovery is enabled
     connected = true;
-    disconnected = false;
-    emit('connect');
     emitBuffered();
+    emitReserved("connect");
+    _drainQueue(true);
   }
 
   ///
@@ -396,19 +505,14 @@ class Socket extends EventEmitter {
   ///
   /// @api private
   void emitBuffered() {
-    int i;
-    for (i = 0; i < receiveBuffer.length; i++) {
-      List args = receiveBuffer[i];
-      if (args.length > 2) {
-        Function.apply(super.emit, [args.first, args.sublist(1)]);
-      } else {
-        Function.apply(super.emit, args);
-      }
+    for (var args in receiveBuffer) {
+      emitEvent(args);
     }
     receiveBuffer = [];
 
-    for (i = 0; i < sendBuffer.length; i++) {
-      packet(sendBuffer[i]);
+    for (var packet in sendBuffer) {
+      notifyOutgoingListeners(packet);
+      packet(packet);
     }
     sendBuffer = [];
   }
@@ -486,5 +590,157 @@ class Socket extends EventEmitter {
   Socket compress(compress) {
     flags['compress'] = compress;
     return this;
+  }
+
+  /// Sets a modifier for a subsequent event emission that the event message will be dropped when this socket is not
+  /// ready to send messages.
+  ///
+  /// @example
+  /// socket.volatile.emit("hello"); // the server may or may not receive it
+  ///
+  /// @returns self
+  Socket get volatile {
+    flags['volatile'] = true;
+    return this;
+  }
+
+  /// Sets a modifier for a subsequent event emission that the callback will be called with an error when the
+  /// given number of milliseconds have elapsed without an acknowledgement from the server:
+  ///
+  /// @example
+  /// socket.timeout(5000).emit("my-event", (err) => {
+  ///   if (err) {
+  ///     // the server did not acknowledge the event in the given delay
+  ///   }
+  /// });
+  ///
+  /// @returns self
+  Socket timeout(int timeout) {
+    flags['timeout'] = timeout;
+    return this;
+  }
+
+  /// Adds a listener that will be fired when any event is emitted. The event name is passed as the first argument to the
+  /// callback.
+  ///
+  /// @example
+  /// socket.onAny((event, ...args) => {
+  ///   console.log(`got ${event}`);
+  /// });
+  ///
+  /// @param listener
+  @override
+  Socket onAny(AnyEventHandler handler) {
+    _anyListeners.add(handler);
+    return this;
+  }
+
+  /// Adds a listener that will be fired when any event is emitted. The event name is passed as the first argument to the
+  /// callback. The listener is added to the beginning of the listeners array.
+  ///
+  /// @example
+  /// socket.prependAny((event, ...args) => {
+  ///   console.log(`got event ${event}`);
+  /// });
+  ///
+  /// @param listener
+  Socket prependAny(AnyEventHandler handler) {
+    _anyListeners.insert(0, handler);
+    return this;
+  }
+
+  /// Removes the listener that will be fired when any event is emitted.
+  ///
+  /// @example
+  /// const catchAllListener = (event, ...args) => {
+  ///   console.log(`got event ${event}`);
+  /// }
+  ///
+  /// socket.onAny(catchAllListener);
+  ///
+  /// // remove a specific listener
+  /// socket.offAny(catchAllListener);
+  ///
+  /// // or remove all listeners
+  /// socket.offAny();
+  ///
+  /// @param listener
+  @override
+  Socket offAny([AnyEventHandler? handler]) {
+    if (handler != null) {
+      _anyListeners.remove(handler);
+    } else {
+      _anyListeners.clear();
+    }
+    return this;
+  }
+
+  /// Returns an array of listeners that are listening for any event that is specified. This array can be manipulated,
+  /// e.g. to remove listeners.
+  List listenersAny() {
+    return _anyListeners;
+  }
+
+  /// Adds a listener that will be fired when any event is emitted. The event name is passed as the first argument to the
+  /// callback.
+  ///
+  /// Note: acknowledgements sent to the server are not included.
+  ///
+  /// @example
+  /// socket.onAnyOutgoing((event, ...args) => {
+  ///   console.log(`sent event ${event}`);
+  /// });
+  ///
+  /// @param listener
+  Socket onAnyOutgoing(AnyEventHandler handler) {
+    _anyOutgoingListeners.add(handler);
+    return this;
+  }
+
+  /// Adds a listener that will be fired when any event is emitted. The event name is passed as the first argument to the
+  /// callback. The listener is added to the beginning of the listeners array.
+  ///
+  /// Note: acknowledgements sent to the server are not included.
+  ///
+  /// @example
+  /// socket.prependAnyOutgoing((event, ...args) => {
+  ///   console.log(`sent event ${event}`);
+  /// });
+  ///
+  /// @param listener
+  Socket prependAnyOutgoing(AnyEventHandler handler) {
+    _anyOutgoingListeners.insert(0, handler);
+    return this;
+  }
+
+  /// Removes the listener that will be fired when any event is emitted.
+  ///
+  /// @example
+  /// const catchAllListener = (event, ...args) => {
+  ///   console.log(`sent event ${event}`);
+  /// }
+  ///
+  /// socket.onAnyOutgoing(catchAllListener);
+  ///
+  /// // remove a specific listener
+  /// socket.offAnyOutgoing(catchAllListener);
+  ///
+  /// // or remove all listeners
+  /// socket.offAnyOutgoing();
+  ///
+  /// @param [listener] - the catch-all listener (optional)
+  Socket offAnyOutgoing([AnyEventHandler? handler]) {
+    if (handler != null) {
+      _anyOutgoingListeners.remove(handler);
+    } else {
+      _anyOutgoingListeners.clear();
+    }
+    return this;
+  }
+
+  /// Returns an array of listeners that are listening for any event that is specified. This array can be manipulated,
+  /// e.g. to remove listeners.
+  List listenersAnyOutgoing() {
+    return _anyOutgoingListeners;
   }
 }

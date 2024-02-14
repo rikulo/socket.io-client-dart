@@ -4,13 +4,13 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:logging/logging.dart';
 import 'package:socket_io_common/src/util/event_emitter.dart';
 import 'package:socket_io_client/src/engine/parseqs.dart';
 import 'package:socket_io_common/src/engine/parser/parser.dart' as parser;
-import 'package:socket_io_client/src/engine/transport/polling_transport.dart';
-import './transport/transport.dart';
+import 'transport.dart';
 
 // ignore: uri_does_not_exist
 import './transport/transports_stub.dart'
@@ -29,52 +29,35 @@ final Logger _logger = Logger('socket_io_client:engine.Socket');
 /// @api public
 ///
 class Socket extends EventEmitter {
-  late Map opts;
-  late Uri uri;
-  late bool secure;
-  bool? agent;
-  late String hostname;
-  int? port;
-  late Map query;
-  bool? upgrade;
-  late String path;
-  bool? forceJSONP;
-  bool? jsonp;
-  bool? forceBase64;
-  bool? enablesXDR;
-  String? timestampParam;
-  dynamic timestampRequests;
-  late List<String> transports;
-  late Map transportOptions;
+  String? id;
+  Transport? transport;
+  String binaryType = 'arraybuffer';
   String readyState = '';
   List writeBuffer = [];
+
   int prevBufferLen = 0;
-  int? policyPort;
-  bool? rememberUpgrade;
-  dynamic binaryType;
-  bool? onlyBinaryUpgrades;
-  late Map perMessageDeflate;
-  String? id;
-  late List upgrades;
-  late int pingInterval;
-  late int pingTimeout;
-  Timer? pingIntervalTimer;
+  List? upgrades;
+  int? pingInterval;
+  int? pingTimeout;
   Timer? pingTimeoutTimer;
-  int? requestTimeout;
-  Transport? transport;
-  bool? supportsBinary;
   bool? upgrading;
-  Map? extraHeaders;
+  int? maxPayload;
+
+  late Map opts;
+  late bool secure;
+  late String hostname;
+  int? port;
+  late List<String> transports;
 
   Socket(String uri, Map? opts) {
     opts = opts ?? <dynamic, dynamic>{};
 
     if (uri.isNotEmpty) {
-      this.uri = Uri.parse(uri);
-      opts['hostname'] = this.uri.host;
-      opts['secure'] = this.uri.scheme == 'https' || this.uri.scheme == 'wss';
-      opts['port'] = this.uri.port;
-      if (this.uri.hasQuery) opts['query'] = this.uri.query;
+      var _uri = Uri.parse(uri);
+      opts['hostname'] = _uri.host;
+      opts['secure'] = _uri.scheme == 'https' || _uri.scheme == 'wss';
+      opts['port'] = _uri.port;
+      if (_uri.hasQuery) opts['query'] = _uri.query;
     } else if (opts.containsKey('host')) {
       opts['hostname'] = Uri.parse(opts['host']).host;
     }
@@ -86,7 +69,6 @@ class Socket extends EventEmitter {
       opts['port'] = secure ? '443' : '80';
     }
 
-    agent = opts['agent'] ?? false;
     hostname =
         opts['hostname'] /*?? (window.location.hostname ?? 'localhost')*/;
     port = opts[
@@ -95,70 +77,45 @@ class Socket extends EventEmitter {
             ? int.parse(window.location.port)
             : (this.secure ? 443 : 80))*/
         ;
-    var query = opts['query'] ?? {};
-    if (query is String) {
-      this.query = decode(query);
-    } else if (query is Map) {
-      this.query = query;
+
+    transports = opts['transports'] ?? ['polling', 'websocket', 'webtransport'];
+    writeBuffer = [];
+    prevBufferLen = 0;
+
+    this.opts = {
+      'path': "/engine.io",
+      'agent': false,
+      'withCredentials': false,
+      'upgrade': true,
+      'timestampParam': "t",
+      'rememberUpgrade': false,
+      'addTrailingSlash': true,
+      'rejectUnauthorized': true,
+      'perMessageDeflate': {
+        'threshold': 1024,
+      },
+      'transportOptions': {},
+      'closeOnBeforeunload': false,
+      ...opts,
+    };
+
+
+    this.opts['path'] =
+        this.opts['path'].toString().replaceFirst(RegExp(r'\/$'), '') +
+            (this.opts['addTrailingSlash'] ? '/' : '');
+
+    if (opts['query'] is String) {
+      this.opts['query'] = decode(opts['query']);
     }
-
-    upgrade = opts['upgrade'] != false;
-    path =
-        '${(opts['path'] ?? '/engine.io').toString().replaceFirst(RegExp(r'\/$'), '')}/';
-    forceJSONP = opts['forceJSONP'] == true;
-    jsonp = opts['jsonp'] != false;
-    forceBase64 = opts['forceBase64'] == true;
-    enablesXDR = opts['enablesXDR'] == true;
-    timestampParam = opts['timestampParam'] ?? 't';
-    timestampRequests = opts['timestampRequests'];
-    transports = opts['transports'] ?? ['polling', 'websocket'];
-    transportOptions = opts['transportOptions'] ?? {};
-    policyPort = opts['policyPort'] ?? 843;
-    rememberUpgrade = opts['rememberUpgrade'] ?? false;
-    binaryType = null;
-    onlyBinaryUpgrades = opts['onlyBinaryUpgrades'];
-
-    if (!opts.containsKey('perMessageDeflate') ||
-        opts['perMessageDeflate'] == true) {
-      perMessageDeflate =
-          opts['perMessageDeflate'] is Map ? opts['perMessageDeflate'] : {};
-      if (!perMessageDeflate.containsKey('threshold')) {
-        perMessageDeflate['threshold'] = 1024;
-      }
-    }
-
-    extraHeaders = opts['extraHeaders'] ?? <String, dynamic>{};
-    // SSL options for Node.js client
-//  this.pfx = opts.pfx || null;
-//  this.key = opts.key || null;
-//  this.passphrase = opts.passphrase || null;
-//  this.cert = opts.cert || null;
-//  this.ca = opts.ca || null;
-//  this.ciphers = opts.ciphers || null;
-//  this.rejectUnauthorized = opts.rejectUnauthorized === undefined ? true : opts.rejectUnauthorized;
-//  this.forceNode = !!opts.forceNode;
-
-    // other options for Node.js client
-//  var freeGlobal = typeof global === 'object' && global;
-//  if (freeGlobal.global === freeGlobal) {
-//  if (opts.extraHeaders && Object.keys(opts.extraHeaders).length > 0) {
-//  this.extraHeaders = opts.extraHeaders;
-//  }
-//
-//  if (opts.localAddress) {
-//  this.localAddress = opts.localAddress;
-//  }
-//  }
 
     // set on handshake
-//  this.id = null;
-//  this.upgrades = null;
-//  this.pingInterval = null;
-//  this.pingTimeout = null;
+    id = null;
+    upgrades = null;
+    pingInterval = null;
+    pingTimeout = null;
 
     // set on heartbeat
-//  this.pingIntervalTimer = null;
-//  this.pingTimeoutTimer = null;
+    pingTimeoutTimer = null;
 
     open();
   }
@@ -171,11 +128,6 @@ class Socket extends EventEmitter {
   /// @api public
   static int protocol = parser.protocol; // this is an int
 
-//
-//  Socket.Socket = Socket;
-//  Socket.Transport = require('./transport');
-//  Socket.transports = require('./transports/index');
-//  Socket.parser = require('engine.io-parser');
 
   ///
   /// Creates transport of the given type.
@@ -185,7 +137,7 @@ class Socket extends EventEmitter {
   /// @api private
   Transport createTransport(name, [options]) {
     _logger.fine('creating transport "$name"');
-    var query = Map.from(this.query);
+    var query = Map<String, dynamic>.from(this.opts['query'] ?? {});
 
     // append engine.io protocol identifier
     query['EIO'] = parser.protocol;
@@ -193,43 +145,23 @@ class Socket extends EventEmitter {
     // transport name
     query['transport'] = name;
 
-    // per-transport options
-    var options = transportOptions[name] ?? {};
-
     // session id if we already have one
     if (id != null) query['sid'] = id;
 
-    var transport = Transports.newInstance(name, {
+    // per-transport options
+    final transportOptions = this.opts['transportOptions'][name] ?? {};
+
+    final opts = {
+      ...this.opts,
       'query': query,
       'socket': this,
-      'agent': options['agent'] ?? agent,
-      'hostname': options['hostname'] ?? hostname,
-      'port': options['port'] ?? port,
-      'secure': options['secure'] ?? secure,
-      'path': options['path'] ?? path,
-      'forceJSONP': options['forceJSONP'] ?? forceJSONP,
-      'jsonp': options['jsonp'] ?? jsonp,
-      'forceBase64': options['forceBase64'] ?? forceBase64,
-      'enablesXDR': options['enablesXDR'] ?? enablesXDR,
-      'timestampRequests': options['timestampRequests'] ?? timestampRequests,
-      'timestampParam': options['timestampParam'] ?? timestampParam,
-      'policyPort': options['policyPort'] ?? policyPort,
-//  'pfx: options.pfx || this.pfx,
-//  'key: options.key || this.key,
-//  'passphrase: options.passphrase || this.passphrase,
-//  'cert: options.cert || this.cert,
-//  'ca: options.ca || this.ca,
-//  'ciphers: options.ciphers || this.ciphers,
-//  'rejectUnauthorized: options.rejectUnauthorized || this.rejectUnauthorized,
-      'perMessageDeflate': options['perMessageDeflate'] ?? perMessageDeflate,
-      'extraHeaders': options['extraHeaders'] ?? extraHeaders,
-//  'forceNode: options.forceNode || this.forceNode,
-//  'localAddress: options.localAddress || this.localAddress,
-      'requestTimeout': options['requestTimeout'] ?? requestTimeout,
-      'protocols': options['protocols']
-    });
+      'hostname': this.hostname,
+      'secure': this.secure,
+      'port': this.port,
+      ...transportOptions,
+    };
 
-    return transport;
+    return Transports.newInstance(name, opts);
   }
 
   ///
@@ -238,13 +170,13 @@ class Socket extends EventEmitter {
   /// @api private
   void open() {
     dynamic transport;
-    if (rememberUpgrade != null &&
+    if (this.opts['rememberUpgrade'] != null &&
         priorWebsocketSuccess &&
         transports.contains('websocket')) {
       transport = 'websocket';
     } else if (transports.isEmpty) {
       // Emit error on next tick so it can be listened to
-      Timer.run(() => emit('error', 'No transports available'));
+      Timer.run(() => emitReserved('error', 'No transports available'));
       return;
     } else {
       transport = transports[0];
@@ -255,6 +187,7 @@ class Socket extends EventEmitter {
     try {
       transport = createTransport(transport);
     } catch (e) {
+      _logger.fine("error while creating transport: $e");
       transports.removeAt(0);
       open();
       return;
@@ -284,7 +217,7 @@ class Socket extends EventEmitter {
       ..on('drain', (_) => onDrain())
       ..on('packet', (packet) => onPacket(packet))
       ..on('error', (e) => onError(e))
-      ..on('close', (_) => onClose('transport close'));
+      ..on('close', (reason) => onClose('transport close', reason));
   }
 
   ///
@@ -300,11 +233,6 @@ class Socket extends EventEmitter {
     priorWebsocketSuccess = false;
 
     onTransportOpen(_) {
-      if (onlyBinaryUpgrades == true) {
-        var upgradeLosesBinary =
-            supportsBinary == false && transport!.supportsBinary == false;
-        failed = failed || upgradeLosesBinary;
-      }
       if (failed) return;
 
       _logger.fine('probe transport "$name" opened');
@@ -316,13 +244,12 @@ class Socket extends EventEmitter {
         if ('pong' == msg['type'] && 'probe' == msg['data']) {
           _logger.fine('probe transport "$name" pong');
           upgrading = true;
-          emit('upgrading', transport);
+          emitReserved('upgrading', transport);
           if (transport == null) return;
           priorWebsocketSuccess = 'websocket' == transport!.name;
 
           _logger.fine('pausing current transport "${transport?.name}"');
-          if (this.transport is PollingTransport) {
-            (this.transport as PollingTransport).pause(() {
+          this.transport?.pause(() {
               if (failed) return;
               if ('closed' == readyState) return;
               _logger.fine('changing transport and sending upgrade packet');
@@ -338,10 +265,9 @@ class Socket extends EventEmitter {
               upgrading = false;
               flush();
             });
-          }
         } else {
           _logger.fine('probe transport "$name" failed');
-          emit('upgradeError',
+          emitReserved('upgradeError',
               {'error': 'probe error', 'transport': transport!.name});
         }
       });
@@ -366,7 +292,7 @@ class Socket extends EventEmitter {
 
       _logger.fine('probe transport "$name" failed because of error: $err');
 
-      emit('upgradeError',
+      emitReserved('upgradeError',
           {'error': 'probe error: $err', 'transport': oldTransport!.name});
     }
 
@@ -399,7 +325,16 @@ class Socket extends EventEmitter {
     once('close', onclose);
     once('upgrading', onupgrade);
 
-    transport!.open();
+    if (this.upgrades!.indexOf('webtransport') != -1 && name != 'webtransport') {
+      // favor WebTransport
+      Timer(Duration(milliseconds: 200), () {
+        if (!failed) {
+          transport!.open();
+        }
+      });
+    } else {
+      transport!.open();
+    }
   }
 
   ///
@@ -410,17 +345,17 @@ class Socket extends EventEmitter {
     _logger.fine('socket open');
     readyState = 'open';
     priorWebsocketSuccess = 'websocket' == transport!.name;
-    emit('open');
+    emitReserved('open');
     flush();
 
     // we check for `readyState` in case an `open`
     // listener already closed the socket
     if ('open' == readyState &&
-        upgrade == true &&
-        transport is PollingTransport) {
+        this.opts['upgrade'] == true &&
+        transport?.name == 'polling') {
       _logger.fine('starting upgrade probes');
-      for (var i = 0, l = upgrades.length; i < l; i++) {
-        probe(upgrades[i]);
+      for (var i = 0, l = upgrades!.length; i < l; i++) {
+        probe(upgrades![i]);
       }
     }
   }
@@ -437,20 +372,21 @@ class Socket extends EventEmitter {
       var data = packet['data'];
       _logger.fine('socket receive: type "$type", data "$data"');
 
-      emit('packet', packet);
+      emitReserved('packet', packet);
 
       // Socket is live - any packet counts
-      emit('heartbeat');
+      emitReserved('heartbeat');
+      resetPingTimeout();
 
       switch (type) {
         case 'open':
-          onHandshake(json.decode(data ?? 'null'));
+          onHandshake(json.decode(data));
           break;
 
         case 'ping':
-          resetPingTimeout();
           sendPacket(type: 'pong');
-          emit('pong');
+          emitReserved('ping');
+          emitReserved('pong');
           break;
 
         case 'error':
@@ -458,13 +394,32 @@ class Socket extends EventEmitter {
           break;
 
         case 'message':
-          emit('data', data);
-          emit('message', data);
+          emitReserved('data', data);
+          emitReserved('message', data);
           break;
       }
     } else {
       _logger.fine('packet received with socket readyState "$readyState"');
     }
+  }
+
+  ///
+  /// Called upon handshake completion.
+  ///
+  /// @param {Object} handshake obj
+  /// @api private
+  void onHandshake(Map data) {
+    emitReserved('handshake', data);
+    id = data['sid'];
+    transport!.query!['sid'] = data['sid'];
+    upgrades = filterUpgrades(data['upgrades']);
+    pingInterval = data['pingInterval'];
+    pingTimeout = data['pingTimeout'];
+    maxPayload = data['maxPayload'];
+    onOpen();
+    // In case open handler closes socket
+    if ('closed' == readyState) return;
+    resetPingTimeout();
   }
 
   ///
@@ -474,53 +429,10 @@ class Socket extends EventEmitter {
   void resetPingTimeout() {
     pingTimeoutTimer?.cancel();
     pingTimeoutTimer =
-        Timer(Duration(milliseconds: pingInterval + pingTimeout), () {
-      onClose('ping timeout');
-    });
+        Timer(Duration(milliseconds: pingInterval != null && pingTimeout != null ? (pingInterval! + pingTimeout!) : 0), () {
+          onClose('ping timeout');
+        });
   }
-
-  ///
-  /// Called upon handshake completion.
-  ///
-  /// @param {Object} handshake obj
-  /// @api private
-  void onHandshake(Map data) {
-    emit('handshake', data);
-    id = data['sid'];
-    transport!.query!['sid'] = data['sid'];
-    upgrades = filterUpgrades(data['upgrades']);
-    pingInterval = data['pingInterval'];
-    pingTimeout = data['pingTimeout'];
-    onOpen();
-    // In case open handler closes socket
-    if ('closed' == readyState) return;
-    resetPingTimeout();
-
-    // Prolong liveness of socket on heartbeat
-    // off('heartbeat', onHeartbeat);
-    // on('heartbeat', onHeartbeat);
-  }
-
-  ///
-  /// Resets ping timeout.
-  ///
-  /// @api private
-  // void onHeartbeat(timeout) {
-  //   pingTimeoutTimer?.cancel();
-  //   pingTimeoutTimer = Timer(
-  //       Duration(milliseconds: timeout ?? (pingInterval + pingTimeout)), () {
-  //     if ('closed' == readyState) return;
-  //     onClose('ping timeout');
-  //   });
-  // }
-
-  ///
-  /// Sends a ping packet.
-  ///
-  /// @api private
-  // void ping() {
-  //   sendPacket(type: 'ping', callback: (_) => emit('ping'));
-  // }
 
   ///
   /// Called on `drain` event
@@ -535,7 +447,7 @@ class Socket extends EventEmitter {
     prevBufferLen = 0;
 
     if (writeBuffer.isEmpty) {
-      emit('drain');
+      emitReserved('drain');
     } else {
       flush();
     }
@@ -550,13 +462,68 @@ class Socket extends EventEmitter {
         transport!.writable == true &&
         upgrading != true &&
         writeBuffer.isNotEmpty) {
-      _logger.fine('flushing ${writeBuffer.length} packets in socket');
-      transport!.send(writeBuffer);
+
+      final packets = getWritablePackets();
+      _logger.fine('flushing ${packets.length} packets in socket');
+      transport!.send(packets);
       // keep track of current length of writeBuffer
       // splice writeBuffer and callbackBuffer on `drain`
       prevBufferLen = writeBuffer.length;
       emit('flush');
     }
+  }
+
+  List getWritablePackets() {
+    final bool shouldCheckPayloadSize = maxPayload != null &&
+        transport?.name == "polling" &&
+        writeBuffer.length > 1;
+
+    if (!shouldCheckPayloadSize) {
+      return writeBuffer;
+    }
+
+    int payloadSize = 1; // first packet type
+    List<Map<String, dynamic>> writablePackets = [];
+    for (int i = 0; i < writeBuffer.length; i++) {
+      final data = writeBuffer[i]['data'];
+      if (data != null) {
+        payloadSize += _byteLength(data);
+      }
+      if (i > 0 && payloadSize > maxPayload!) {
+        _logger.fine("only send $i out of ${writeBuffer.length} packets");
+        return writablePackets;
+      }
+      payloadSize += 2; // separator + packet type
+      writablePackets.add(writeBuffer[i]);
+    }
+    _logger.fine("payload size is $payloadSize (max: $maxPayload)");
+    return writablePackets;
+  }
+
+  int _byteLength(dynamic obj) {
+    if (obj is String) {
+      return _utf8Length(obj);
+    }
+    // Assuming obj is a ByteBuffer or similar with a length property.
+    return ((obj as ByteBuffer).lengthInBytes * 1.33).ceil();
+  }
+
+  int _utf8Length(String str) {
+    int length = 0;
+    for (int i = 0; i < str.length; i++) {
+      int c = str.codeUnitAt(i);
+      if (c < 0x80) {
+        length += 1;
+      } else if (c < 0x800) {
+        length += 2;
+      } else if (c < 0xD800 || c >= 0xE000) {
+        length += 3;
+      } else {
+        i++;
+        length += 4;
+      }
+    }
+    return length;
   }
 
   ///
@@ -591,7 +558,7 @@ class Socket extends EventEmitter {
     options['compress'] = false != options['compress'];
 
     var packet = {'type': type, 'data': data, 'options': options};
-    emit('packetCreate', packet);
+    emitReserved('packetCreate', packet);
     writeBuffer.add(packet);
     if (callback != null) once('flush', callback);
     flush();
@@ -652,7 +619,7 @@ class Socket extends EventEmitter {
   void onError(err) {
     _logger.fine('socket error $err');
     priorWebsocketSuccess = false;
-    emit('error', err);
+    emitReserved('error', err);
     onClose('transport error', err);
   }
 
@@ -667,7 +634,6 @@ class Socket extends EventEmitter {
       _logger.fine('socket close with reason: "$reason"');
 
       // clear timers
-      pingIntervalTimer?.cancel();
       pingTimeoutTimer?.cancel();
 
       // stop event from firing again for transport
@@ -686,7 +652,7 @@ class Socket extends EventEmitter {
       id = null;
 
       // emit close event
-      emit('close', {'reason': reason, 'desc': desc});
+      emitReserved('close', {'reason': reason, 'desc': desc});
 
       // clean buffers after, so users can still
       // grab the buffers on `close` event
