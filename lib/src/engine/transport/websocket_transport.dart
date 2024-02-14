@@ -18,7 +18,7 @@ class WebSocketTransport extends Transport {
   WebSocket? ws;
 
   WebSocketTransport(Map opts) : super(opts) {
-    var forceBase64 = opts['forceBase64'];
+    var forceBase64 = opts['forceBase64'] ?? false;
     supportsBinary = !forceBase64;
   }
 

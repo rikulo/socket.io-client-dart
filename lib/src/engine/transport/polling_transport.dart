@@ -225,7 +225,7 @@ class PollingTransport extends Transport {
     var schema = this.opts['secure'] ? 'https' : 'http';
 
     // cache busting is forced
-    if (this.opts['timestampRequests'] != false) {
+    if (this.opts['timestampRequests'] != null) {
       query[this.opts['timestampRequests']] =
           DateTime.now().millisecondsSinceEpoch.toRadixString(36);
     }
