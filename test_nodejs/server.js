@@ -13,7 +13,11 @@
 'use strict';
 const app = require('express')();
 const server = require('http').createServer(app);
-const io = require('socket.io')(server);
+const io = require('socket.io')(server, {
+    cors: {
+        origin: '*',
+    }
+});
 io.on('connection', userSocket => {
     console.log('connected');
     userSocket.on('toServer', data => {

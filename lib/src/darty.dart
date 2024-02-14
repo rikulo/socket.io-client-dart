@@ -3,6 +3,7 @@
 // Author: jumperchen<jumperchen@potix.com>
 
 import 'package:socket_io_client/socket_io_client.dart';
+import 'package:socket_io_common/socket_io_common.dart';
 import 'package:socket_io_common/src/util/event_emitter.dart';
 
 /// Default event listeners for dart way API.
@@ -60,6 +61,13 @@ extension DartySocket on Socket {
   }
 }
 
+/// Parser options
+class ParserOptions {
+  final Encoder Function() encoder;
+  final Decoder Function() decoder;
+  ParserOptions({required this.encoder, required this.decoder});
+}
+
 /// Option Builder to help developer to construct an options map.
 class OptionBuilder {
   final Map<String, dynamic> _opts;
@@ -114,6 +122,11 @@ class OptionBuilder {
     return this;
   }
 
+  /// The parser used to marshall/unmarshall packets for transport.
+  OptionBuilder setParser(ParserOptions parserOptions) {
+    _opts['parser'] = parserOptions;
+    return this;
+  }
   OptionBuilder setReconnectionAttempts(num attempts) {
     _opts['reconnectionAttempts'] = attempts;
     return this;

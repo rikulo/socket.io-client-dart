@@ -1,3 +1,10 @@
+## 3.0.0-beta.0
+
+**New Feature:**
+
+* [#55](https://github.com/rikulo/socket.io-client-dart/issues/55) how to custom parser
+
+
 ## 2.0.3+1
 
 Fix dart analyzing issues

@@ -96,8 +96,8 @@ class Manager extends EventEmitter {
     this.uri = uri;
 
     if (options['parser'] != null) {
-      encoder = options['parser'].Encoder();
-      decoder = options['parser'].Decoder();
+      encoder = options['parser'].encoder();
+      decoder = options['parser'].decoder();
     } else {
       encoder = Encoder();
       decoder = Decoder();
