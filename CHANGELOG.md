@@ -4,6 +4,7 @@
 
 * [#55](https://github.com/rikulo/socket.io-client-dart/issues/55) how to custom parser
 * [#322](https://github.com/rikulo/socket.io-client-dart/pull/322) added emitWithAckAsync
+* [#334](https://github.com/rikulo/socket.io-client-dart/pull/334) Socket.on... returns disposer function
 
 ## 2.0.3+1
 

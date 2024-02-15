@@ -278,15 +278,6 @@ Contribution of all kinds is welcome. Please read [Contributing.md](https://gith
 
 ## Contributors
 
-- Thanks [@felangel](https://github.com/felangel) for https://github.com/rikulo/socket.io-client-dart/issues/7
-- Thanks [@Oskang09](https://github.com/Oskang09) for https://github.com/rikulo/socket.io-client-dart/issues/21
-- Thanks [@bruce3x](https://github.com/bruce3x) for https://github.com/rikulo/socket.io-client-dart/issues/25
-- Thanks [@Kavantix](https://github.com/Kavantix) for https://github.com/rikulo/socket.io-client-dart/issues/26
-- Thanks [@luandnguyen](https://github.com/luandnguyen) for https://github.com/rikulo/socket.io-client-dart/issues/59
-- Thanks [@jorgefspereira](https://github.com/jorgefspereira) for https://github.com/rikulo/socket.io-client-dart/pull/177
-- Thanks [@fzyzcjy](https://github.com/fzyzcjy) for https://github.com/rikulo/socket.io-client-dart/pull/188
-- Thanks [@darwin-morocho](https://github.com/darwin-morocho) for https://github.com/rikulo/socket.io-client-dart/pull/189
-- Thanks [@chatziko](https://github.com/chatziko) for https://github.com/rikulo/socket.io-client-dart/pull/237
-- Thanks [@Astray-git](https://github.com/Astray-git) for https://github.com/rikulo/socket.io-client-dart/pull/313
-- Thanks [@Astray-git](https://github.com/Astray-git) for https://github.com/rikulo/socket.io-client-dart/pull/310
-- Thanks [@Frank3K](https://github.com/Frank3K) for https://github.com/rikulo/socket.io-client-dart/pull/338
+<a href="https://github.com/rikulo/socket.io-client-dart/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=rikulo/socket.io-client-dart" />
+</a>

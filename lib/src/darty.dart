@@ -8,56 +8,56 @@ import 'package:socket_io_common/src/util/event_emitter.dart';
 
 /// Default event listeners for dart way API.
 extension DartySocket on Socket {
-  void onConnect(EventHandler handler) {
-    on('connect', handler);
+  Function() onConnect(EventHandler handler) {
+    return on('connect', handler);
   }
 
-  void onConnectError(EventHandler handler) {
-    on('connect_error', handler);
+  Function() onConnectError(EventHandler handler) {
+    return on('connect_error', handler);
   }
 
-  void onConnectTimeout(EventHandler handler) {
-    on('connect_timeout', handler);
+  Function() onConnectTimeout(EventHandler handler) {
+    return on('connect_timeout', handler);
   }
 
-  void onConnecting(EventHandler handler) {
-    on('connecting', handler);
+  Function() onConnecting(EventHandler handler) {
+    return on('connecting', handler);
   }
 
-  void onDisconnect(EventHandler handler) {
-    on('disconnect', handler);
+  Function() onDisconnect(EventHandler handler) {
+    return on('disconnect', handler);
   }
 
-  void onError(EventHandler handler) {
-    this.io.on('error', handler);
+  Function() onError(EventHandler handler) {
+    return this.io.on('error', handler);
   }
 
-  void onReconnect(EventHandler handler) {
-    this.io.on('reconnect', handler);
+  Function() onReconnect(EventHandler handler) {
+    return this.io.on('reconnect', handler);
   }
 
-  void onReconnectAttempt(EventHandler handler) {
-    this.io.on('reconnect_attempt', handler);
+  Function() onReconnectAttempt(EventHandler handler) {
+    return this.io.on('reconnect_attempt', handler);
   }
 
-  void onReconnectFailed(EventHandler handler) {
-    this.io.on('reconnect_failed', handler);
+  Function() onReconnectFailed(EventHandler handler) {
+    return this.io.on('reconnect_failed', handler);
   }
 
-  void onReconnectError(EventHandler handler) {
-    this.io.on('reconnect_error', handler);
+  Function() onReconnectError(EventHandler handler) {
+    return this.io.on('reconnect_error', handler);
   }
 
-  void onReconnecting(EventHandler handler) {
-    on('reconnecting', handler);
+  Function() onReconnecting(EventHandler handler) {
+    return on('reconnecting', handler);
   }
 
-  void onPing(EventHandler handler) {
-    this.io.on('ping', handler);
+  Function() onPing(EventHandler handler) {
+    return this.io.on('ping', handler);
   }
 
-  void onPong(EventHandler handler) {
-    on('pong', handler);
+  Function() onPong(EventHandler handler) {
+    return on('pong', handler);
   }
 }
 
