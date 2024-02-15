@@ -6,6 +6,9 @@
 * [#322](https://github.com/rikulo/socket.io-client-dart/pull/322) added emitWithAckAsync
 * [#334](https://github.com/rikulo/socket.io-client-dart/pull/334) Socket.on... returns disposer function
 
+**Bug fix:**
+* [#360](https://github.com/rikulo/socket.io-client-dart/pull/360) Library is not compatible with latest version on socket.io 4.7.4
+
 ## 2.0.3+1
 
 Fix dart analyzing issues
