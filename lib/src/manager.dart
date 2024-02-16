@@ -1,6 +1,6 @@
-/// Copyright (C) 2017 Potix Corporation. All Rights Reserved
-/// History: 2017-04-26 15:27
-/// Author: jumperchen<jumperchen@potix.com>
+// Copyright (C) 2017 Potix Corporation. All Rights Reserved
+// History: 2017-04-26 15:27
+// Author: jumperchen<jumperchen@potix.com>
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -169,7 +169,7 @@ class Manager extends EventEmitter {
       if (callback != null) callback();
     });
 
-    var onError;
+    Function(dynamic error) onError;
     // emit `connect_error`
     var errorSub = util.on(socket, 'error', onError = (error) {
       _logger.fine('error');

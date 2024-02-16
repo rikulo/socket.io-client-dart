@@ -7,7 +7,6 @@ import 'dart:html';
 import 'package:logging/logging.dart';
 import 'package:socket_io_client/src/engine/transport.dart';
 import 'package:socket_io_common/src/engine/parser/parser.dart';
-import 'package:socket_io_client/src/engine/parseqs.dart';
 
 class WebSocketTransport extends Transport {
   static final Logger _logger =
@@ -25,9 +24,9 @@ class WebSocketTransport extends Transport {
   @override
   void doOpen() {
     var uri = this.uri();
-    var protocols = this.opts['protocols'];
-    if (this.opts.containsKey('extraHeaders')) {
-      this.opts['headers'] = this.opts['extraHeaders'];
+    var protocols = opts['protocols'];
+    if (opts.containsKey('extraHeaders')) {
+      opts['headers'] = opts['extraHeaders'];
     }
 
     try {
@@ -40,7 +39,7 @@ class WebSocketTransport extends Transport {
       supportsBinary = false;
     }
 
-    ws!.binaryType = this.socket!.binaryType;
+    ws!.binaryType = socket!.binaryType;
 
     addEventListeners();
   }
@@ -111,10 +110,10 @@ class WebSocketTransport extends Transport {
   /// @api private
   String uri() {
     var query = this.query ?? {};
-    var schema = this.opts['secure'] ? 'wss' : 'ws';
+    var schema = opts['secure'] ? 'wss' : 'ws';
     // append timestamp to URI
-    if (this.opts['timestampRequests'] == true) {
-      query[this.opts['timestampRequests']] =
+    if (opts['timestampRequests'] == true) {
+      query[opts['timestampRequests']] =
           DateTime.now().millisecondsSinceEpoch.toRadixString(36);
     }
 

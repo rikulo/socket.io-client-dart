@@ -1,14 +1,14 @@
-///
-/// socket.dart
-///
-/// Purpose:
-///
-/// Description:
-///
-/// History:
-///   26/04/2017, Created by jumperchen
-///
-/// Copyright (C) 2017 Potix Corporation. All Rights Reserved.
+//
+// socket.dart
+//
+// Purpose:
+//
+// Description:
+//
+// History:
+//   26/04/2017, Created by jumperchen
+//
+// Copyright (C) 2017 Potix Corporation. All Rights Reserved.
 import 'dart:async';
 import 'dart:typed_data';
 
@@ -44,7 +44,7 @@ class Socket extends EventEmitter {
   dynamic auth;
   List receiveBuffer = [];
   List sendBuffer = [];
-  List _queue = [];
+  final List _queue = [];
   int _queueSeq = 0;
 
   String nsp;
@@ -54,8 +54,8 @@ class Socket extends EventEmitter {
   List? subs;
   Map flags = {};
   String? query;
-  List _anyListeners = [];
-  List _anyOutgoingListeners = [];
+  final List _anyListeners = [];
+  final List _anyOutgoingListeners = [];
 
   Socket(this.io, this.nsp, this._opts) {
     if (_opts != null) {

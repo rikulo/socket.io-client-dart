@@ -1,14 +1,14 @@
-///
-/// polling_transport.dart
-///
-/// Purpose:
-///
-/// Description:
-///
-/// History:
-///   26/04/2017, Created by jumperchen
-///
-/// Copyright (C) 2017 Potix Corporation. All Rights Reserved.
+//
+// polling_transport.dart
+//
+// Purpose:
+//
+// Description:
+//
+// History:
+//   26/04/2017, Created by jumperchen
+//
+// Copyright (C) 2017 Potix Corporation. All Rights Reserved.
 import 'dart:async';
 import 'dart:html';
 
@@ -39,8 +39,8 @@ class PollingTransport extends Transport {
   String? name = 'polling';
 
   bool polling = false;
-  dynamic? pollXhr;
-  dynamic? cookieJar;
+  dynamic pollXhr;
+  dynamic cookieJar;
   late bool xd;
 
   ///
@@ -83,6 +83,7 @@ class PollingTransport extends Transport {
   ///
   /// @param {Function} callback upon buffers are flushed and transport is paused
   /// @api private
+  @override
   void pause(onPause) {
     var self = this;
 
@@ -222,11 +223,11 @@ class PollingTransport extends Transport {
   /// @api private
   String uri() {
     final query = this.query ?? {};
-    var schema = this.opts['secure'] ? 'https' : 'http';
+    var schema = opts['secure'] ? 'https' : 'http';
 
     // cache busting is forced
-    if (this.opts['timestampRequests'] != null) {
-      query[this.opts['timestampRequests']] =
+    if (opts['timestampRequests'] != null) {
+      query[opts['timestampRequests']] =
           DateTime.now().millisecondsSinceEpoch.toRadixString(36);
     }
 
@@ -241,11 +242,11 @@ class PollingTransport extends Transport {
     opts = opts ?? {};
     final mergedOpts = {
       ...opts,
-      xd: this.xd,
-      cookieJar: this.cookieJar,
+      xd: xd,
+      cookieJar: cookieJar,
       ...this.opts
     };
-    return Request(this.uri(), mergedOpts);
+    return Request(uri(), mergedOpts);
   }
   ///
   /// Sends data.
@@ -253,7 +254,6 @@ class PollingTransport extends Transport {
   /// @param {String} data to send.
   /// @param {Function} called upon flush.
   /// @api private
-  @override
   void doWrite(data, fn) {
     var isBinary = data is! String;
     var req = request({'method': 'POST', 'data': data, 'isBinary': isBinary});
@@ -267,7 +267,6 @@ class PollingTransport extends Transport {
   /// Starts a poll cycle.
   ///
   /// @api private
-  @override
   void doPoll() {
     _logger.fine('xhr poll');
     var req = request();
@@ -290,11 +289,9 @@ class Request extends EventEmitter {
   int? index;
   StreamSubscription? readyStateChange;
 
-  Request(uri, Map opts) {
-    this.opts = opts;
-    this.method = opts['method'] ?? 'GET';
-    this.uri = uri;
-    this.data = opts['data'];
+  Request(this.uri, this.opts) {
+    method = opts['method'] ?? 'GET';
+    data = opts['data'];
 
     create();
   }

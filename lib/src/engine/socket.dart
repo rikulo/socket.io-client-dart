@@ -53,11 +53,11 @@ class Socket extends EventEmitter {
     opts = opts ?? <dynamic, dynamic>{};
 
     if (uri.isNotEmpty) {
-      var _uri = Uri.parse(uri);
-      opts['hostname'] = _uri.host;
-      opts['secure'] = _uri.scheme == 'https' || _uri.scheme == 'wss';
-      opts['port'] = _uri.port;
-      if (_uri.hasQuery) opts['query'] = _uri.query;
+      var uri0 = Uri.parse(uri);
+      opts['hostname'] = uri0.host;
+      opts['secure'] = uri0.scheme == 'https' || uri0.scheme == 'wss';
+      opts['port'] = uri0.port;
+      if (uri0.hasQuery) opts['query'] = uri0.query;
     } else if (opts.containsKey('host')) {
       opts['hostname'] = Uri.parse(opts['host']).host;
     }
@@ -101,7 +101,7 @@ class Socket extends EventEmitter {
 
 
     this.opts['path'] =
-        this.opts['path'].toString().replaceFirst(RegExp(r'\/$'), '') +
+        this.opts['path'].toString().replaceFirst(RegExp(r'/$'), '') +
             (this.opts['addTrailingSlash'] ? '/' : '');
 
     if (opts['query'] is String) {
@@ -155,9 +155,9 @@ class Socket extends EventEmitter {
       ...this.opts,
       'query': query,
       'socket': this,
-      'hostname': this.hostname,
-      'secure': this.secure,
-      'port': this.port,
+      'hostname': hostname,
+      'secure': secure,
+      'port': port,
       ...transportOptions,
     };
 
@@ -170,7 +170,7 @@ class Socket extends EventEmitter {
   /// @api private
   void open() {
     dynamic transport;
-    if (this.opts['rememberUpgrade'] != null &&
+    if (opts['rememberUpgrade'] != null &&
         priorWebsocketSuccess &&
         transports.contains('websocket')) {
       transport = 'websocket';
@@ -325,7 +325,7 @@ class Socket extends EventEmitter {
     once('close', onclose);
     once('upgrading', onupgrade);
 
-    if (this.upgrades!.indexOf('webtransport') != -1 && name != 'webtransport') {
+    if (upgrades!.contains('webtransport') && name != 'webtransport') {
       // favor WebTransport
       Timer(Duration(milliseconds: 200), () {
         if (!failed) {
@@ -351,7 +351,7 @@ class Socket extends EventEmitter {
     // we check for `readyState` in case an `open`
     // listener already closed the socket
     if ('open' == readyState &&
-        this.opts['upgrade'] == true &&
+        opts['upgrade'] == true &&
         transport?.name == 'polling') {
       _logger.fine('starting upgrade probes');
       for (var i = 0, l = upgrades!.length; i < l; i++) {

@@ -1,6 +1,6 @@
-/// Copyright (C) 2017 Potix Corporation. All Rights Reserved
-/// History: 2017-04-26 12:27
-/// Author: jumperchen<jumperchen@potix.com>
+// Copyright (C) 2017 Potix Corporation. All Rights Reserved
+// History: 2017-04-26 12:27
+// Author: jumperchen<jumperchen@potix.com>
 import 'package:socket_io_client/src/engine/transport.dart';
 import 'package:socket_io_client/src/engine/transport/polling_transport.dart';
 import 'package:socket_io_client/src/engine/transport/websocket_transport.dart';

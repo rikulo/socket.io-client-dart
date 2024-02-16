@@ -1,6 +1,6 @@
-/// Copyright (C) 2019 Potix Corporation. All Rights Reserved
-/// History: 2019-01-21 12:27
-/// Author: jumperchen<jumperchen@potix.com>
+// Copyright (C) 2019 Potix Corporation. All Rights Reserved
+// History: 2019-01-21 12:27
+// Author: jumperchen<jumperchen@potix.com>
 import 'dart:convert';
 
 import 'package:logging/logging.dart';
@@ -19,8 +19,7 @@ abstract class Transport extends EventEmitter {
   String? readyState;
   Socket? socket;
 
-  Transport(Map opts) {
-    this.opts = opts;
+  Transport(this.opts) {
     query = opts['query'];
     readyState = '';
     socket = opts['socket'];
@@ -105,7 +104,7 @@ abstract class Transport extends EventEmitter {
   }
   get name;
 
-  void pause(onPause()) {}
+  void pause(Function() onPause) {}
 
   String createUri(String schema, Map<String, dynamic> query) {
     return '$schema://${_hostname()}${_port()}${opts["path"]}${_query(query)}';

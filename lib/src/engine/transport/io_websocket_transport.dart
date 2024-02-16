@@ -120,10 +120,10 @@ class IOWebSocketTransport extends Transport {
   /// @api private
   String uri() {
     var query = this.query ?? {};
-    var schema = this.opts['secure'] ? 'wss' : 'ws';
+    var schema = opts['secure'] ? 'wss' : 'ws';
     // append timestamp to URI
-    if (this.opts['timestampRequests'] == true) {
-      query[this.opts['timestampRequests']] =
+    if (opts['timestampRequests'] == true) {
+      query[opts['timestampRequests']] =
           DateTime.now().millisecondsSinceEpoch.toRadixString(36);
     }
 
