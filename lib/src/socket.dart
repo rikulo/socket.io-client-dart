@@ -536,7 +536,7 @@ class Socket extends EventEmitter {
 
     for (var packet in sendBuffer) {
       notifyOutgoingListeners(packet);
-      packet(packet);
+      this.packet(packet);
     }
     sendBuffer = [];
   }

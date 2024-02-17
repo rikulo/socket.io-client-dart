@@ -5,6 +5,7 @@
 * [#55](https://github.com/rikulo/socket.io-client-dart/issues/55) how to custom parser
 * [#322](https://github.com/rikulo/socket.io-client-dart/pull/322) added emitWithAckAsync
 * [#334](https://github.com/rikulo/socket.io-client-dart/pull/334) Socket.on... returns disposer function
+* [#343](https://github.com/rikulo/socket.io-client-dart/issues/343) Empty query map in OptionsBuilder throws RangeError
 * [#353](https://github.com/rikulo/socket.io-client-dart/issues/353) Add timeout on emit and emitWithAck
 
 **Bug fix:**

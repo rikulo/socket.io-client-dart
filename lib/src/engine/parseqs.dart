@@ -28,6 +28,9 @@ String encode(Map obj) {
 /// @api private
 ///
 Map decode(qs) {
+  if (qs.isEmpty) {
+    return <dynamic, dynamic>{};
+  }
   var qry = <dynamic, dynamic>{};
   var pairs = qs.split('&');
   for (var i = 0, l = pairs.length; i < l; i++) {
