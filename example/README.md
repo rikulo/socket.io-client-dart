@@ -107,15 +107,12 @@ These events can be listened on.
 const List EVENTS = [
   'connect',
   'connect_error',
-  'connect_timeout',
-  'connecting',
   'disconnect',
   'error',
   'reconnect',
   'reconnect_attempt',
   'reconnect_failed',
   'reconnect_error',
-  'reconnecting',
   'ping',
   'pong'
 ];

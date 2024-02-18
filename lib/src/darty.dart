@@ -16,14 +16,6 @@ extension DartySocket on Socket {
     return on('connect_error', handler);
   }
 
-  Function() onConnectTimeout(EventHandler handler) {
-    return on('connect_timeout', handler);
-  }
-
-  Function() onConnecting(EventHandler handler) {
-    return on('connecting', handler);
-  }
-
   Function() onDisconnect(EventHandler handler) {
     return on('disconnect', handler);
   }
@@ -46,10 +38,6 @@ extension DartySocket on Socket {
 
   Function() onReconnectError(EventHandler handler) {
     return this.io.on('reconnect_error', handler);
-  }
-
-  Function() onReconnecting(EventHandler handler) {
-    return on('reconnecting', handler);
   }
 
   Function() onPing(EventHandler handler) {
