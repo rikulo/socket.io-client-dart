@@ -377,7 +377,7 @@ class Manager extends EventEmitter {
   /// @api private
   ///
   void onclose(error) {
-     final String _error = '';
+    String _error = '';
 
     if (error is String) {
       _error = error;
