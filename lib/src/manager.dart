@@ -377,12 +377,12 @@ class Manager extends EventEmitter {
   /// @api private
   ///
   void onclose(error) {
-    _logger.fine("closed due to $error['reason']");
+    _logger.fine("closed due to ${error is Map ? error['reason'] : error}");
 
     cleanup();
     _backoff!.reset();
     readyState = 'closed';
-    emitReserved('close', error['reason']);
+    emitReserved('close', error is Map ? error['reason'] : error);
 
     if (reconnection == true && !skipReconnect!) {
       reconnect();

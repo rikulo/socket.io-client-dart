@@ -1,3 +1,8 @@
+## 3.0.0-beta.1
+
+**Bug fix:**
+* [#367](https://github.com/rikulo/socket.io-client-dart/issues/367) Error on dispose
+
 ## 3.0.0-beta.0
 
 **New Feature:**
