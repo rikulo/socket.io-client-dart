@@ -17,7 +17,6 @@ import 'package:socket_io_client/src/engine/transport.dart';
 import 'package:socket_io_common/src/engine/parser/parser.dart';
 import 'package:socket_io_common/src/util/event_emitter.dart';
 
-
 final Logger _logger = Logger('socket_io:transport.PollingTransport');
 
 bool _hasXHR2() {
@@ -25,7 +24,8 @@ bool _hasXHR2() {
     // Dart's HttpRequest doesn't expose a direct way to check for XHR2 features,
     // but attempting to use features like setting `responseType` could serve as a proxy.
     final xhr = HttpRequest();
-    xhr.responseType = 'arraybuffer'; // Attempting to set a responseType supported by XHR2
+    xhr.responseType =
+        'arraybuffer'; // Attempting to set a responseType supported by XHR2
     return true;
   } catch (e) {
     return false;
@@ -240,14 +240,10 @@ class PollingTransport extends Transport {
 
   Request request([Map? opts]) {
     opts = opts ?? {};
-    final mergedOpts = {
-      ...opts,
-      xd: xd,
-      cookieJar: cookieJar,
-      ...this.opts
-    };
+    final mergedOpts = {...opts, xd: xd, cookieJar: cookieJar, ...this.opts};
     return Request(uri(), mergedOpts);
   }
+
   ///
   /// Sends data.
   ///
@@ -279,6 +275,7 @@ class PollingTransport extends Transport {
     pollXhr = req;
   }
 }
+
 class Request extends EventEmitter {
   late Map opts;
   late String method;
@@ -322,7 +319,8 @@ class Request extends EventEmitter {
       xhr.open(method, uri, async: true);
 
       try {
-        if (this.opts.containsKey('extraHeaders') && this.opts['extraHeaders']?.isNotEmpty == true) {
+        if (this.opts.containsKey('extraHeaders') &&
+            this.opts['extraHeaders']?.isNotEmpty == true) {
           this.opts['extraHeaders'].forEach((k, v) {
             xhr.setRequestHeader(k, v);
           });
@@ -333,7 +331,7 @@ class Request extends EventEmitter {
 
       if ('POST' == method) {
         try {
-            xhr.setRequestHeader('Content-type', 'text/plain;charset=UTF-8');
+          xhr.setRequestHeader('Content-type', 'text/plain;charset=UTF-8');
         } catch (e) {
           // ignore
         }
@@ -433,5 +431,4 @@ class Request extends EventEmitter {
   ///
   /// @api public
   void abort() => cleanup();
-
 }

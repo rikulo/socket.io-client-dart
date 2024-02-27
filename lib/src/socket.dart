@@ -18,7 +18,6 @@ import 'package:socket_io_client/src/manager.dart';
 import 'package:socket_io_client/src/on.dart' as util;
 import 'package:socket_io_common/src/parser/parser.dart';
 
-
 const reservedEvents = <String, int>{
   'connect': 1,
   'connect_error': 1,
@@ -158,14 +157,15 @@ class Socket extends EventEmitter {
       sendData.add(data);
     }
 
-    if (_opts?['retries'] != null && !flags.containsKey('fromQueue') && !flags.containsKey('volatile')) {
+    if (_opts?['retries'] != null &&
+        !flags.containsKey('fromQueue') &&
+        !flags.containsKey('volatile')) {
       if (ack != null) {
         sendData.add(ack);
       }
       _addToQueue(sendData);
       return;
     }
-
 
     var packet = {
       'type': EVENT,
@@ -187,8 +187,7 @@ class Socket extends EventEmitter {
     final discardPacket =
         flags['volatile'] != null && (!isTransportWritable || !connected);
     if (discardPacket) {
-      _logger
-          .fine('discard packet as the transport is not currently writable');
+      _logger.fine('discard packet as the transport is not currently writable');
     } else if (connected) {
       notifyOutgoingListeners(packet);
       this.packet(packet);
@@ -196,7 +195,6 @@ class Socket extends EventEmitter {
       sendBuffer.add(packet);
     }
     flags = {};
-
   }
 
   /// Emits an event and waits for an acknowledgement
@@ -245,7 +243,8 @@ class Socket extends EventEmitter {
         if (packet['tryCount'] is int &&
             _opts!['retries'] is int &&
             (packet['tryCount'] as int) > (_opts!['retries'] as int)) {
-          _logger.fine("packet [${packet['id']}] is discarded after ${packet['tryCount']} tries");
+          _logger.fine(
+              "packet [${packet['id']}] is discarded after ${packet['tryCount']} tries");
           _queue.removeAt(0);
           if (ack != null) {
             ack(err);
@@ -265,6 +264,7 @@ class Socket extends EventEmitter {
     _queue.add(packet);
     _drainQueue();
   }
+
   void _drainQueue([bool force = false]) {
     _logger.fine("draining queue");
     if (!connected || _queue.isEmpty) {
@@ -272,18 +272,21 @@ class Socket extends EventEmitter {
     }
     var packet = _queue.first;
     if (packet['pending'] && !force) {
-      _logger.fine("packet [${packet['id']}] has already been sent and is waiting for an ack");
+      _logger.fine(
+          "packet [${packet['id']}] has already been sent and is waiting for an ack");
       return;
     }
     packet['pending'] = true;
     packet['tryCount']++;
-    _logger.fine("sending packet [${packet['id']}] (try n°${packet['tryCount']})");
+    _logger
+        .fine("sending packet [${packet['id']}] (try n°${packet['tryCount']})");
     flags = packet['flags'];
     var args = packet['args'] as List;
     final evt = args.removeAt(0);
     final ack = args.last is Function ? args.removeLast() : null;
     emitWithAck(evt, args, ack: ack);
   }
+
   void _registerAckCallback(int id, Function ack) {
     final sid = '$id';
     final timeout = flags['timeout'] ?? _opts?['ackTimeout'];

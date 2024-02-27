@@ -99,7 +99,6 @@ class Socket extends EventEmitter {
       ...opts,
     };
 
-
     this.opts['path'] =
         this.opts['path'].toString().replaceFirst(RegExp(r'/$'), '') +
             (this.opts['addTrailingSlash'] ? '/' : '');
@@ -127,7 +126,6 @@ class Socket extends EventEmitter {
   ///
   /// @api public
   static int protocol = parser.protocol; // this is an int
-
 
   ///
   /// Creates transport of the given type.
@@ -250,21 +248,21 @@ class Socket extends EventEmitter {
 
           _logger.fine('pausing current transport "${transport?.name}"');
           this.transport?.pause(() {
-              if (failed) return;
-              if ('closed' == readyState) return;
-              _logger.fine('changing transport and sending upgrade packet');
+            if (failed) return;
+            if ('closed' == readyState) return;
+            _logger.fine('changing transport and sending upgrade packet');
 
-              cleanup();
+            cleanup();
 
-              setTransport(transport);
-              transport!.send([
-                {'type': 'upgrade'}
-              ]);
-              emit('upgrade', transport);
-              transport = null;
-              upgrading = false;
-              flush();
-            });
+            setTransport(transport);
+            transport!.send([
+              {'type': 'upgrade'}
+            ]);
+            emit('upgrade', transport);
+            transport = null;
+            upgrading = false;
+            flush();
+          });
         } else {
           _logger.fine('probe transport "$name" failed');
           emitReserved('upgradeError',
@@ -428,10 +426,13 @@ class Socket extends EventEmitter {
   ///
   void resetPingTimeout() {
     pingTimeoutTimer?.cancel();
-    pingTimeoutTimer =
-        Timer(Duration(milliseconds: pingInterval != null && pingTimeout != null ? (pingInterval! + pingTimeout!) : 0), () {
-          onClose('ping timeout');
-        });
+    pingTimeoutTimer = Timer(
+        Duration(
+            milliseconds: pingInterval != null && pingTimeout != null
+                ? (pingInterval! + pingTimeout!)
+                : 0), () {
+      onClose('ping timeout');
+    });
   }
 
   ///
@@ -462,7 +463,6 @@ class Socket extends EventEmitter {
         transport!.writable == true &&
         upgrading != true &&
         writeBuffer.isNotEmpty) {
-
       final packets = getWritablePackets();
       _logger.fine('flushing ${packets.length} packets in socket');
       transport!.send(packets);

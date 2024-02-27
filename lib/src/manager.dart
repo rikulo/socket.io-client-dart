@@ -171,18 +171,21 @@ class Manager extends EventEmitter {
 
     Function(dynamic error) onError;
     // emit `connect_error`
-    var errorSub = util.on(socket, 'error', onError = (error) {
-      _logger.fine('error');
-      cleanup();
-      readyState = 'closed';
-      emitReserved('error', error);
-      if (callback != null) {
-        callback({'error': 'Connection error', 'data': error});
-      } else {
-        // Only do this if there is no fn to handle the error
-        maybeReconnectOnOpen();
-      }
-    });
+    var errorSub = util.on(
+        socket,
+        'error',
+        onError = (error) {
+          _logger.fine('error');
+          cleanup();
+          readyState = 'closed';
+          emitReserved('error', error);
+          if (callback != null) {
+            callback({'error': 'Connection error', 'data': error});
+          } else {
+            // Only do this if there is no fn to handle the error
+            maybeReconnectOnOpen();
+          }
+        });
 
     // emit `connect_timeout`
     if (timeout != null) {
@@ -209,12 +212,12 @@ class Manager extends EventEmitter {
     return this;
   }
 
-
   /// Alias for open()
   ///
   /// @return self
   /// @public
-  Manager connect({callback, Map? opts}) => open(callback: callback, opts: opts);
+  Manager connect({callback, Map? opts}) =>
+      open(callback: callback, opts: opts);
 
   ///
   /// Called upon transport open.

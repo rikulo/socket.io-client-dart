@@ -51,9 +51,9 @@ class WebSocketTransport extends Transport {
     ws!
       ..onOpen.listen((_) => onOpen())
       ..onClose.listen((closeEvent) => onClose({
-        'description': "websocket connection closed",
-        'context': closeEvent,
-      }))
+            'description': "websocket connection closed",
+            'context': closeEvent,
+          }))
       ..onMessage.listen((MessageEvent evt) => onData(evt.data))
       ..onError.listen((e) {
         onError('websocket error', e);

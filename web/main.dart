@@ -17,9 +17,11 @@ import 'package:socket_io_common/socket_io_common.dart';
 void main() {
   var socket = io.io(
       'http://localhost:3000',
-      io.OptionBuilder().setTransports(['polling'])
-      .setParser(io.ParserOptions(encoder: () => MyEncoder(), decoder: () => MyDecoder()))
-      // .disableAutoConnect()
+      io.OptionBuilder()
+          .setTransports(['polling'])
+          .setParser(io.ParserOptions(
+              encoder: () => MyEncoder(), decoder: () => MyDecoder()))
+          // .disableAutoConnect()
           .build());
 
   // socket.connect();
@@ -37,6 +39,7 @@ void main() {
   socket.on('disconnect', (_) => print('disconnect'));
   socket.on('fromServer', (_) => print(_));
 }
+
 class MyEncoder extends Encoder {
   @override
   List<Object?> encode(Object? obj) {
@@ -44,6 +47,7 @@ class MyEncoder extends Encoder {
     return super.encode(obj);
   }
 }
+
 class MyDecoder extends Decoder {
   @override
   add(obj) {

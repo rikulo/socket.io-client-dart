@@ -31,7 +31,8 @@ abstract class Transport extends EventEmitter {
   /// @param {String} str
   /// @return {Transport} for chaining
   onError(msg, [desc]) {
-    super.emitReserved('error', {'msg': msg, 'desc': desc, 'type': 'TransportError'});
+    super.emitReserved(
+        'error', {'msg': msg, 'desc': desc, 'type': 'TransportError'});
     return this;
   }
 
@@ -102,6 +103,7 @@ abstract class Transport extends EventEmitter {
     readyState = 'closed';
     emitReserved('close', details);
   }
+
   get name;
 
   void pause(Function() onPause) {}
