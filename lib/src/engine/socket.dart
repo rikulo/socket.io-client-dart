@@ -62,7 +62,8 @@ class Socket extends EventEmitter {
       opts['hostname'] = Uri.parse(opts['host']).host;
     }
 
-    secure = opts['secure'] ?? false /*?? (window.location.protocol == 'https:')*/;
+    secure =
+        opts['secure'] ?? false /*?? (window.location.protocol == 'https:')*/;
 
     if (opts['hostname'] != null && !opts.containsKey('port')) {
       // if no port is specified manually, use the protocol default
