@@ -669,5 +669,5 @@ class Socket extends EventEmitter {
   /// @api private
   ///
   List filterUpgrades(List upgrades) =>
-      transports.where((_) => upgrades.contains(_)).toList();
+      transports.where((transport) => upgrades.contains(transport)).toList();
 }
