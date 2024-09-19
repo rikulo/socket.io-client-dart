@@ -1,8 +1,13 @@
+## 3.0.0-beta.3
+
+**Bug fix:**
+* [#393](https://github.com/rikulo/socket.io-client-dart/issues/393) Bug: type 'Null' is not a subtype of type 'bool'
+
 ## 3.0.0-beta.2
 
 **Bug fix:**
 * [#373](https://github.com/rikulo/socket.io-client-dart/issues/373) hot restart error - Unhandled Exception: type 'Null' is not a subtype of type 'bool'
-* 
+
 ## 3.0.0-beta.1
 
 **Bug fix:**

@@ -170,7 +170,9 @@ class Socket extends EventEmitter {
     var packet = {
       'type': EVENT,
       'data': sendData,
-      'options': {'compress': flags.isNotEmpty == true && flags['compress']}
+      'options': {
+        'compress': flags.isNotEmpty == true && (flags['compress'] ?? false)
+      }
     };
 
     // event ack callback
