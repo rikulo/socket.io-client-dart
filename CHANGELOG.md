@@ -1,3 +1,8 @@
+## 3.0.0-beta.4
+
+**Bug fix:**
+* [#394](https://github.com/rikulo/socket.io-client-dart/issues/394) Incorrect argument matching in notifyOutgoingListeners
+
 ## 3.0.0-beta.3
 
 **Bug fix:**

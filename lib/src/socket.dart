@@ -319,7 +319,7 @@ class Socket extends EventEmitter {
     if (_anyOutgoingListeners.isNotEmpty) {
       final listeners = List.from(_anyOutgoingListeners);
       for (final listener in listeners) {
-        Function.apply(listener, [packet['data']]);
+        Function.apply(listener, packet['data']);
       }
     }
   }

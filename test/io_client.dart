@@ -13,6 +13,9 @@ void main() {
 
   // socket.connect();
 
+  // Test for #394
+  socket.onAnyOutgoing((event, data) => print('outgoing: $event, data: $data'));
+
   socket.onConnect((_) {
     socket.emit('toServer', 'init');
 
