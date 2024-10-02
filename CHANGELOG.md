@@ -1,3 +1,8 @@
+## 3.0.0
+
+**Bug fix:**
+* Upgrade to use socket_io_common 3.0.0
+
 ## 3.0.0-beta.4
 
 **Bug fix:**
