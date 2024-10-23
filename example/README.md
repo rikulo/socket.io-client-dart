@@ -182,7 +182,7 @@ void connectAndListen(){
     });
 
     //When an event recieved from server, data is added to the stream
-    socket.on('event', (data) => streamSocket.addResponse);
+    socket.on('event', (data) => streamSocket.addResponse(data));
     socket.onDisconnect((_) => print('disconnect'));
 
 }
