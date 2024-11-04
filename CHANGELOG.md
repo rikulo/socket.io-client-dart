@@ -1,3 +1,8 @@
+## 3.0.1
+
+**Bug fix:**
+* [#398](https://github.com/rikulo/socket.io-client-dart/issues/398) [Issue] Unhandled Exception: type 'String' is not a subtype of type 'Iterable<dynamic>' on Server Acknowledgement
+
 ## 3.0.0
 
 **Bug fix:**

@@ -311,7 +311,10 @@ class Socket extends EventEmitter {
 
     acks[sid] = (args) {
       timer.cancel();
-      Function.apply(ack, [null, ...args]);
+      Function.apply(ack, [
+        null,
+        ...(args is List ? args : [args])
+      ]);
     };
   }
 
