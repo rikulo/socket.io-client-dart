@@ -113,7 +113,7 @@ class WebSocketTransport extends Transport {
     var schema = opts['secure'] ? 'wss' : 'ws';
     // append timestamp to URI
     if (opts['timestampRequests'] == true) {
-      query[opts['timestampRequests']] =
+      query[opts['timestampParam']] =
           DateTime.now().millisecondsSinceEpoch.toRadixString(36);
     }
 
