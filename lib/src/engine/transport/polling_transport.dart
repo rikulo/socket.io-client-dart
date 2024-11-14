@@ -227,7 +227,7 @@ class PollingTransport extends Transport {
 
     // cache busting is forced
     if (opts['timestampRequests'] != null) {
-      query[opts['timestampRequests']] =
+      query[opts['timestampParam']] =
           DateTime.now().millisecondsSinceEpoch.toRadixString(36);
     }
 
