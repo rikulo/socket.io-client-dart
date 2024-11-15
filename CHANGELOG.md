@@ -1,3 +1,8 @@
+## 3.0.2
+
+**Bug fix:**
+* [#399](https://github.com/rikulo/socket.io-client-dart/issues/399) [Issue] Fixes timestamp param
+
 ## 3.0.1
 
 **Bug fix:**
