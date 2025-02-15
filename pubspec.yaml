@@ -10,7 +10,7 @@ environment:
 
 dependencies:
   logging: '^1.2.0'
-  socket_io_common: '^3.0.1'
+  socket_io_common: '^3.0.2'
 
 dev_dependencies:
   lints: ^4.0.0
