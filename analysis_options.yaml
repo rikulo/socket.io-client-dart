@@ -7,7 +7,6 @@ analyzer:
 # Lint rules and documentation, see http://dart-lang.github.io/linter/lints
 linter:
   rules:
-    unsafe_html: false
     cancel_subscriptions: true
     close_sinks: true
     hash_and_equals: true
