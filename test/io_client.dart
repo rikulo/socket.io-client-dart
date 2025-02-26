@@ -27,5 +27,5 @@ void main() {
 
   socket.on('event', (data) => print(data));
   socket.on('disconnect', (_) => print('disconnect'));
-  socket.on('fromServer', (_) => print(_));
+  socket.on('fromServer', (data) => print(data));
 }

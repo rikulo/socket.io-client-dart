@@ -10,7 +10,8 @@
 //
 // Copyright (C) 2017 Potix Corporation. All Rights Reserved.
 import 'dart:async';
-import 'dart:html';
+import 'dart:js_interop';
+import 'package:web/web.dart';
 
 import 'package:logging/logging.dart';
 import 'package:socket_io_client/src/engine/transport.dart';
@@ -23,7 +24,7 @@ bool _hasXHR2() {
   try {
     // Dart's HttpRequest doesn't expose a direct way to check for XHR2 features,
     // but attempting to use features like setting `responseType` could serve as a proxy.
-    final xhr = HttpRequest();
+    final xhr = XMLHttpRequest();
     xhr.responseType =
         'arraybuffer'; // Attempting to set a responseType supported by XHR2
     return true;
@@ -280,9 +281,9 @@ class Request extends EventEmitter {
   late Map opts;
   late String method;
   late String uri;
-  late dynamic data;
+  late String? data;
 
-  HttpRequest? xhr;
+  XMLHttpRequest? xhr;
   int? index;
   StreamSubscription? readyStateChange;
 
@@ -311,12 +312,12 @@ class Request extends EventEmitter {
     };
     opts['xdomain'] = this.opts['xd'] ?? false;
 
-    var xhr = this.xhr = HttpRequest();
+    var xhr = this.xhr = XMLHttpRequest();
     var self = this;
 
     try {
       _logger.fine('xhr open $method: $uri');
-      xhr.open(method, uri, async: true);
+      xhr.open(method, uri, true);
 
       try {
         if (this.opts.containsKey('extraHeaders') &&
@@ -371,7 +372,7 @@ class Request extends EventEmitter {
       });
 
       _logger.fine('xhr data $data');
-      xhr.send(data);
+      xhr.send(data?.jsify());
     } catch (e) {
       // Need to defer since .create() is called directly fhrom the constructor
       // and thus the 'error' event can only be only bound *after* this exception
@@ -419,7 +420,7 @@ class Request extends EventEmitter {
   /// @api private
   void onLoad() {
     final data = xhr!.responseText;
-    if (data != null) {
+    if (data.isNotEmpty) {
       emitReserved('data', data);
       emitReserved('success');
       cleanup();

@@ -15,7 +15,7 @@ import 'transport.dart';
 // ignore: uri_does_not_exist
 import './transport/transports_stub.dart'
 // ignore: uri_does_not_exist
-    if (dart.library.html) './transport/transports.dart'
+    if (dart.library.js_interop) './transport/transports.dart'
 // ignore: uri_does_not_exist
     if (dart.library.io) './transport/io_transports.dart';
 
