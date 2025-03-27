@@ -1,6 +1,6 @@
 name: socket_io_client
 description: Dartlang port of socket.io-client for web, flutter, dartvm to use
-version: 3.1.0
+version: 3.1.0+1
 homepage: https://www.zkoss.org
 repository: https://github.com/rikulo/socket.io-client-dart
 issue_tracker: https://github.com/rikulo/socket.io-client-dart/issues

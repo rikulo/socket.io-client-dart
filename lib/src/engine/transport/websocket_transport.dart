@@ -30,7 +30,11 @@ class WebSocketTransport extends Transport {
     }
 
     try {
-      ws = WebSocket(uri, protocols);
+      if (protocols == null) {
+        ws = WebSocket(uri);
+      } else {
+        ws = WebSocket(uri, protocols);
+      }
     } catch (err) {
       return emitReserved('error', err);
     }

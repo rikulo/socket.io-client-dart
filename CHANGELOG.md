@@ -1,8 +1,14 @@
+## 3.1.0+1
+
+**Bug fix:**
+* [websocket connection cannot be established](https://github.com/rikulo/socket.io-client-dart/pull/412#issuecomment-2756531708)
+
 ## 3.1.0
 
 **Bug fix:**
 * [#392](https://github.com/rikulo/socket.io-client-dart/issues/392) [Flutter WASM] No transports available
 * [#404](https://github.com/rikulo/socket.io-client-dart/issues/404) Flutter web socket connection problem on wasm
+
 ## 3.0.2
 
 **Bug fix:**
