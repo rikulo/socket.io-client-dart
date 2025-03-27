@@ -3,6 +3,7 @@
 // Author: jumperchen<jumperchen@potix.com>
 
 import 'package:socket_io_client/socket_io_client.dart';
+import 'package:socket_io_client/src/engine/transport/http_client_adapter.dart';
 import 'package:socket_io_common/socket_io_common.dart';
 import 'package:socket_io_common/src/util/event_emitter.dart';
 
@@ -283,6 +284,11 @@ class OptionBuilder {
   /// The maximum number of retries. Above the limit, the packet will be discarded.
   OptionBuilder setRetries(int retries) {
     _opts['retries'] = retries;
+    return this;
+  }
+
+  OptionBuilder setHttpClientAdapter(HttpClientAdapter httpClientAdapter) {
+    _opts['httpClientAdapter'] = httpClientAdapter;
     return this;
   }
 
