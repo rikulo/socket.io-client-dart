@@ -1,3 +1,8 @@
+## 3.1.0+2
+
+**Bug fix:**
+* [websocket connection cannot be established in WASM mode](https://github.com/rikulo/socket.io-client-dart/pull/412#issuecomment-2756685758)
+
 ## 3.1.0+1
 
 **Bug fix:**

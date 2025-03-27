@@ -2,6 +2,7 @@
 // History: 26/04/2017
 // Author: jumperchen<jumperchen@potix.com>
 
+import 'dart:js_interop';
 import 'dart:async';
 import 'package:web/web.dart';
 import 'package:logging/logging.dart';
@@ -83,7 +84,11 @@ class WebSocketTransport extends Transport {
         // throw an error
         try {
           // TypeError is thrown when passing the second argument on Safari
-          ws!.send(data);
+          if (data is String) {
+            ws!.send(data.toJS); // fix for WASM
+          } else {
+            ws!.send(data);
+          }
         } catch (e) {
           _logger.fine('websocket closed before onclose event');
         }
