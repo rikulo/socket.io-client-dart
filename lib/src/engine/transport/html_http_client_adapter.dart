@@ -1,4 +1,4 @@
-import 'dart:html';
+import 'package:web/web.dart';
 import 'http_client_adapter.dart';
 
 class HtmlHttpClientAdapter implements HttpClientAdapter {

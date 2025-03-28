@@ -1,3 +1,8 @@
+## 3.1.1
+
+**New Feature:**
+* [#416](https://github.com/rikulo/socket.io-client-dart/pull/416) Add Support for Custom HttpClient Configuration
+
 ## 3.1.0+2
 
 **Bug fix:**
