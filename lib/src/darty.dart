@@ -113,7 +113,7 @@ class OptionBuilder {
 
   /// Disable the trailing slash which was added by default
   OptionBuilder disableAddTrailingSlash() {
-    _opts.remove('addTrailingSlash');
+    _opts['addTrailingSlash'] = false;
     return this;
   }
 
