@@ -1,3 +1,8 @@
+## 3.1.2
+
+**Bug fix:**
+* [#379](https://github.com/rikulo/socket.io-client-dart/issues/379#issuecomment-2407013081) Dynamic call with too many positional arguments. Expected: 2 Actual: 3
+
 ## 3.1.1
 
 **New Feature:**

@@ -457,7 +457,11 @@ class Socket extends EventEmitter {
     if (_anyListeners.isNotEmpty) {
       final listeners = List.from(_anyListeners);
       for (final listener in listeners) {
-        Function.apply(listener, args);
+        if (args.length > 2) {
+          Function.apply(listener, [args.first, args.sublist(1)]);
+        } else {
+          Function.apply(listener, args);
+        }
       }
     }
     // Assuming `super.emit` is analogous to calling an inherited or mixin method.
