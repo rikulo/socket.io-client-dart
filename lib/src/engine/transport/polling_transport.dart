@@ -241,7 +241,13 @@ class PollingTransport extends Transport {
 
   Request request([Map? opts]) {
     opts = opts ?? {};
-    final mergedOpts = {...opts, xd: xd, cookieJar: cookieJar, ...this.opts};
+    final mergedOpts = {
+      ...opts,
+      xd: xd,
+      cookieJar: cookieJar,
+      ...this.opts,
+      'withCredentials': this.opts['withCredentials'] ?? false,
+    };
     return Request(uri(), mergedOpts);
   }
 
@@ -372,6 +378,7 @@ class Request extends EventEmitter {
       });
 
       _logger.fine('xhr data $data');
+      xhr.withCredentials = this.opts['withCredentials'] == true;
       xhr.send(data?.jsify());
     } catch (e) {
       // Need to defer since .create() is called directly fhrom the constructor

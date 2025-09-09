@@ -63,6 +63,12 @@ class OptionBuilder {
 
   OptionBuilder() : _opts = <String, dynamic>{};
 
+  /// Enable with credentials so that cookies can be saved.
+  OptionBuilder enableWithCredentials() {
+    _opts['withCredentials'] = true;
+    return this;
+  }
+
   /// Whether to enable to create a new Manager instance.
   /// The default is false
   OptionBuilder enableForceNew() {
