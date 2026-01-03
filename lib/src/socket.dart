@@ -426,7 +426,7 @@ class Socket extends EventEmitter {
 
       case CONNECT_ERROR:
         destroy();
-        emitReserved('error', packet['data']);
+        emitReserved('connect_error', packet['data']);
         break;
     }
   }
