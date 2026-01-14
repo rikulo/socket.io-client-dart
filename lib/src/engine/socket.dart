@@ -56,7 +56,10 @@ class Socket extends EventEmitter {
       var uri0 = Uri.parse(uri);
       opts['hostname'] = uri0.host;
       opts['secure'] = uri0.scheme == 'https' || uri0.scheme == 'wss';
-      opts['port'] = uri0.port;
+      // Only set port if explicitly specified in URL (port 0 means not specified)
+      if (uri0.hasPort && uri0.port != 0) {
+        opts['port'] = uri0.port;
+      }
       if (uri0.hasQuery) opts['query'] = uri0.query;
     } else if (opts.containsKey('host')) {
       opts['hostname'] = Uri.parse(opts['host']).host;
@@ -67,17 +70,18 @@ class Socket extends EventEmitter {
 
     if (opts['hostname'] != null && !opts.containsKey('port')) {
       // if no port is specified manually, use the protocol default
-      opts['port'] = secure ? '443' : '80';
+      opts['port'] = secure ? 443 : 80;
     }
 
     hostname =
         opts['hostname'] /*?? (window.location.hostname ?? 'localhost')*/;
-    port = opts[
-            'port'] /*??
-        (window.location.port.isNotEmpty
-            ? int.parse(window.location.port)
-            : (this.secure ? 443 : 80))*/
-        ;
+
+    // Ensure port is set to default if still null or 0
+    if (opts['port'] == null || opts['port'] == 0) {
+      opts['port'] = secure ? 443 : 80;
+    }
+
+    port = opts['port'];
 
     transports = opts['transports'] ?? ['polling', 'websocket', 'webtransport'];
     writeBuffer = [];

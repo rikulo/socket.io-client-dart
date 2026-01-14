@@ -118,13 +118,24 @@ abstract class Transport extends EventEmitter {
   }
 
   String _port() {
-    final port = opts["port"];
-    if (port != null &&
-        ((opts["secure"] == true && port != 443) ||
-            (opts["secure"] != true && port != 80))) {
+    final rawPort = opts["port"];
+
+    // Convert port to int if it's a string
+    int? port;
+    if (rawPort is int) {
+      port = rawPort;
+    } else if (rawPort is String) {
+      port = int.tryParse(rawPort);
+    }
+
+    // FIX: Always include port to avoid Dart WebSocket.connect() adding :0
+    // Dart's Uri parsing returns port 0 when not specified, causing WebSocket errors
+    if (port != null && port != 0) {
       return ":$port";
     } else {
-      return "";
+      // Use default port for scheme if port is null or 0
+      final defaultPort = opts["secure"] == true ? 443 : 80;
+      return ":$defaultPort";
     }
   }
 
