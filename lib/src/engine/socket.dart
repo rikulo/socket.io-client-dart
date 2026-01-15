@@ -7,10 +7,9 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:logging/logging.dart';
-import 'package:socket_io_common/src/util/event_emitter.dart';
 import 'package:socket_io_client/src/engine/parseqs.dart';
 import 'package:socket_io_common/src/engine/parser/parser.dart' as parser;
-import 'transport.dart';
+import 'package:socket_io_common/src/util/event_emitter.dart';
 
 // ignore: uri_does_not_exist
 import './transport/transports_stub.dart'
@@ -18,6 +17,7 @@ import './transport/transports_stub.dart'
     if (dart.library.js_interop) './transport/transports.dart'
 // ignore: uri_does_not_exist
     if (dart.library.io) './transport/io_transports.dart';
+import 'transport.dart';
 
 final Logger _logger = Logger('socket_io_client:engine.Socket');
 
@@ -57,7 +57,7 @@ class Socket extends EventEmitter {
       opts['hostname'] = uri0.host;
       opts['secure'] = uri0.scheme == 'https' || uri0.scheme == 'wss';
       // Only set port if explicitly specified in URL (port 0 means not specified)
-      if (uri0.hasPort && uri0.port != 0) {
+      if (uri0.port != 0) {
         opts['port'] = uri0.port;
       }
       if (uri0.hasQuery) opts['query'] = uri0.query;
@@ -68,15 +68,10 @@ class Socket extends EventEmitter {
     secure =
         opts['secure'] ?? false /*?? (window.location.protocol == 'https:')*/;
 
-    if (opts['hostname'] != null && !opts.containsKey('port')) {
-      // if no port is specified manually, use the protocol default
-      opts['port'] = secure ? 443 : 80;
-    }
-
     hostname =
         opts['hostname'] /*?? (window.location.hostname ?? 'localhost')*/;
 
-    // Ensure port is set to default if still null or 0
+    // Ensure port is set to default if not specified, null, or 0
     if (opts['port'] == null || opts['port'] == 0) {
       opts['port'] = secure ? 443 : 80;
     }

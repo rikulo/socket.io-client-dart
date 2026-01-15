@@ -4,9 +4,9 @@
 import 'dart:convert';
 
 import 'package:logging/logging.dart';
+import 'package:socket_io_client/src/engine/socket.dart';
 import 'package:socket_io_common/src/engine/parser/parser.dart';
 import 'package:socket_io_common/src/util/event_emitter.dart';
-import 'package:socket_io_client/src/engine/socket.dart';
 
 abstract class Transport extends EventEmitter {
   static final Logger _logger = Logger('socket_io_client:Transport');
@@ -128,15 +128,16 @@ abstract class Transport extends EventEmitter {
       port = int.tryParse(rawPort);
     }
 
-    // FIX: Always include port to avoid Dart WebSocket.connect() adding :0
-    // Dart's Uri parsing returns port 0 when not specified, causing WebSocket errors
-    if (port != null && port != 0) {
+    // Determine default port for the scheme
+    final defaultPort = opts["secure"] == true ? 443 : 80;
+
+    // Only include port if it's specified and different from the default port
+    // Default ports (443 for HTTPS, 80 for HTTP) should be omitted from URIs
+    if (port != null && port != 0 && port != defaultPort) {
       return ":$port";
-    } else {
-      // Use default port for scheme if port is null or 0
-      final defaultPort = opts["secure"] == true ? 443 : 80;
-      return ":$defaultPort";
     }
+
+    return "";
   }
 
   String _query(Map<String, dynamic> query) {
