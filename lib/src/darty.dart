@@ -10,9 +10,14 @@ import 'package:web_socket/web_socket.dart' as ws;
 /// Factory function to create a WebSocket connection.
 /// Allows consumers to provide custom WebSocket implementations
 /// (e.g., CupertinoWebSocket, OkHttpWebSocket).
+///
+/// The [headers] parameter contains extra headers from [OptionBuilder.setExtraHeaders].
+/// Note: Browser WebSockets do not support custom headers (browser security restriction).
+/// On native platforms, use this parameter to add authentication or custom headers.
 typedef WebSocketConnector = Future<ws.WebSocket> Function(
   Uri uri, {
   Iterable<String>? protocols,
+  Map<String, String>? headers,
 });
 
 /// Default event listeners for dart way API.
@@ -264,7 +269,7 @@ class OptionBuilder {
   }
 
   /// Additional headers to be sent during the handshake.
-  OptionBuilder setExtraHeaders(Map<String, dynamic> headers) {
+  OptionBuilder setExtraHeaders(Map<String, String> headers) {
     _opts['extraHeaders'] = headers;
     return this;
   }
@@ -304,13 +309,20 @@ class OptionBuilder {
   /// Set a custom WebSocket connector for creating connections.
   /// Allows using platform-specific implementations like CupertinoWebSocket.
   ///
-  /// Example:
+  /// The connector receives [headers] from [setExtraHeaders] if configured.
+  ///
+  /// Example using CupertinoWebSocket on iOS/macOS:
   /// ```dart
   /// import 'package:cupertino_http/cupertino_http.dart';
   ///
   /// OptionBuilder()
-  ///   .setWebSocketConnector((uri, {protocols}) =>
-  ///     CupertinoWebSocket.connect(uri, protocols: protocols))
+  ///   .setWebSocketConnector((uri, {protocols, headers}) {
+  ///     final config = URLSessionConfiguration.defaultSessionConfiguration();
+  ///     if (headers != null) {
+  ///       config.httpAdditionalHeaders = headers;
+  ///     }
+  ///     return CupertinoWebSocket.connect(uri, protocols: protocols, config: config);
+  ///   })
   ///   .build();
   /// ```
   OptionBuilder setWebSocketConnector(WebSocketConnector connector) {

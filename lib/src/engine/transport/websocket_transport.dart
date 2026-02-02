@@ -29,12 +29,13 @@ class WebSocketTransport extends Transport {
   void doOpen() async {
     var uri = this.uri();
     try {
-      final connector = opts['webSocketConnector']
-          as Future<ws.WebSocket> Function(Uri, {Iterable<String>? protocols})?;
+      final connector = opts['webSocketConnector'] as Future<ws.WebSocket>
+          Function(Uri, {Iterable<String>? protocols, Map<String, String>? headers})?;
       final protocols = opts['protocols'] as Iterable<String>?;
+      final headers = opts['extraHeaders'] as Map<String, String>?;
 
       if (connector != null) {
-        _ws = await connector(Uri.parse(uri), protocols: protocols);
+        _ws = await connector(Uri.parse(uri), protocols: protocols, headers: headers);
       } else {
         _ws = await ws.WebSocket.connect(Uri.parse(uri), protocols: protocols);
       }
