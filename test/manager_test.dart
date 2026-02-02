@@ -6,7 +6,7 @@ void main() {
   group('Manager', () {
     test('Should pass the custom webSocketConnector to transport options', () {
       Future<ws.WebSocket> mockConnector(Uri uri,
-          {Iterable<String>? protocols}) async {
+          {Iterable<String>? protocols, Map<String, String>? headers}) async {
         return ws.WebSocket.connect(uri, protocols: protocols);
       }
 

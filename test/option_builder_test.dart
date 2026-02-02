@@ -6,7 +6,7 @@ void main() {
   group('OptionBuilder', () {
     test('Should configure the custom WebSocketConnector', () {
       Future<ws.WebSocket> customConnector(Uri uri,
-          {Iterable<String>? protocols}) async {
+          {Iterable<String>? protocols, Map<String, String>? headers}) async {
         return ws.WebSocket.connect(uri, protocols: protocols);
       }
 
