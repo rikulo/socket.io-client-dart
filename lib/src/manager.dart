@@ -11,9 +11,6 @@ import 'package:socket_io_client/src/on.dart';
 import 'package:socket_io_client/src/socket.dart';
 import 'package:socket_io_client/src/engine/socket.dart' as engine_socket;
 import 'package:socket_io_client/src/on.dart' as util;
-import 'package:socket_io_client/src/engine/transport/http_client_adapter.dart';
-import 'package:socket_io_client/src/engine/transport/http_client_adapter_factory.dart'
-    show createPlatformHttpClientAdapter;
 
 final Logger _logger = Logger('socket_io_client:Manager');
 
@@ -29,7 +26,6 @@ class Manager extends EventEmitter {
   Map<String, Socket> nsps = {};
   List subs = [];
   late Map? options;
-  final HttpClientAdapter _httpClientAdapter;
 
   ///
   /// Sets the `reconnection` config.
@@ -78,16 +74,17 @@ class Manager extends EventEmitter {
   late bool autoConnect;
   bool? skipReconnect;
 
-  Manager({uri, Map? options})
-      : _httpClientAdapter = createPlatformHttpClientAdapter(),
-        super() {
+  Manager({uri, Map? options}) : super() {
     options = options ?? <dynamic, dynamic>{};
-    options['transportOptions'] = {
-      'websocket': {
-        'httpClientAdapter': options['httpClientAdapter'] ?? _httpClientAdapter
-      },
-      ...?options['transportOptions'],
-    };
+    // Pass webSocketConnector to transport options if provided
+    if (options['webSocketConnector'] != null) {
+      options['transportOptions'] = {
+        'websocket': {
+          'webSocketConnector': options['webSocketConnector'],
+        },
+        ...?options['transportOptions'],
+      };
+    }
 
     options['path'] ??= '/socket.io';
     // ignore: prefer_initializing_formals

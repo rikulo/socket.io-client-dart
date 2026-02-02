@@ -5,6 +5,15 @@
 import 'package:socket_io_client/socket_io_client.dart';
 import 'package:socket_io_common/socket_io_common.dart';
 import 'package:socket_io_common/src/util/event_emitter.dart';
+import 'package:web_socket/web_socket.dart' as ws;
+
+/// Factory function to create a WebSocket connection.
+/// Allows consumers to provide custom WebSocket implementations
+/// (e.g., CupertinoWebSocket, OkHttpWebSocket).
+typedef WebSocketConnector = Future<ws.WebSocket> Function(
+  Uri uri, {
+  Iterable<String>? protocols,
+});
 
 /// Default event listeners for dart way API.
 extension DartySocket on Socket {
@@ -292,8 +301,20 @@ class OptionBuilder {
     return this;
   }
 
-  OptionBuilder setHttpClientAdapter(HttpClientAdapter httpClientAdapter) {
-    _opts['httpClientAdapter'] = httpClientAdapter;
+  /// Set a custom WebSocket connector for creating connections.
+  /// Allows using platform-specific implementations like CupertinoWebSocket.
+  ///
+  /// Example:
+  /// ```dart
+  /// import 'package:cupertino_http/cupertino_http.dart';
+  ///
+  /// OptionBuilder()
+  ///   .setWebSocketConnector((uri, {protocols}) =>
+  ///     CupertinoWebSocket.connect(uri, protocols: protocols))
+  ///   .build();
+  /// ```
+  OptionBuilder setWebSocketConnector(WebSocketConnector connector) {
+    _opts['webSocketConnector'] = connector;
     return this;
   }
 
