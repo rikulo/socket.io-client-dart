@@ -1,21 +1,25 @@
-import 'package:socket_io_client/src/engine/transport/http_client_adapter_factory.dart';
 import 'package:test/test.dart';
 import 'package:socket_io_client/src/darty.dart';
+import 'package:web_socket/web_socket.dart' as ws;
 
 void main() {
   group('OptionBuilder', () {
-    test('Should configure the custom HttpClientAdapter', () {
-      final customHttpClientAdapter = createPlatformHttpClientAdapter();
-      final options =
-          OptionBuilder().setHttpClientAdapter(customHttpClientAdapter).build();
+    test('Should configure the custom WebSocketConnector', () {
+      Future<ws.WebSocket> customConnector(Uri uri,
+          {Iterable<String>? protocols}) async {
+        return ws.WebSocket.connect(uri, protocols: protocols);
+      }
 
-      expect(options['httpClientAdapter'], equals(customHttpClientAdapter));
+      final options =
+          OptionBuilder().setWebSocketConnector(customConnector).build();
+
+      expect(options['webSocketConnector'], equals(customConnector));
     });
 
-    test('Should build options correctly without HttpClientAdapter', () {
+    test('Should build options correctly without WebSocketConnector', () {
       final options = OptionBuilder().build();
 
-      expect(options.containsKey('httpClientAdapter'), isFalse);
+      expect(options.containsKey('webSocketConnector'), isFalse);
     });
   });
 }

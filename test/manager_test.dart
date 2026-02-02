@@ -1,33 +1,33 @@
 import 'package:test/test.dart';
-import 'package:mocktail/mocktail.dart';
 import 'package:socket_io_client/src/manager.dart';
-import 'package:socket_io_client/src/engine/transport/http_client_adapter.dart';
-
-class MockHttpClientAdapter extends Mock implements HttpClientAdapter {}
+import 'package:web_socket/web_socket.dart' as ws;
 
 void main() {
   group('Manager', () {
-    test('Should pass the custom HttpClientAdapter to transport options', () {
-      final mockAdapter = MockHttpClientAdapter();
+    test('Should pass the custom webSocketConnector to transport options', () {
+      Future<ws.WebSocket> mockConnector(Uri uri,
+          {Iterable<String>? protocols}) async {
+        return ws.WebSocket.connect(uri, protocols: protocols);
+      }
+
       final manager = Manager(
         uri: 'http://localhost:3000',
-        options: {'httpClientAdapter': mockAdapter},
+        options: {'webSocketConnector': mockConnector},
       );
 
       final transportOptions = manager.options?['transportOptions'];
       expect(transportOptions, isNotNull);
-      expect(transportOptions['websocket']['httpClientAdapter'],
-          equals(mockAdapter));
+      expect(transportOptions['websocket']['webSocketConnector'],
+          equals(mockConnector));
     });
 
-    test('Should use the default HttpClientAdapter if none is provided', () {
+    test('Should not set transport options if no webSocketConnector is provided',
+        () {
       final manager = Manager(uri: 'http://localhost:3000');
 
       final transportOptions = manager.options?['transportOptions'];
-      expect(transportOptions, isNotNull);
-      expect(transportOptions['websocket']['httpClientAdapter'], isNotNull);
-      expect(transportOptions['websocket']['httpClientAdapter'],
-          isA<HttpClientAdapter>());
+      // transportOptions should be null when no connector is provided
+      expect(transportOptions, isNull);
     });
   });
 }

@@ -2,20 +2,23 @@
 // History: 26/04/2017
 // Author: jumperchen<jumperchen@potix.com>
 
-import 'dart:js_interop';
 import 'dart:async';
-import 'package:web/web.dart';
+import 'dart:typed_data';
 import 'package:logging/logging.dart';
 import 'package:socket_io_client/src/engine/transport.dart';
 import 'package:socket_io_common/src/engine/parser/parser.dart';
+import 'package:web_socket/web_socket.dart' as ws;
 
+/// Unified WebSocket transport using package:web_socket.
+/// Works on both native (dart:io) and web platforms.
 class WebSocketTransport extends Transport {
   static final Logger _logger =
       Logger('socket_io_client:transport.WebSocketTransport');
 
   @override
   String? name = 'websocket';
-  WebSocket? ws;
+  ws.WebSocket? _ws;
+  StreamSubscription<ws.WebSocketEvent>? _subscription;
 
   WebSocketTransport(Map opts) : super(opts) {
     var forceBase64 = opts['forceBase64'] ?? false;
@@ -23,46 +26,39 @@ class WebSocketTransport extends Transport {
   }
 
   @override
-  void doOpen() {
+  void doOpen() async {
     var uri = this.uri();
-    var protocols = opts['protocols'];
-    if (opts.containsKey('extraHeaders')) {
-      opts['headers'] = opts['extraHeaders'];
-    }
-
     try {
-      if (protocols == null) {
-        ws = WebSocket(uri);
+      final connector = opts['webSocketConnector']
+          as Future<ws.WebSocket> Function(Uri, {Iterable<String>? protocols})?;
+      final protocols = opts['protocols'] as Iterable<String>?;
+
+      if (connector != null) {
+        _ws = await connector(Uri.parse(uri), protocols: protocols);
       } else {
-        ws = WebSocket(uri, protocols);
+        _ws = await ws.WebSocket.connect(Uri.parse(uri), protocols: protocols);
       }
+      _addEventListeners();
     } catch (err) {
-      return emitReserved('error', err);
+      return emit('error', err);
     }
-
-    if (ws?.binaryType == null) {
-      supportsBinary = false;
-    }
-
-    ws!.binaryType = socket!.binaryType;
-
-    addEventListeners();
   }
 
   /// Adds event listeners to the socket
   ///
   /// @api private
-  void addEventListeners() {
-    ws!
-      ..onOpen.listen((_) => onOpen())
-      ..onClose.listen((closeEvent) => onClose({
-            'description': "websocket connection closed",
-            'context': closeEvent,
-          }))
-      ..onMessage.listen((MessageEvent evt) => onData(evt.data))
-      ..onError.listen((e) {
-        onError('websocket error', e);
-      });
+  void _addEventListeners() {
+    onOpen();
+    _subscription = _ws!.events.listen((event) {
+      switch (event) {
+        case ws.TextDataReceived(:final text):
+          onData(text);
+        case ws.BinaryDataReceived(:final data):
+          onData(data);
+        case ws.CloseReceived():
+          onClose();
+      }
+    }, onError: (_) => onError('websocket error'));
   }
 
   /// Writes data to socket.
@@ -83,11 +79,12 @@ class WebSocketTransport extends Transport {
         // have a chance of informing us about it yet, in that case send will
         // throw an error
         try {
-          // TypeError is thrown when passing the second argument on Safari
           if (data is String) {
-            ws!.send(data.toJS); // fix for WASM
-          } else {
-            ws!.send(data);
+            _ws?.sendText(data);
+          } else if (data is ByteBuffer) {
+            _ws?.sendBytes(data.asUint8List());
+          } else if (data is List<int>) {
+            _ws?.sendBytes(Uint8List.fromList(data));
           }
         } catch (e) {
           _logger.fine('websocket closed before onclose event');
@@ -110,8 +107,10 @@ class WebSocketTransport extends Transport {
   /// @api private
   @override
   void doClose() {
-    ws?.close();
-    ws = null;
+    _subscription?.cancel();
+    _subscription = null;
+    _ws?.close();
+    _ws = null;
   }
 
   /// Generates uri for connection.

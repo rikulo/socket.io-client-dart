@@ -12,6 +12,7 @@ dependencies:
   logging: "^1.2.0"
   socket_io_common: "^3.1.1"
   web: ^1.1.0
+  web_socket: ^1.0.0
 
 dev_dependencies:
   lints: ^4.0.0
