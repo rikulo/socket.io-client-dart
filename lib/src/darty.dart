@@ -12,8 +12,7 @@ import 'package:web_socket/web_socket.dart' as ws;
 /// (e.g., CupertinoWebSocket, OkHttpWebSocket).
 ///
 /// The [headers] parameter contains extra headers from [OptionBuilder.setExtraHeaders].
-/// Note: Browser WebSockets do not support custom headers (browser security restriction).
-/// On native platforms, use this parameter to add authentication or custom headers.
+/// You may use this parameter to add authentication or custom headers.
 typedef WebSocketConnector = Future<ws.WebSocket> Function(
   Uri uri, {
   Iterable<String>? protocols,
