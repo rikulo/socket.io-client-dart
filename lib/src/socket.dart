@@ -615,6 +615,8 @@ class Socket extends EventEmitter {
   void dispose() {
     disconnect();
     clearListeners();
+    _anyListeners.clear();
+    _anyOutgoingListeners.clear();
   }
 
   ///
