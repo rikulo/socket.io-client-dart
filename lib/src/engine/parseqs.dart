@@ -35,7 +35,8 @@ Map decode(qs) {
   var pairs = qs.split('&');
   for (var i = 0, l = pairs.length; i < l; i++) {
     var pair = pairs[i].split('=');
-    qry[Uri.decodeComponent(pair[0])] = Uri.decodeComponent(pair[1]);
+    qry[Uri.decodeComponent(pair[0])] =
+        pair.length > 1 ? Uri.decodeComponent(pair[1]) : '';
   }
   return qry;
 }
