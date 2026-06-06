@@ -69,6 +69,12 @@ class OptionBuilder {
     return this;
   }
 
+  /// Disable with credentials.
+  OptionBuilder disableWithCredentials() {
+    _opts['withCredentials'] = false;
+    return this;
+  }
+
   /// Whether to enable to create a new Manager instance.
   /// The default is false
   OptionBuilder enableForceNew() {
