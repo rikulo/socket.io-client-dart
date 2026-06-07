@@ -53,7 +53,8 @@ void main() {
       socket.emit('hello', 'world');
 
       // Wait for response
-      final response = await messageCompleter.future.timeout(const Duration(seconds: 5));
+      final response =
+          await messageCompleter.future.timeout(const Duration(seconds: 5));
       expect(response, equals('Hello from server!'));
 
       socket.dispose();
@@ -145,7 +146,8 @@ Future<void> _simulateServer(
   void Function(String event, dynamic data)? onEvent,
 }) async {
   // Send Engine.IO open packet
-  serverWs.sendText('0{"sid":"test-session-id","upgrades":[],"pingInterval":25000,"pingTimeout":20000,"maxPayload":1000000}');
+  serverWs.sendText(
+      '0{"sid":"test-session-id","upgrades":[],"pingInterval":25000,"pingTimeout":20000,"maxPayload":1000000}');
 
   try {
     await for (final event in serverWs.events) {

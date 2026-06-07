@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'package:logging/logging.dart';
 import 'package:socket_io_client/src/engine/transport.dart';
+import 'package:socket_io_client/src/engine/transport/default_ws_connector.dart';
 import 'package:socket_io_common/src/engine/parser/parser.dart';
 import 'package:web_socket/web_socket.dart' as ws;
 
@@ -28,21 +29,39 @@ class WebSocketTransport extends Transport {
   @override
   void doOpen() async {
     var uri = this.uri();
+    final ws.WebSocket socket;
     try {
-      final connector = opts['webSocketConnector'] as Future<ws.WebSocket>
-          Function(Uri, {Iterable<String>? protocols, Map<String, String>? headers})?;
+      final connector = opts['webSocketConnector']
+          as Future<ws.WebSocket> Function(Uri,
+              {Iterable<String>? protocols, Map<String, String>? headers})?;
       final protocols = opts['protocols'] as Iterable<String>?;
       final headers = opts['extraHeaders'] as Map<String, String>?;
 
       if (connector != null) {
-        _ws = await connector(Uri.parse(uri), protocols: protocols, headers: headers);
+        socket = await connector(Uri.parse(uri),
+            protocols: protocols, headers: headers);
       } else {
-        _ws = await ws.WebSocket.connect(Uri.parse(uri), protocols: protocols);
+        // Use the platform default connector so that extraHeaders keep working
+        // on native (dart:io) without requiring a custom webSocketConnector.
+        socket = await connectWebSocket(Uri.parse(uri),
+            protocols: protocols, headers: headers);
       }
-      _addEventListeners();
     } catch (err) {
       return emit('error', err);
     }
+
+    // doOpen() is async, so the transport may have been closed (e.g. a connect
+    // timeout or a quick disconnect) while the connection was still pending.
+    // In that case discard the freshly opened socket instead of resurrecting a
+    // closed transport, which would otherwise leak the socket and fire a
+    // spurious 'open' after 'close'.
+    if (readyState == 'closed') {
+      unawaited(socket.close().catchError((Object _) {}));
+      return;
+    }
+
+    _ws = socket;
+    _addEventListeners();
   }
 
   /// Adds event listeners to the socket

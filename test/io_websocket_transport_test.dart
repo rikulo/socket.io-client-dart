@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:test/test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -105,7 +104,8 @@ void main() {
       expect(capturedUri, isNotNull);
       expect(capturedUri.toString(), equals('wss://example.com/socket.io/'));
       expect(capturedProtocols, equals(['proto1', 'proto2']));
-      expect(capturedHeaders, equals({'Authorization': 'Bearer token', 'X-Custom': 'value'}));
+      expect(capturedHeaders,
+          equals({'Authorization': 'Bearer token', 'X-Custom': 'value'}));
     });
 
     test('Should pass null headers when extraHeaders not set', () async {
@@ -141,6 +141,49 @@ void main() {
 
       expect(connectorCalled, isTrue);
       expect(capturedHeaders, isNull);
+    });
+
+    test('Should discard the socket if closed while still connecting',
+        () async {
+      final connectCompleter = Completer<ws.WebSocket>();
+      final mockWs = MockWebSocket();
+      when(() => mockWs.close()).thenAnswer((_) async {});
+
+      Future<ws.WebSocket> slowConnector(
+        Uri uri, {
+        Iterable<String>? protocols,
+        Map<String, String>? headers,
+      }) =>
+          connectCompleter.future;
+
+      final options = {
+        'secure': false,
+        'hostname': 'localhost',
+        'port': 3000,
+        'path': '/socket.io/',
+        'timestampRequests': false,
+        'webSocketConnector': slowConnector,
+      };
+
+      final transport = WebSocketTransport(options);
+      var openEmitted = false;
+      transport.on('open', (_) => openEmitted = true);
+
+      // Start connecting, then close before the connection resolves.
+      transport.open();
+      transport.close();
+      expect(transport.readyState, equals('closed'));
+
+      // The connection now resolves after the transport was already closed.
+      connectCompleter.complete(mockWs);
+      await Future.delayed(Duration.zero);
+
+      // The late socket must be closed and discarded, with no spurious 'open'
+      // and no event subscription on the resurrected transport.
+      verify(() => mockWs.close()).called(1);
+      verifyNever(() => mockWs.events);
+      expect(openEmitted, isFalse);
+      expect(transport.readyState, equals('closed'));
     });
   });
 }

@@ -21,7 +21,8 @@ void main() {
           equals(mockConnector));
     });
 
-    test('Should not set transport options if no webSocketConnector is provided',
+    test(
+        'Should not set transport options if no webSocketConnector is provided',
         () {
       final manager = Manager(uri: 'http://localhost:3000');
 

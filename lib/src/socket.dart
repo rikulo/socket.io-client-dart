@@ -285,7 +285,8 @@ class Socket extends EventEmitter {
     flags = packet['flags'];
     var args = packet['args'] as List;
     final evt = args.removeAt(0);
-    final ack = args.isNotEmpty && args.last is Function ? args.removeLast() : null;
+    final ack =
+        args.isNotEmpty && args.last is Function ? args.removeLast() : null;
     emitWithAck(evt, args, ack: ack);
   }
 

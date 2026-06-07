@@ -30,8 +30,7 @@ void main() {
       });
 
       test('disableForceNew removes forceNew key', () {
-        final opts =
-            OptionBuilder().enableForceNew().disableForceNew().build();
+        final opts = OptionBuilder().enableForceNew().disableForceNew().build();
         expect(opts.containsKey('forceNew'), isFalse);
       });
     });
@@ -68,10 +67,8 @@ void main() {
       });
 
       test('enableAutoConnect removes autoConnect key (defaults to true)', () {
-        final opts = OptionBuilder()
-            .disableAutoConnect()
-            .enableAutoConnect()
-            .build();
+        final opts =
+            OptionBuilder().disableAutoConnect().enableAutoConnect().build();
         expect(opts.containsKey('autoConnect'), isFalse);
       });
     });
@@ -82,11 +79,10 @@ void main() {
         expect(opts['reconnection'], isFalse);
       });
 
-      test('enableReconnection removes reconnection key (defaults to true)', () {
-        final opts = OptionBuilder()
-            .disableReconnection()
-            .enableReconnection()
-            .build();
+      test('enableReconnection removes reconnection key (defaults to true)',
+          () {
+        final opts =
+            OptionBuilder().disableReconnection().enableReconnection().build();
         expect(opts.containsKey('reconnection'), isFalse);
       });
 
@@ -138,8 +134,7 @@ void main() {
 
     group('transports', () {
       test('setTransports stores the list', () {
-        final opts =
-            OptionBuilder().setTransports(['websocket']).build();
+        final opts = OptionBuilder().setTransports(['websocket']).build();
         expect(opts['transports'], equals(['websocket']));
       });
 
@@ -176,8 +171,7 @@ void main() {
 
     group('miscellaneous', () {
       test('setProtocols stores the list', () {
-        final opts =
-            OptionBuilder().setProtocols(['wss']).build();
+        final opts = OptionBuilder().setProtocols(['wss']).build();
         expect(opts['protocols'], equals(['wss']));
       });
 
@@ -202,9 +196,10 @@ void main() {
       });
 
       test('setTransportOptions stores the map', () {
-        final transportOpts = {'websocket': {'timeout': 5000}};
-        final opts =
-            OptionBuilder().setTransportOptions(transportOpts).build();
+        final transportOpts = {
+          'websocket': {'timeout': 5000}
+        };
+        final opts = OptionBuilder().setTransportOptions(transportOpts).build();
         expect(opts['transportOptions'], equals(transportOpts));
       });
     });

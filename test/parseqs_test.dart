@@ -15,7 +15,8 @@ void main() {
     });
 
     test('percent-encodes special characters in keys and values', () {
-      expect(encode({'hello world': 'foo bar'}), equals('hello%20world=foo%20bar'));
+      expect(encode({'hello world': 'foo bar'}),
+          equals('hello%20world=foo%20bar'));
     });
 
     test('encodes an empty map into an empty string', () {

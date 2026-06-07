@@ -1,3 +1,16 @@
+## 3.1.5
+
+**New Feature:**
+
+- [#435](https://github.com/rikulo/socket.io-client-dart/pull/435) feat!: unify the WebSocket transport with [`package:web_socket`](https://pub.dev/packages/web_socket) for a single native/web implementation. Custom implementations can be supplied through `setWebSocketConnector` (e.g. `CupertinoWebSocket`/`OkHttpWebSocket`); `setExtraHeaders` continues to work out of the box on native (dart:io) platforms via the default connector (browsers still cannot send custom headers on the WebSocket handshake).
+- [#437](https://github.com/rikulo/socket.io-client-dart/pull/437) Added `OptionBuilder.disableWithCredentials()` to mirror `enableWithCredentials()`.
+
+**Bug fix:**
+
+- [#439](https://github.com/rikulo/socket.io-client-dart/pull/439) fix: `_drainQueue` crashes with `Bad state: No element` when an event is emitted with no arguments while `retries` is set.
+- [#438](https://github.com/rikulo/socket.io-client-dart/pull/438) fix: `dispose()` now clears `_anyListeners` and `_anyOutgoingListeners`.
+- [#437](https://github.com/rikulo/socket.io-client-dart/pull/437) fix: `parseqs.decode()` crash on key-only query params (e.g. `a=1&flag&c=3`).
+
 ## 3.1.4
 
 **Bug fix:**
