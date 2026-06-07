@@ -134,7 +134,7 @@ class Socket extends EventEmitter {
   /// @return {Socket} self
   /// @api public
   @override
-  void emit(String event, [data]) {
+  void emit(String event, [dynamic data]) {
     emitWithAck(event, data);
   }
 
@@ -372,7 +372,7 @@ class Socket extends EventEmitter {
   }
 
   /// Called upon engine or manager `error`
-  void onerror(err) {
+  void onerror(dynamic err) {
     if (!connected) {
       emitReserved('connect_error', err);
     }
@@ -383,7 +383,7 @@ class Socket extends EventEmitter {
   ///
   /// @param {String} reason
   /// @api private
-  void onclose(reason) {
+  void onclose(dynamic reason) {
     _logger.fine('close ($reason)');
     emitReserved('disconnecting', reason);
     connected = false;
@@ -396,7 +396,7 @@ class Socket extends EventEmitter {
   ///
   /// @param {Object} packet
   /// @api private
-  void onpacket(packet) {
+  void onpacket(dynamic packet) {
     if (packet['nsp'] != nsp) return;
 
     switch (packet['type']) {
@@ -480,7 +480,7 @@ class Socket extends EventEmitter {
   /// Produces an ack callback to emit with an event.
   ///
   /// @api private
-  Function ack(id) {
+  Function ack(dynamic id) {
     var sent = false;
     return (dynamic data) {
       // prevent double callbacks
@@ -527,7 +527,7 @@ class Socket extends EventEmitter {
   /// Called upon server connect.
   ///
   /// @api private
-  void onconnect(id, pid) {
+  void onconnect(dynamic id, dynamic pid) {
     this.id = id;
     recovered = pid != null && _pid == pid;
     _pid = pid; // defined only if connection state recovery is enabled
@@ -626,7 +626,7 @@ class Socket extends EventEmitter {
   /// @param {Boolean} if `true`, compresses the sending data
   /// @return {Socket} self
   /// @api public
-  Socket compress(compress) {
+  Socket compress(dynamic compress) {
     flags['compress'] = compress;
     return this;
   }

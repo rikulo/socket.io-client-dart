@@ -162,7 +162,7 @@ class Manager extends EventEmitter {
   /// @return {Manager} self
   /// @api public
   ///
-  Manager open({callback, Map? opts}) {
+  Manager open({dynamic callback, Map? opts}) {
     _logger.fine('readyState $readyState');
     if (readyState.contains('open')) return this;
 
@@ -225,7 +225,7 @@ class Manager extends EventEmitter {
   ///
   /// @return self
   /// @public
-  Manager connect({callback, Map? opts}) =>
+  Manager connect({dynamic callback, Map? opts}) =>
       open(callback: callback, opts: opts);
 
   ///
@@ -266,7 +266,7 @@ class Manager extends EventEmitter {
   ///
   /// @api private
   ///
-  void ondata(data) {
+  void ondata(dynamic data) {
     try {
       decoder.add(data);
     } catch (e) {
@@ -279,7 +279,7 @@ class Manager extends EventEmitter {
   ///
   /// @api private
   ///
-  void ondecoded(packet) {
+  void ondecoded(dynamic packet) {
     // the nextTick call prevents an exception in a user-provided event listener from triggering a disconnection due to a "parse error"
     Future.microtask(() {
       emitReserved('packet', packet);
@@ -291,7 +291,7 @@ class Manager extends EventEmitter {
   ///
   /// @api private
   ///
-  void onerror(err) {
+  void onerror(dynamic err) {
     _logger.fine('error $err');
     emitReserved('error', err);
   }
@@ -320,7 +320,7 @@ class Manager extends EventEmitter {
   ///
   /// @param {Socket} socket
   ///
-  void destroy(socket) {
+  void destroy(dynamic socket) {
     final nsps = this.nsps.keys;
 
     for (var nsp in nsps) {
@@ -388,7 +388,7 @@ class Manager extends EventEmitter {
   ///
   /// @api private
   ///
-  void onclose(error) {
+  void onclose(dynamic error) {
     _logger.fine("closed due to ${error is Map ? error['reason'] : error}");
 
     cleanup();
@@ -515,19 +515,19 @@ class _Backoff {
   ///
   /// @api public
   ///
-  set min(min) => _ms = min;
+  set min(dynamic min) => _ms = min;
 
   ///
   /// Set the maximum duration
   ///
   /// @api public
   ///
-  set max(max) => _max = max;
+  set max(dynamic max) => _max = max;
 
   ///
   /// Set the jitter
   ///
   /// @api public
   ///
-  set jitter(jitter) => _jitter = jitter;
+  set jitter(dynamic jitter) => _jitter = jitter;
 }

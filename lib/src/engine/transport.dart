@@ -30,7 +30,7 @@ abstract class Transport extends EventEmitter {
   ///
   /// @param {String} str
   /// @return {Transport} for chaining
-  onError(msg, [desc]) {
+  dynamic onError(dynamic msg, [dynamic desc]) {
     super.emitReserved(
         'error', {'msg': msg, 'desc': desc, 'type': 'TransportError'});
     return this;
@@ -39,7 +39,7 @@ abstract class Transport extends EventEmitter {
   ///
   /// Opens the transport.
   ///
-  open() {
+  dynamic open() {
     readyState = 'opening';
     doOpen();
     return this;
@@ -48,7 +48,7 @@ abstract class Transport extends EventEmitter {
   ///
   /// Closes the transport.
   ///
-  close() {
+  dynamic close() {
     if ('opening' == readyState || 'open' == readyState) {
       doClose();
       onClose();
@@ -84,14 +84,14 @@ abstract class Transport extends EventEmitter {
   ///
   /// @param {String} data
   /// @api private
-  void onData(data) {
+  void onData(dynamic data) {
     var packet = PacketParser.decodePacket(data, socket!.binaryType);
     onPacket(packet);
   }
 
   ///
   /// Called with a decoded packet.
-  void onPacket(packet) {
+  void onPacket(dynamic packet) {
     emitReserved('packet', packet);
   }
 
@@ -104,7 +104,7 @@ abstract class Transport extends EventEmitter {
     emitReserved('close', details);
   }
 
-  get name;
+  dynamic get name;
 
   void pause(Function() onPause) {}
 

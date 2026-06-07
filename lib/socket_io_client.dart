@@ -41,7 +41,7 @@ final Logger _logger = Logger('socket_io_client');
 ///
 /// @api public
 ///
-Socket io(uri, [opts]) => _lookup(uri, opts);
+Socket io(dynamic uri, [dynamic opts]) => _lookup(uri, opts);
 
 Socket _lookup(uri, opts) {
   opts = opts ?? <dynamic, dynamic>{};

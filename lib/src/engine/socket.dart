@@ -133,7 +133,7 @@ class Socket extends EventEmitter {
   /// @param {String} transport name
   /// @return {Transport}
   /// @api private
-  Transport createTransport(name, [options]) {
+  Transport createTransport(dynamic name, [dynamic options]) {
     _logger.fine('creating transport "$name"');
     var query = Map<String, dynamic>.from(this.opts['query'] ?? {});
 
@@ -199,7 +199,7 @@ class Socket extends EventEmitter {
   /// Sets the current transport. Disables the existing one (if any).
   ///
   /// @api private
-  void setTransport(transport) {
+  void setTransport(dynamic transport) {
     _logger.fine('setting transport ${transport?.name}');
 
     if (this.transport != null) {
@@ -223,7 +223,7 @@ class Socket extends EventEmitter {
   ///
   /// @param {String} transport name
   /// @api private
-  void probe(name) {
+  void probe(dynamic name) {
     _logger.fine('probing transport "$name"');
     Transport? transport = createTransport(name, {'probe': true});
     var failed = false;
@@ -534,9 +534,10 @@ class Socket extends EventEmitter {
   /// @param {Object} options.
   /// @return {Socket} for chaining.
   /// @api public
-  Socket write(msg, options, [EventHandler? fn]) => send(msg, options, fn);
+  Socket write(dynamic msg, dynamic options, [EventHandler? fn]) =>
+      send(msg, options, fn);
 
-  Socket send(msg, options, [EventHandler? fn]) {
+  Socket send(dynamic msg, dynamic options, [EventHandler? fn]) {
     sendPacket(type: 'message', data: msg, options: options, callback: fn);
     return this;
   }
@@ -549,7 +550,8 @@ class Socket extends EventEmitter {
   /// @param {Object} options.
   /// @param {Function} callback function.
   /// @api private
-  void sendPacket({type, data, options, EventHandler? callback}) {
+  void sendPacket(
+      {dynamic type, dynamic data, dynamic options, EventHandler? callback}) {
     if ('closing' == readyState || 'closed' == readyState) {
       return;
     }
@@ -616,7 +618,7 @@ class Socket extends EventEmitter {
   /// Called upon transport error
   ///
   /// @api private
-  void onError(err) {
+  void onError(dynamic err) {
     _logger.fine('socket error $err');
     priorWebsocketSuccess = false;
     emitReserved('error', err);
@@ -627,7 +629,7 @@ class Socket extends EventEmitter {
   /// Called upon transport close.
   ///
   /// @api private
-  void onClose(reason, [desc]) {
+  void onClose(dynamic reason, [dynamic desc]) {
     if ('opening' == readyState ||
         'open' == readyState ||
         'closing' == readyState) {

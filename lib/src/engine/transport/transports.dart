@@ -13,7 +13,7 @@ class Transports {
     return [];
   }
 
-  static Transport newInstance(String name, options) {
+  static Transport newInstance(String name, dynamic options) {
     if ('websocket' == name) {
       return WebSocketTransport(options);
     } else if ('polling' == name) {

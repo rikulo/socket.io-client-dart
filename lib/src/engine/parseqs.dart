@@ -27,7 +27,7 @@ String encode(Map obj) {
 /// @param {String} qs
 /// @api private
 ///
-Map decode(qs) {
+Map decode(dynamic qs) {
   if (qs.isEmpty) {
     return <dynamic, dynamic>{};
   }

@@ -12,7 +12,7 @@ class Transports {
     return [];
   }
 
-  static Transport newInstance(String name, options) {
+  static Transport newInstance(String name, dynamic options) {
     // Native only supports websocket
     return WebSocketTransport(options);
   }

@@ -85,7 +85,7 @@ class PollingTransport extends Transport {
   /// @param {Function} callback upon buffers are flushed and transport is paused
   /// @api private
   @override
-  void pause(onPause) {
+  void pause(dynamic onPause) {
     var self = this;
 
     readyState = 'pausing';
@@ -137,7 +137,7 @@ class PollingTransport extends Transport {
   ///
   /// @api private
   @override
-  void onData(data) {
+  void onData(dynamic data) {
     var self = this;
     _logger.fine('polling got data $data');
     callback(packet, [index, total]) {
@@ -257,7 +257,7 @@ class PollingTransport extends Transport {
   /// @param {String} data to send.
   /// @param {Function} called upon flush.
   /// @api private
-  void doWrite(data, fn) {
+  void doWrite(dynamic data, dynamic fn) {
     var isBinary = data is! String;
     var req = request({'method': 'POST', 'data': data, 'isBinary': isBinary});
     req.on('success', fn);
@@ -393,7 +393,7 @@ class Request extends EventEmitter {
   /// Called upon error.
   ///
   /// @api private
-  void onError(err) {
+  void onError(dynamic err) {
     emitReserved('error', err);
     cleanup(true);
   }
@@ -402,7 +402,7 @@ class Request extends EventEmitter {
   /// Cleans up house.
   ///
   /// @api private
-  void cleanup([fromError]) {
+  void cleanup([dynamic fromError]) {
     if (xhr == null) {
       return;
     }

@@ -6,6 +6,6 @@ import 'package:socket_io_client/src/engine/transport.dart';
 class Transports {
   static List<String> upgradesTo(String from) =>
       throw UnimplementedError('Should not invoke this method!');
-  static Transport newInstance(String name, options) =>
+  static Transport newInstance(String name, dynamic options) =>
       throw UnimplementedError('Should not invoke this method!');
 }

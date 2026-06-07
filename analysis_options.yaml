@@ -16,3 +16,4 @@ linter:
     valid_regexps: true
     implementation_imports: false
     overridden_fields: false
+    type_annotate_public_apis: true
