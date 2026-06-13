@@ -50,7 +50,7 @@ class MyEncoder extends Encoder {
 
 class MyDecoder extends Decoder {
   @override
-  add(obj) {
+  dynamic add(dynamic obj) {
     print('MyDecoder: $obj');
     return super.add(obj);
   }
