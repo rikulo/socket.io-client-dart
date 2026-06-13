@@ -13,8 +13,7 @@ void main() {
       );
       // ackTimeout makes _registerAckCallback wrap the ack with the error-first
       // timeout wrapper, which is the path that used to crash on empty acks.
-      socket =
-          Socket(manager, '/', {'autoConnect': false, 'ackTimeout': 5000});
+      socket = Socket(manager, '/', {'autoConnect': false, 'ackTimeout': 5000});
     });
 
     test('empty server ack completes (was NoSuchMethodError)', () async {
@@ -35,7 +34,10 @@ void main() {
     test('single-value ack still forwards the value (no side effect)',
         () async {
       final future = socket.emitWithAckAsync('ping', {});
-      socket.onack({'id': '0', 'data': <dynamic>['pong']});
+      socket.onack({
+        'id': '0',
+        'data': <dynamic>['pong']
+      });
       expect(await future, equals('pong'));
     });
 
@@ -45,7 +47,10 @@ void main() {
       socket.emitWithAck('ping', {}, ack: (err, [a, b, c]) {
         received.addAll([err, a, b, c]);
       });
-      socket.onack({'id': '0', 'data': <dynamic>[1, 2, 3]});
+      socket.onack({
+        'id': '0',
+        'data': <dynamic>[1, 2, 3]
+      });
       expect(received, equals([null, 1, 2, 3]));
     });
   });
