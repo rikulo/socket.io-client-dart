@@ -21,6 +21,7 @@ import 'package:socket_io_client/src/manager.dart';
 
 export 'package:socket_io_client/src/socket.dart';
 export 'package:socket_io_client/src/darty.dart';
+export 'package:socket_io_client/src/engine/transport/http_client_adapter.dart';
 
 // Protocol version
 final protocol = parser.protocol;

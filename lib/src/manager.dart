@@ -11,6 +11,9 @@ import 'package:socket_io_client/src/on.dart';
 import 'package:socket_io_client/src/socket.dart';
 import 'package:socket_io_client/src/engine/socket.dart' as engine_socket;
 import 'package:socket_io_client/src/on.dart' as util;
+import 'package:socket_io_client/src/engine/transport/http_client_adapter.dart';
+import 'package:socket_io_client/src/engine/transport/legacy_adapter_connector.dart'
+    show connectViaAdapter;
 
 final Logger _logger = Logger('socket_io_client:Manager');
 
@@ -76,6 +79,18 @@ class Manager extends EventEmitter {
 
   Manager({uri, Map? options}) : super() {
     options = options ?? <dynamic, dynamic>{};
+    // Backward compatibility (3.1.1–3.1.4): translate the deprecated
+    // `httpClientAdapter` option into a `webSocketConnector`, restoring the
+    // behaviour that was removed when migrating to package:web_socket in 3.1.5.
+    if (options['webSocketConnector'] == null &&
+        options['httpClientAdapter'] != null) {
+      // ignore: deprecated_member_use_from_same_package
+      final adapter = options['httpClientAdapter'] as HttpClientAdapter;
+      options['webSocketConnector'] = (Uri uri,
+              {Iterable<String>? protocols, Map<String, String>? headers}) =>
+          connectViaAdapter(adapter, uri,
+              protocols: protocols, headers: headers);
+    }
     // Pass webSocketConnector to transport options if provided
     if (options['webSocketConnector'] != null) {
       options['transportOptions'] = {

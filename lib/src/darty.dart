@@ -335,6 +335,21 @@ class OptionBuilder {
     return this;
   }
 
+  /// Set a custom [HttpClientAdapter] used to establish the WebSocket
+  /// connection.
+  ///
+  /// Deprecated: use [setWebSocketConnector] instead. Kept for backward
+  /// compatibility with 3.1.1–3.1.4 (it was unintentionally removed in 3.1.5);
+  /// it will be removed in 4.0.0. The supplied adapter is bridged onto the
+  /// package:web_socket transport by the [Manager].
+  @Deprecated('Use setWebSocketConnector instead. '
+      'setHttpClientAdapter will be removed in 4.0.0.')
+  // ignore: deprecated_member_use_from_same_package
+  OptionBuilder setHttpClientAdapter(HttpClientAdapter httpClientAdapter) {
+    _opts['httpClientAdapter'] = httpClientAdapter;
+    return this;
+  }
+
   /// Build the options map.
   Map<String, dynamic> build() => _opts;
 }

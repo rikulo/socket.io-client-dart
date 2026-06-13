@@ -1,3 +1,9 @@
+## 3.1.6
+
+**Bug fix:**
+
+- [#442](https://github.com/rikulo/socket.io-client-dart/issues/442) Restore the `HttpClientAdapter` class and `OptionBuilder.setHttpClientAdapter()` that were unintentionally removed in 3.1.5 (a SemVer-breaking change in a patch release). They are now **deprecated** thin compatibility shims that bridge onto the package:web_socket transport via `setWebSocketConnector`, and will be removed in 4.0.0. Migrate to `OptionBuilder.setWebSocketConnector()`.
+
 ## 3.1.5
 
 **New Feature:**

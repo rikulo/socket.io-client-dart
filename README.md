@@ -86,6 +86,63 @@ socket.io.options['extraHeaders'] = {'foo': 'bar'}; // Update the extra headers.
 socket.io..disconnect()..connect(); // Reconnect the socket manually.
 ```
 
+### Custom WebSocket connector
+
+Use `setWebSocketConnector` to plug in a custom WebSocket implementation — for
+example `CupertinoWebSocket`/`OkHttpWebSocket` from `package:cupertino_http` /
+`package:cronet_http`, or a `dart:io` `HttpClient` with custom TLS/proxy
+settings. The connector receives the `extraHeaders` you set via `setExtraHeaders`
+(forwarded on native; browsers cannot send custom headers on the WebSocket
+handshake, so they are ignored there).
+
+```dart
+import 'package:cupertino_http/cupertino_http.dart';
+
+Socket socket = io('http://localhost:3000',
+    OptionBuilder()
+      .setTransports(['websocket'])
+      .setWebSocketConnector((uri, {protocols, headers}) {
+        final config = URLSessionConfiguration.defaultSessionConfiguration();
+        if (headers != null) config.httpAdditionalHeaders = headers;
+        return CupertinoWebSocket.connect(uri, protocols: protocols, config: config);
+      })
+      .build());
+```
+
+#### Migrating from `setHttpClientAdapter`
+
+`HttpClientAdapter` and `OptionBuilder.setHttpClientAdapter()` are **deprecated**
+since 3.1.6 and will be removed in 4.0.0. (They were unintentionally dropped in
+3.1.5 — see [#442](https://github.com/rikulo/socket.io-client-dart/issues/442) —
+and restored as deprecated shims to keep `^3.1.x` builds compiling.) Replace them
+with `setWebSocketConnector`. To keep using a custom `dart:io` `HttpClient` on
+native (e.g. for self-signed certificates or a proxy), add `web_socket` to your
+`dependencies` and wrap the socket with `IOWebSocket.fromWebSocket`:
+
+```dart
+import 'dart:io';
+import 'package:web_socket/io_web_socket.dart';
+
+// Before (deprecated):
+//   io('http://localhost:3000',
+//     OptionBuilder().setHttpClientAdapter(myAdapter).build());
+
+// After:
+Socket socket = io('http://localhost:3000',
+    OptionBuilder()
+      .setTransports(['websocket'])
+      .setWebSocketConnector((uri, {protocols, headers}) async {
+        final raw = await WebSocket.connect(
+          uri.toString(),
+          protocols: protocols,
+          headers: headers,
+          customClient: myHttpClient, // your custom dart:io HttpClient
+        );
+        return IOWebSocket.fromWebSocket(raw);
+      })
+      .build());
+```
+
 ### Emit with acknowledgement
 
 ```dart
