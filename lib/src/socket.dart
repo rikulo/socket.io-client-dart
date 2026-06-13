@@ -310,12 +310,10 @@ class Socket extends EventEmitter {
       ack(Exception("operation has timed out"));
     });
 
-    acks[sid] = (args) {
+    acks[sid] = ([args]) {
       timer.cancel();
-      Function.apply(ack, [
-        null,
-        ...(args is List ? args : [args])
-      ]);
+      final list = args is List ? args : (args == null ? <dynamic>[] : [args]);
+      Function.apply(ack, [null, ...list]);
     };
   }
 
