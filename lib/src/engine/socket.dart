@@ -368,7 +368,7 @@ class Socket extends EventEmitter {
         'closing' == readyState) {
       var type = packet['type'];
       var data = packet['data'];
-      _logger.fine('socket receive: type "$type", data "$data"');
+      _logger.fine(() => 'socket receive: type "$type", data "$data"');
 
       emitReserved('packet', packet);
 
