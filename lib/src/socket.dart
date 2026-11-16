@@ -437,7 +437,7 @@ class Socket extends EventEmitter {
   /// @api private
   void onevent(Map packet) {
     List args = packet['data'] ?? [];
-    _logger.fine('emitting event $args');
+    _logger.fine(() => 'emitting event $args');
 
     if (null != packet['id']) {
       _logger.fine('attaching ack callback to event');
@@ -484,7 +484,7 @@ class Socket extends EventEmitter {
       // prevent double callbacks
       if (sent) return;
       sent = true;
-      _logger.fine('sending ack $data');
+      _logger.fine(() => 'sending ack $data');
 
       var sendData = <dynamic>[];
       if (data is ByteBuffer || data is List<int>) {
@@ -507,7 +507,8 @@ class Socket extends EventEmitter {
   void onack(Map packet) {
     var ack = acks.remove('${packet['id']}');
     if (ack is Function) {
-      _logger.fine('''calling ack ${packet['id']} with ${packet['data']}''');
+      _logger
+          .fine(() => '''calling ack ${packet['id']} with ${packet['data']}''');
 
       var args = packet['data'] as List;
       if (args.length > 1) {

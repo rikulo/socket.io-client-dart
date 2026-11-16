@@ -357,7 +357,7 @@ class Manager extends EventEmitter {
   /// @api private
   ///
   void packet(Map packet) {
-    _logger.fine('writing packet $packet');
+    _logger.fine(() => 'writing packet $packet');
 
     var encodedPackets = encoder.encode(packet);
 
